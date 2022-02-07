@@ -1,54 +1,64 @@
 import React from 'react';
-import io from 'socket.io-client';
+import io, { Socket } from 'socket.io-client';
 import * as THREE from 'three';
 import * as styles from './canvas.module.scss';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
-import { Box } from '../box/box';
+import { UserWrapper } from '../userWrapper/userWrapper';
 import { Room } from '../room/room';
+import { ClientType } from '../../../types/socket';
+import { ControlsWrapper } from '../controlsWrapper/controlsWrapper';
 
-interface Props {}
+interface Props {
+  clients: ClientType;
+  socket: Socket;
+}
 
 const CanvasComponent: React.FC<Props> = (props) => {
-  const socket = io();
-  const room: string = 'exhibition';
-
-  socket.on('message', (message) => {
-    console.log(message);
-  });
-
-  socket.on('roomData', (data) => {
-    console.log(data);
-  });
-
-  socket.emit('join', room, (error: string | undefined) => {
-    if (error) {
-      console.log(error);
-    }
-  });
-
-  socket.on('disconnect', () => {
-    console.log('disconnect');
-  });
-
-  const randomPosition = new THREE.Vector3(
-    Math.random() * 15 - 2,
-    Math.random() * 2,
-    Math.random() * 15 - 2
-  );
+  const { clients, socket } = props;
 
   return (
     <div className={styles.container}>
       <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
         <color attach="background" args={['#0000ff']} />
-        <Room />
         <ambientLight intensity={0.3} />
         <directionalLight color="red" position={[0, 3, 0]} />
-        <Box position={randomPosition} />
-        <OrbitControls enablePan={true} enableZoom={true} />
+        <Room />
+        <ControlsWrapper socket={socket} />
+        {renderUsers()}
       </Canvas>
     </div>
   );
+
+  function renderUsers() {
+    const keys = Object.keys(clients);
+    const users = keys
+      .filter((clientKey) => clientKey !== socket.id)
+      .map((client) => {
+        const { position, rotation } = clients[client];
+
+        const vector3: THREE.Vector3 = new THREE.Vector3(
+          position[0],
+          position[1],
+          position[2]
+        );
+        const euler: THREE.Euler = new THREE.Euler(
+          rotation[0],
+          rotation[1],
+          rotation[2]
+        );
+
+        return (
+          <UserWrapper
+            key={client}
+            position={vector3}
+            rotation={euler}
+            id={client}
+          />
+        );
+      });
+
+    return users;
+  }
 };
 
 export default CanvasComponent;

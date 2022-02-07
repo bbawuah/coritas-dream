@@ -1,44 +1,50 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express } from 'express';
 import * as http from 'http';
 import next, { NextApiHandler } from 'next';
 import * as socketio from 'socket.io';
-import { users } from './users/users';
+import { ClientType } from '../types/socket';
 
 const port: number = parseInt(process.env.PORT || '3000', 10);
 const dev: boolean = process.env.NODE_ENV !== 'production';
 const nextApp = next({ dev });
 const nextHandler: NextApiHandler = nextApp.getRequestHandler();
 
+const clients: ClientType = {};
+
 nextApp.prepare().then(async () => {
   const app: Express = express();
   const server: http.Server = http.createServer(app);
   const io: socketio.Server = new socketio.Server();
+
   io.attach(server);
 
   io.on('connection', (socket: socketio.Socket) => {
-    socket.emit('status', `Hello from user ${socket.id}`);
+    const clientsCount = io.engine.clientsCount;
 
-    socket.on('join', (room, callback) => {
-      const { error } = users.addUser(socket.id, room);
+    console.log(`There are currently ${clientsCount} connected`);
 
-      socket.join(room);
+    clients[socket.id] = {
+      position: [0, 0, 0],
+      rotation: [0, 0, 0],
+    };
 
-      socket.emit('message', `Welcome to the exhibtion ${socket.id}!`);
+    io.sockets.emit('move', clients);
 
-      socket.broadcast
-        .to(room)
-        .emit('message', `User ${socket.id} has joined the exhibition!`);
+    socket.on('move', ({ id, rotation, position }) => {
+      clients[id].position = position;
+      clients[id].rotation = rotation;
 
-      io.to(room).emit('roomData', {
-        room,
-        users: users.getUsersInRoom(room),
-      });
-
-      callback();
+      io.sockets.emit('move', clients);
     });
 
     socket.on('disconnect', () => {
-      console.log('client disconnected');
+      console.log(
+        `User ${socket.id} disconnected, there are currently ${clientsCount} users connected`
+      );
+
+      delete clients[socket.id];
+
+      io.sockets.emit('move', clients);
     });
   });
 
