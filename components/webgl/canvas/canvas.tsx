@@ -1,57 +1,51 @@
-import React, { useRef } from 'react';
+import React from 'react';
+import io from 'socket.io-client';
 import * as THREE from 'three';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { BoxLineGeometry } from 'three/examples/jsm/geometries/BoxLineGeometry';
 import * as styles from './canvas.module.scss';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
+import { Box } from '../box/box';
+import { Room } from '../room/room';
 
 interface Props {}
 
-const Room: React.FC = () => {
-  const ref = useRef();
+const CanvasComponent: React.FC<Props> = (props) => {
+  const socket = io();
+  const room: string = 'exhibition';
 
-  if (ref.current) {
-    (ref.current as THREE.LineSegments).geometry.translate(0, 1.5, 0);
-  }
+  socket.on('message', (message) => {
+    console.log(message);
+  });
 
-  return (
-    <lineSegments
-      ref={ref}
-      geometry={new BoxLineGeometry(10, 6, 6, 10, 10, 10)}
-      material={new THREE.LineBasicMaterial({ color: 0x808080 })}
-    />
-  );
-};
+  socket.on('roomData', (data) => {
+    console.log(data);
+  });
 
-const Box: React.FC = () => {
-  const ref = useRef();
-
-  if (ref.current) {
-  }
-
-  useFrame((state, delta) => {
-    if (ref.current) {
-      (ref.current as any).rotation.x = (ref.current as any).rotation.z +=
-        delta;
+  socket.emit('join', room, (error: string | undefined) => {
+    if (error) {
+      console.log(error);
     }
   });
 
-  return (
-    <mesh ref={ref} position={[0, 1, 0]}>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial />
-    </mesh>
-  );
-};
+  socket.on('disconnect', () => {
+    console.log('disconnect');
+  });
 
-const CanvasComponent: React.FC<Props> = (props) => {
+  const randomPosition = new THREE.Vector3(
+    Math.random() * 15 - 2,
+    Math.random() * 2,
+    Math.random() * 15 - 2
+  );
+
   return (
     <div className={styles.container}>
-      <Canvas camera={{ fov: 80, position: [0, 1.6, 3] }}>
-        <color attach="background" args={['#505050']} />
+      <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
+        <color attach="background" args={['#0000ff']} />
         <Room />
-        <ambientLight intensity={0.1} />
-        <directionalLight color="red" position={[0, 0, 7]} />
-        <Box />
+        <ambientLight intensity={0.3} />
+        <directionalLight color="red" position={[0, 3, 0]} />
+        <Box position={randomPosition} />
+        <OrbitControls enablePan={true} enableZoom={true} />
       </Canvas>
     </div>
   );
