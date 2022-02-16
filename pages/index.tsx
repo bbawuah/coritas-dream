@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { io, Socket } from 'socket.io-client';
-import { ControlsWrapper } from '../components/webgl/controlsWrapper/controlsWrapper';
+import { Controls } from '../components/webgl/controls/controls';
 import { ClientType } from '../types/socket';
 import styles from '../styles/Home.module.scss';
 
