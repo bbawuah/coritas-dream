@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { Socket } from 'socket.io-client';
 import { Debug, Physics } from '@react-three/cannon';
 import * as THREE from 'three';
 import * as styles from './canvas.module.scss';
@@ -14,10 +13,7 @@ import { useStore } from '../../../store/store';
 import { Keyboard } from '../../../hooks/useKeys';
 import { OtherUsers } from '../user/otherUsers';
 
-interface Props {
-  clients: ClientType;
-  socket: Socket;
-}
+interface Props {}
 
 interface StatsProps {
   showPanel?: number;
@@ -48,17 +44,14 @@ function Stats(props: StatsProps) {
 }
 
 const CanvasComponent: React.FC<Props> = (props) => {
-  const { clients, socket } = props;
-  const keys = Object.keys(clients);
-
   return (
     <div className={styles.container}>
       <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
         <color attach="background" args={['#ffffff']} />
         <ambientLight intensity={0.3} />
         <directionalLight color="white" position={[0, 3, 0]} />
-        {renderUser()}
-        {renderOtherUsers()}
+        {/* {renderUser()}
+        {renderOtherUsers()} */}
         <Floor />
         <Keyboard />
         <Stats />
@@ -66,59 +59,57 @@ const CanvasComponent: React.FC<Props> = (props) => {
     </div>
   );
 
-  function renderUser() {
-    const user = keys.filter((key) => key === socket.id)[0];
+  // function renderUser() {
+  //   const user = keys.filter((key) => key === channel.id)[0];
 
-    if (user) {
-      const { position, rotation } = clients[user];
+  //   if (user && clients) {
+  //     const { position, rotation } = (clients as ClientType)[user];
 
-      const vector3: THREE.Vector3 = new THREE.Vector3(
-        position[0],
-        position[1],
-        position[2]
-      );
+  //     const vector3: THREE.Vector3 = new THREE.Vector3(
+  //       position[0],
+  //       position[1],
+  //       position[2]
+  //     );
 
-      const euler: THREE.Euler = new THREE.Euler(
-        rotation[0],
-        rotation[1],
-        rotation[2]
-      );
+  //     const euler: THREE.Euler = new THREE.Euler(
+  //       rotation[0],
+  //       rotation[1],
+  //       rotation[2]
+  //     );
 
-      return (
-        <User position={vector3} rotation={euler} id={user} socket={socket} />
-      );
-    }
-  }
+  //     return <User position={vector3} rotation={euler} id={user} />;
+  //   }
+  // }
 
-  function renderOtherUsers() {
-    const users = keys
-      .filter((key) => key !== socket.id)
-      .map((clientId) => {
-        const { position, rotation } = clients[clientId];
+  // function renderOtherUsers() {
+  //   const users = keys
+  //     .filter((key) => key !== channel.id)
+  //     .map((clientId) => {
+  //       const { position, rotation } = (clients as ClientType)[clientId];
 
-        const vector3: THREE.Vector3 = new THREE.Vector3(
-          position[0],
-          position[1],
-          position[2]
-        );
-        const euler: THREE.Euler = new THREE.Euler(
-          rotation[0],
-          rotation[1],
-          rotation[2]
-        );
+  //       const vector3: THREE.Vector3 = new THREE.Vector3(
+  //         position[0],
+  //         position[1],
+  //         position[2]
+  //       );
+  //       const euler: THREE.Euler = new THREE.Euler(
+  //         rotation[0],
+  //         rotation[1],
+  //         rotation[2]
+  //       );
 
-        return (
-          <OtherUsers
-            key={clientId}
-            position={vector3}
-            rotation={euler}
-            id={clientId}
-          />
-        );
-      });
+  //       return (
+  //         <OtherUsers
+  //           key={clientId}
+  //           position={vector3}
+  //           rotation={euler}
+  //           id={clientId}
+  //         />
+  //       );
+  //     });
 
-    return users;
-  }
+  //   return users;
+  // }
 };
 
 export default CanvasComponent;

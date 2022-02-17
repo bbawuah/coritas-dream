@@ -1,35 +1,15 @@
 import type { NextPage } from 'next';
-import { useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-import { io, Socket } from 'socket.io-client';
 import { Controls } from '../components/webgl/controls/controls';
 import { ClientType } from '../types/socket';
 import styles from '../styles/Home.module.scss';
+import { useColyseus } from '../hooks/useColyseus';
 
 const Canvas = dynamic(() => import('../components/webgl/canvas/canvas'));
 
 const Home: NextPage = () => {
-  const [socketClient, setSocketClient] = useState<Socket>();
-  const [clients, setClients] = useState<ClientType>({});
-
-  useEffect(() => {
-    setSocketClient(io());
-
-    return () => {
-      if (socketClient) socketClient.disconnect();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  useEffect(() => {
-    if (socketClient) {
-      socketClient.on('move', (clients) => {
-        setClients(clients);
-      });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socketClient]);
+  const { client, room } = useColyseus();
 
   return (
     <div className={styles.container}>
@@ -43,11 +23,11 @@ const Home: NextPage = () => {
   );
 
   function renderPage() {
-    if (!socketClient) {
-      return null;
-    }
+    // if (!) {
+    //   return null;
+    // }
 
-    return <Canvas clients={clients} socket={socketClient} />;
+    return <p>A connection!</p>;
   }
 };
 

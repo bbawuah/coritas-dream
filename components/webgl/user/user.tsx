@@ -12,7 +12,6 @@ interface Props {
   position: THREE.Vector3;
   rotation: THREE.Euler;
   id: string;
-  socket: Socket;
 }
 
 interface PlayerInfo extends THREE.Mesh {
@@ -44,7 +43,7 @@ let playerIsOnGround = false;
 // let tempSegment = new THREE.Line3();
 
 export const User: React.FC<Props> = (props) => {
-  const { position, rotation, id, socket } = props;
+  const { position, rotation } = props;
   const userRef = useRef<THREE.Mesh>();
   const controlsRef = useRef<any>();
   const { get, set } = useStore(({ get, set }) => ({ get, set }));
