@@ -27,7 +27,7 @@ const Home: NextPage = () => {
     //   return null;
     // }
 
-    return <p>A connection!</p>;
+    return <Canvas />;
   }
 };
 
