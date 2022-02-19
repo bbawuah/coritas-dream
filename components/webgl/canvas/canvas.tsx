@@ -4,7 +4,6 @@ import * as THREE from 'three';
 import * as styles from './canvas.module.scss';
 import { Canvas, addEffect, addAfterEffect } from '@react-three/fiber';
 import { User } from '../user/user';
-import { Room } from '../room/room';
 import { ClientType } from '../../../types/socket';
 import { Controls } from '../controls/controls';
 import { Floor } from '../floor/floor';
