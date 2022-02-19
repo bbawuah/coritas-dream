@@ -10,10 +10,13 @@ exports.Player = void 0;
 const schema_1 = require("@colyseus/schema");
 class Player extends schema_1.Schema {
     constructor() {
-        super(...arguments);
-        this.x = 0.11;
-        this.y = 2.22;
-        this.z = 2.22;
+        super();
+        this.x = 0;
+        this.y = 0;
+        this.z = 0;
+        this.x = Math.floor(Math.random() * 6) + 1;
+        this.y = 0.5;
+        this.z = Math.floor(Math.random() * 6) + 1;
     }
 }
 __decorate([

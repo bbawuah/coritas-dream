@@ -4,7 +4,7 @@ import * as THREE from 'three';
 
 interface Props {}
 
-export const Room: React.FC<Props> = (props) => {
+export const Gallery: React.FC<Props> = (props) => {
   const ref = useRef();
 
   if (ref.current) {

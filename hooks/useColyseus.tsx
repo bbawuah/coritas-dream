@@ -4,23 +4,20 @@ import { Client, Room } from 'colyseus.js';
 export const useColyseus = () => {
   const [client, setClient] = useState<Client>();
   const [room, setRoom] = useState<Room>();
+  const [data, setData] = useState<any>();
 
   useEffect(() => {
-    setClient(
-      new Client(
-        `${location.protocol.replace('http', 'ws')}//${location.hostname}:3000`
-      )
-    );
+    setClient(new Client('ws://localhost:8080'));
   }, []);
 
   useEffect(() => {
-    console.log('ggvgh');
     if (client) {
-      console.log(client);
       client
         .joinOrCreate('gallery')
         .then((room) => {
-          console.log(room.sessionId, 'joined', room.name);
+          if (room) {
+            setRoom(room);
+          }
         })
         .catch((e) => {
           console.log('JOIN ERROR', e);
@@ -28,5 +25,19 @@ export const useColyseus = () => {
     }
   }, [client]);
 
-  return { client, room };
+  return { client, room, getSpawnPosition };
+
+  function getSpawnPosition(): any {
+    let data: any = {};
+    if (room) {
+      room.onMessage('spawn', (message) => {
+        const test = message;
+        console.log(test);
+        data = { ...test };
+      });
+      console.log(data);
+      return data;
+    }
+    return 'isdjc';
+  }
 };

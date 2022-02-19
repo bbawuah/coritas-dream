@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { OrbitControls, Text } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Socket } from 'socket.io-client';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { Controls, getState, useStore } from '../../../store/store';

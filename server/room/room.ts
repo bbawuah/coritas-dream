@@ -3,12 +3,11 @@ import { Player } from '../player/player';
 import { State } from '../state/state';
 
 export class Gallery extends Room {
-  maxClients = 10;
+  maxClients = 30;
   onCreate() {
     // initialize empty room state
     this.setState(new State());
 
-    console.log('test');
     // Called every time this room receives a "move" message
     this.onMessage('move', (client, data) => {
       const player = (this.state as State).players.get(client.sessionId);
@@ -27,7 +26,20 @@ export class Gallery extends Room {
 
   // Called every time a client joins
   onJoin(client: Client, options: any) {
-    this.state.players.set(client.sessionId, new Player());
+    console.log('user joined');
+    this.state.players.set(client.sessionId, new Player()); //Store instance of user in state
+    // this.broadcast('joined', `${client.sessionId} joined the gallery!`); //Broadcast to other players that someone joined
+
+    const player = (this.state as State).players.get(client.sessionId); // get player from store
+
+    if (player) {
+      client.send('spawn', {
+        x: player.x,
+        y: player.y,
+        z: player.z,
+        id: client.sessionId,
+      });
+    }
   }
 
   update(deltaTim: number) {

@@ -7,12 +7,11 @@ const state_1 = require("../state/state");
 class Gallery extends colyseus_1.Room {
     constructor() {
         super(...arguments);
-        this.maxClients = 10;
+        this.maxClients = 30;
     }
     onCreate() {
         // initialize empty room state
         this.setState(new state_1.State());
-        console.log('test');
         // Called every time this room receives a "move" message
         this.onMessage('move', (client, data) => {
             const player = this.state.players.get(client.sessionId);
@@ -26,7 +25,15 @@ class Gallery extends colyseus_1.Room {
     }
     // Called every time a client joins
     onJoin(client, options) {
-        this.state.players.set(client.sessionId, new player_1.Player());
+        console.log('user joined');
+        this.state.players.set(client.sessionId, new player_1.Player()); //Store instance of user in state
+        this.broadcast('joined', `${client.sessionId} joined the gallery!`); //Broadcast to other players that someone joined
+        const player = this.state.players.get(client.sessionId); // get player from store
+        if (player) {
+            console.log(player);
+            client.send('spawnPosition', { x: player.x, y: player.y, z: player.z });
+            console.log(`Spawned player at (${player.x}, ${player.y}, ${player.z})`);
+        }
     }
     update(deltaTim) {
         // implement your physics or world updates here!

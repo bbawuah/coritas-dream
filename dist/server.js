@@ -26,21 +26,38 @@ const colyseus_1 = require("colyseus");
 const express_1 = __importDefault(require("express"));
 const http = __importStar(require("http"));
 const next_1 = __importDefault(require("next"));
+const url_1 = __importDefault(require("url"));
 const ws_transport_1 = require("@colyseus/ws-transport");
 const room_1 = require("./room/room");
 const port = parseInt(process.env.PORT || '3000', 10);
 const dev = process.env.NODE_ENV !== 'production';
-const nextApp = (0, next_1.default)({ dev });
+const nextApp = (0, next_1.default)({ dev: false });
 const nextHandler = nextApp.getRequestHandler();
 nextApp.prepare().then(async () => {
     const app = (0, express_1.default)();
     const server = http.createServer(app);
+    const wss = new ws_transport_1.WebSocketTransport();
+    server.on('connection', async function connection(ws) {
+        console.log('incoming connection');
+        ws.onclose = () => {
+            console.log('connection closed', wss.wss.clients.size);
+        };
+    });
+    server.on('upgrade', function (req, socket, head) {
+        var _a;
+        if (req.url) {
+            const { pathname } = url_1.default.parse(req.url, true);
+            if (pathname !== '/_next/webpack-hmr') {
+                (_a = wss.wss) === null || _a === void 0 ? void 0 : _a.handleUpgrade(req, socket, head, function done(ws) {
+                    wss.wss.emit('connection', ws, req);
+                });
+            }
+        }
+    });
     app.all('*', (req, res) => nextHandler(req, res));
     const gameServer = new colyseus_1.Server({
-        transport: new ws_transport_1.WebSocketTransport({
-            server,
-        }),
+        transport: wss,
     });
     gameServer.define('gallery', room_1.Gallery);
-    gameServer.listen(3000);
+    gameServer.listen(port);
 });

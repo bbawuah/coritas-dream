@@ -2,7 +2,6 @@ import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { Controls } from '../components/webgl/controls/controls';
-import { ClientType } from '../types/socket';
 import styles from '../styles/Home.module.scss';
 import { useColyseus } from '../hooks/useColyseus';
 
@@ -23,11 +22,11 @@ const Home: NextPage = () => {
   );
 
   function renderPage() {
-    // if (!) {
-    //   return null;
-    // }
+    if (!client || !room) {
+      return null;
+    }
 
-    return <Canvas />;
+    return <Canvas client={client} room={room} />;
   }
 };
 
