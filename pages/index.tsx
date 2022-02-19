@@ -1,14 +1,13 @@
 import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-import { Controls } from '../components/webgl/controls/controls';
 import styles from '../styles/Home.module.scss';
 import { useColyseus } from '../hooks/useColyseus';
 
 const Canvas = dynamic(() => import('../components/webgl/canvas/canvas'));
 
 const Home: NextPage = () => {
-  const { client, room } = useColyseus();
+  const { client, players, id } = useColyseus();
 
   return (
     <div className={styles.container}>
@@ -22,11 +21,11 @@ const Home: NextPage = () => {
   );
 
   function renderPage() {
-    if (!client || !room) {
+    if (!client) {
       return null;
     }
 
-    return <Canvas client={client} room={room} />;
+    return <Canvas client={client} players={players} id={id} />;
   }
 };
 

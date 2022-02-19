@@ -28,12 +28,13 @@ export class Gallery extends Room {
   onJoin(client: Client, options: any) {
     console.log('user joined');
     this.state.players.set(client.sessionId, new Player()); //Store instance of user in state
-    // this.broadcast('joined', `${client.sessionId} joined the gallery!`); //Broadcast to other players that someone joined
+
+    client.send('id', { id: client.sessionId });
 
     const player = (this.state as State).players.get(client.sessionId); // get player from store
 
     if (player) {
-      client.send('spawn', {
+      this.broadcast('spawnPlayer', {
         x: player.x,
         y: player.y,
         z: player.z,

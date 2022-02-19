@@ -4,15 +4,20 @@ import * as THREE from 'three';
 import * as styles from './canvas.module.scss';
 import { Canvas, addEffect, addAfterEffect } from '@react-three/fiber';
 import { User } from '../user/user';
-import { ClientType } from '../../../types/socket';
-import { Controls } from '../controls/controls';
 import { Floor } from '../floor/floor';
 import StatsImpl from 'stats.js';
 import { useStore } from '../../../store/store';
 import { Keyboard } from '../../../hooks/useKeys';
 import { OtherUsers } from '../user/otherUsers';
+import { Client, Room } from 'colyseus.js';
+import { IPlayers } from '../../../hooks/useColyseus';
 
-interface Props {}
+interface Props {
+  client: Client;
+  room?: Room;
+  players: IPlayers[];
+  id: string | undefined;
+}
 
 interface StatsProps {
   showPanel?: number;
@@ -43,6 +48,10 @@ function Stats(props: StatsProps) {
 }
 
 const CanvasComponent: React.FC<Props> = (props) => {
+  const { client, room, players, id } = props;
+
+  console.log(id);
+
   return (
     <div className={styles.container}>
       <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
@@ -50,7 +59,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
         <ambientLight intensity={0.3} />
         <directionalLight color="white" position={[0, 3, 0]} />
         {renderUser()}
-        {/* {renderOtherUsers()} */}
+        {renderOtherUsers()}
         <Floor />
         <Keyboard />
         <Stats />
@@ -59,25 +68,6 @@ const CanvasComponent: React.FC<Props> = (props) => {
   );
 
   function renderUser() {
-    // const user = keys.filter((key) => key === channel.id)[0];
-
-    // if (user && clients) {
-    //   const { position, rotation } = (clients as ClientType)[user];
-
-    //   const vector3: THREE.Vector3 = new THREE.Vector3(
-    //     position[0],
-    //     position[1],
-    //     position[2]
-    //   );
-
-    //   const euler: THREE.Euler = new THREE.Euler(
-    //     rotation[0],
-    //     rotation[1],
-    //     rotation[2]
-    //   );
-    //
-    // }
-
     return (
       <User
         position={new THREE.Vector3(0, 1, 0)}
@@ -87,35 +77,20 @@ const CanvasComponent: React.FC<Props> = (props) => {
     );
   }
 
-  // function renderOtherUsers() {
-  //   const users = keys
-  //     .filter((key) => key !== channel.id)
-  //     .map((clientId) => {
-  //       const { position, rotation } = (clients as ClientType)[clientId];
+  function renderOtherUsers() {
+    const jsx = players.map((player) => {
+      return (
+        <OtherUsers
+          key={player.id}
+          position={player.position}
+          rotation={new THREE.Euler(0, 0, 0)}
+          id={player.id}
+        />
+      );
+    });
 
-  //       const vector3: THREE.Vector3 = new THREE.Vector3(
-  //         position[0],
-  //         position[1],
-  //         position[2]
-  //       );
-  //       const euler: THREE.Euler = new THREE.Euler(
-  //         rotation[0],
-  //         rotation[1],
-  //         rotation[2]
-  //       );
-
-  //       return (
-  //         <OtherUsers
-  //           key={clientId}
-  //           position={vector3}
-  //           rotation={euler}
-  //           id={clientId}
-  //         />
-  //       );
-  //     });
-
-  //   return users;
-  // }
+    return jsx;
+  }
 };
 
 export default CanvasComponent;

@@ -8,7 +8,7 @@ export class Player extends Schema {
   constructor() {
     super();
     this.x = Math.floor(Math.random() * 6) + 1;
-    this.y = 0.5;
+    this.y = 1;
     this.z = Math.floor(Math.random() * 6) + 1;
   }
 }

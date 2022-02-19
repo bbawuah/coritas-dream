@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Client, Room } from 'colyseus.js';
+import * as THREE from 'three';
+
+export interface IPlayers {
+  id: string;
+  position: THREE.Vector3;
+}
 
 export const useColyseus = () => {
   const [client, setClient] = useState<Client>();
-  const [room, setRoom] = useState<Room>();
-  const [data, setData] = useState<any>();
+  const [players, setPlayers] = useState<IPlayers[]>([]);
+  const [id, setId] = useState<string>();
 
   useEffect(() => {
     setClient(new Client('ws://localhost:8080'));
@@ -12,32 +18,43 @@ export const useColyseus = () => {
 
   useEffect(() => {
     if (client) {
-      client
-        .joinOrCreate('gallery')
-        .then((room) => {
-          if (room) {
-            setRoom(room);
-          }
-        })
-        .catch((e) => {
-          console.log('JOIN ERROR', e);
-        });
+      getRoom();
     }
   }, [client]);
 
-  return { client, room, getSpawnPosition };
+  return { client, players, id };
 
-  function getSpawnPosition(): any {
-    let data: any = {};
-    if (room) {
-      room.onMessage('spawn', (message) => {
-        const test = message;
-        console.log(test);
-        data = { ...test };
-      });
-      console.log(data);
-      return data;
+  async function getRoom() {
+    if (client) {
+      try {
+        const room = await client.joinOrCreate('gallery');
+
+        getSpawnedPlayer(room);
+        getPlayerId(room);
+      } catch (e) {
+        console.log(e);
+      }
     }
-    return 'isdjc';
+  }
+
+  function getPlayerId(room: Room) {
+    room.onMessage('id', (data) => {
+      setId(data.id);
+    });
+  }
+
+  function getSpawnedPlayer(room: Room) {
+    room.onMessage('spawnPlayer', (data) => {
+      const position = new THREE.Vector3(data.x, data.y, data.z);
+      const id: string = data.id;
+
+      setPlayers((players) => [
+        ...players,
+        {
+          id,
+          position,
+        },
+      ]);
+    });
   }
 };
