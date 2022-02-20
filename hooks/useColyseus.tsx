@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Client, Room } from 'colyseus.js';
 import * as THREE from 'three';
+import { useStore } from '../store/store';
 
 export interface IPlayers {
   id: string;
@@ -8,8 +9,8 @@ export interface IPlayers {
 }
 
 export const useColyseus = () => {
+  const { set, get } = useStore(({ set, get }) => ({ set, get }));
   const [client, setClient] = useState<Client>();
-  const [players, setPlayers] = useState<IPlayers[]>([]);
   const [id, setId] = useState<string>();
 
   useEffect(() => {
@@ -20,17 +21,19 @@ export const useColyseus = () => {
     if (client) {
       getRoom();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client]);
 
-  return { client, players, id };
+  return { client, id };
 
   async function getRoom() {
     if (client) {
       try {
         const room = await client.joinOrCreate('gallery');
 
-        getSpawnedPlayer(room);
+        onSpawnPlayer(room);
         getPlayerId(room);
+        onRemovePlayer(room);
       } catch (e) {
         console.log(e);
       }
@@ -43,18 +46,22 @@ export const useColyseus = () => {
     });
   }
 
-  function getSpawnedPlayer(room: Room) {
+  function onSpawnPlayer(room: Room) {
     room.onMessage('spawnPlayer', (data) => {
-      const position = new THREE.Vector3(data.x, data.y, data.z);
-      const id: string = data.id;
+      const { players } = data;
+      console.log('new player joined');
 
-      setPlayers((players) => [
-        ...players,
-        {
-          id,
-          position,
-        },
-      ]);
+      set((state) => ({ ...state, players }));
+    });
+  }
+
+  function onRemovePlayer(room: Room) {
+    room.onMessage('removePlayer', (data) => {
+      const { players } = data;
+
+      console.log('a player left');
+
+      set((state) => ({ ...state, players }));
     });
   }
 };

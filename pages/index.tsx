@@ -7,7 +7,7 @@ import { useColyseus } from '../hooks/useColyseus';
 const Canvas = dynamic(() => import('../components/webgl/canvas/canvas'));
 
 const Home: NextPage = () => {
-  const { client, players, id } = useColyseus();
+  const { client, id } = useColyseus();
 
   return (
     <div className={styles.container}>
@@ -25,7 +25,7 @@ const Home: NextPage = () => {
       return null;
     }
 
-    return <Canvas client={client} players={players} id={id} />;
+    return <Canvas client={client} id={id} />;
   }
 };
 

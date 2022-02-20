@@ -1,9 +1,9 @@
 import React from 'react';
 import create from 'zustand';
+import { subscribeWithSelector } from 'zustand/middleware';
 import shallow from 'zustand/shallow';
 import type { GetState, SetState, StateSelector } from 'zustand';
 import * as THREE from 'three';
-import { ClientType } from '../types/socket';
 import dynamic from 'next/dynamic';
 import { Camera } from 'three';
 
@@ -14,11 +14,22 @@ const controls = {
   right: false,
 };
 
+export type IPlayers = Record<
+  string,
+  {
+    x: number;
+    y: number;
+    z: number;
+  }
+>;
+
 const clients = {};
 
 const test = false;
 
 let collider: THREE.Mesh;
+
+const players: IPlayers = {};
 
 // export const cameras = ['DEFAULT', 'FIRST_PERSON', 'BIRD_EYE'] as const;
 // export type Camera = typeof cameras[number];
@@ -37,7 +48,7 @@ export interface IState {
   actions: Record<ActionNames, (camera: Camera) => void>;
   controls: Controls;
   test: boolean;
-  clients: ClientType;
+  players: IPlayers;
   collider: THREE.Mesh;
   get: Getter;
   set: Setter;
@@ -46,29 +57,32 @@ export interface IState {
 type Getter = GetState<IState>;
 export type Setter = SetState<IState>;
 
-const useStoreImplementation = create<IState>(
-  (set: SetState<IState>, get: GetState<IState>) => {
-    const actions = {
-      walking: () => {},
-      idle: () => {},
-    };
+const useStoreImplementation = create(
+  subscribeWithSelector<IState>(
+    (set: SetState<IState>, get: GetState<IState>) => {
+      const actions = {
+        walking: () => {},
+        idle: () => {},
+      };
 
-    return {
-      actions,
-      controls,
-      clients,
-      test,
-      collider,
-      get,
-      set,
-    };
-  }
+      return {
+        actions,
+        controls,
+        clients,
+        test,
+        players,
+        collider,
+        get,
+        set,
+      };
+    }
+  )
 );
 
 const useStore = <T>(sel: StateSelector<IState, T>) =>
   useStoreImplementation(sel, shallow);
 Object.assign(useStore, useStoreImplementation);
 
-const { getState, setState } = useStoreImplementation;
+const { getState, setState, subscribe } = useStoreImplementation;
 
-export { getState, setState, useStore };
+export { getState, setState, useStore, subscribe };

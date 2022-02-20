@@ -1,5 +1,4 @@
 import React from 'react';
-import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry';
 import { Text } from '@react-three/drei';
 
@@ -9,7 +8,7 @@ interface Props {
   id: string;
 }
 
-export const OtherUsers: React.FC<Props> = (props) => {
+export const Model: React.FC<Props> = (props) => {
   const { position, rotation, id } = props;
 
   return (

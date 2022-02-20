@@ -31,15 +31,10 @@ export class Gallery extends Room {
 
     client.send('id', { id: client.sessionId });
 
-    const player = (this.state as State).players.get(client.sessionId); // get player from store
+    const players = (this.state as State).players; // get player from store
 
-    if (player) {
-      this.broadcast('spawnPlayer', {
-        x: player.x,
-        y: player.y,
-        z: player.z,
-        id: client.sessionId,
-      });
+    if (players) {
+      this.broadcast('spawnPlayer', { players });
     }
   }
 
@@ -49,7 +44,17 @@ export class Gallery extends Room {
   }
 
   onLeave(client: Client) {
+    this.state.players.delete(client.sessionId);
+
+    const players = (this.state as State).players;
+
     this.broadcast('messages', `${client.sessionId} left.`);
+
+    if (players) {
+      this.broadcast('removePlayer', {
+        players,
+      });
+    }
   }
 
   onDispose() {

@@ -17,10 +17,14 @@ export const Floor: React.FC<Props> = (props) => {
 
       set((state) => {
         if (ref.current) {
+          // (ref.current.material as THREE.MeshStandardMaterial).wireframe = true;
+          (ref.current.material as THREE.MeshStandardMaterial).opacity = 0.5;
+
           return { ...state, collider: ref.current };
         }
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // useHelper(ref, MeshBVHVisualizer);

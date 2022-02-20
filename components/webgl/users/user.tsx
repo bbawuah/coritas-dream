@@ -3,7 +3,7 @@ import { OrbitControls, Text } from '@react-three/drei';
 import { useFrame, useThree } from '@react-three/fiber';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
-import { Controls, getState, useStore } from '../../../store/store';
+import { Controls, getState, subscribe, useStore } from '../../../store/store';
 import { INTERSECTED, NOT_INTERSECTED } from 'three-mesh-bvh';
 import { useCustomVariables } from '../../../hooks/useCustomVariables';
 

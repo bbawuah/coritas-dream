@@ -1,21 +1,25 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Debug, Physics } from '@react-three/cannon';
 import * as THREE from 'three';
 import * as styles from './canvas.module.scss';
-import { Canvas, addEffect, addAfterEffect } from '@react-three/fiber';
-import { User } from '../user/user';
+import {
+  Canvas,
+  addEffect,
+  addAfterEffect,
+  useFrame,
+} from '@react-three/fiber';
+import { User } from '../users/user';
 import { Floor } from '../floor/floor';
 import StatsImpl from 'stats.js';
-import { useStore } from '../../../store/store';
+import { subscribe, useStore } from '../../../store/store';
 import { Keyboard } from '../../../hooks/useKeys';
-import { OtherUsers } from '../user/otherUsers';
+import { InstancedUsers } from '../users/instancedUsers';
 import { Client, Room } from 'colyseus.js';
 import { IPlayers } from '../../../hooks/useColyseus';
 
 interface Props {
   client: Client;
   room?: Room;
-  players: IPlayers[];
   id: string | undefined;
 }
 
@@ -43,23 +47,22 @@ function Stats(props: StatsProps) {
       begin();
       end();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parent]);
   return null;
 }
 
 const CanvasComponent: React.FC<Props> = (props) => {
-  const { client, room, players, id } = props;
-
-  console.log(id);
+  const { client, room, id } = props;
 
   return (
     <div className={styles.container}>
       <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
         <color attach="background" args={['#ffffff']} />
-        <ambientLight intensity={0.3} />
+        <ambientLight intensity={0.5} />
         <directionalLight color="white" position={[0, 3, 0]} />
         {renderUser()}
-        {renderOtherUsers()}
+        <InstancedUsers playerId={id} />
         <Floor />
         <Keyboard />
         <Stats />
@@ -75,21 +78,6 @@ const CanvasComponent: React.FC<Props> = (props) => {
         id={'user'}
       />
     );
-  }
-
-  function renderOtherUsers() {
-    const jsx = players.map((player) => {
-      return (
-        <OtherUsers
-          key={player.id}
-          position={player.position}
-          rotation={new THREE.Euler(0, 0, 0)}
-          id={player.id}
-        />
-      );
-    });
-
-    return jsx;
   }
 };
 
