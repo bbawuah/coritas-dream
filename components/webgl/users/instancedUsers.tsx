@@ -1,9 +1,8 @@
 import { useFrame } from '@react-three/fiber';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry';
-import { getState, IPlayers, subscribe, useStore } from '../../../store/store';
-import { Model } from './model';
+import { getState, useStore } from '../../../store/store';
 import { Text } from '@react-three/drei';
 
 interface Props {
@@ -13,8 +12,9 @@ interface Props {
 export const InstancedUsers: React.FC<Props> = (props) => {
   const { playerId } = props;
   const instancedMeshRef = useRef<THREE.InstancedMesh>();
-  const count = useRef<number>(0);
-  const dummy = useMemo(() => new THREE.Object3D(), []);
+  const { playersCount } = useStore(({ playersCount }) => ({ playersCount }));
+
+  const dummy = new THREE.Object3D();
 
   useEffect(() => {
     if (instancedMeshRef.current) {
@@ -29,14 +29,10 @@ export const InstancedUsers: React.FC<Props> = (props) => {
       const players = getState().players;
       const ids = Object.keys(players);
 
-      count.current = ids.length; //Update count ref
-
       ids
         .filter((id) => id !== playerId)
         .forEach((id, index) => {
           dummy.position.set(players[id].x, players[id].y, players[id].z);
-
-          // console.log(dummy.position);
 
           dummy.updateMatrix();
           instancedMeshRef?.current?.setMatrixAt(index, dummy.matrix);
@@ -47,14 +43,15 @@ export const InstancedUsers: React.FC<Props> = (props) => {
   });
 
   return (
-    <instancedMesh
-      position={new THREE.Vector3(4, 1, 0)}
-      ref={instancedMeshRef}
-      args={[
-        new RoundedBoxGeometry(1.0, 2.0, 1.0, 10, 0.5),
-        new THREE.MeshStandardMaterial({ color: new THREE.Color('#00ff00') }),
-        count.current,
-      ]}
-    />
+    <>
+      <instancedMesh
+        ref={instancedMeshRef}
+        args={[
+          new RoundedBoxGeometry(1.0, 2.0, 1.0, 10, 0.5),
+          new THREE.MeshStandardMaterial({ color: new THREE.Color('#00ff00') }),
+          playersCount,
+        ]}
+      />
+    </>
   );
 };

@@ -34,6 +34,7 @@ export const useColyseus = () => {
         onSpawnPlayer(room);
         getPlayerId(room);
         onRemovePlayer(room);
+        onMessage(room);
       } catch (e) {
         console.log(e);
       }
@@ -51,7 +52,17 @@ export const useColyseus = () => {
       const { players } = data;
       console.log('new player joined');
 
-      set((state) => ({ ...state, players }));
+      set((state) => ({
+        ...state,
+        players,
+        playersCount: Object.keys(players).length,
+      }));
+    });
+  }
+
+  function onMessage(room: Room) {
+    room.onMessage('messages', (data) => {
+      console.log(data);
     });
   }
 
@@ -61,7 +72,11 @@ export const useColyseus = () => {
 
       console.log('a player left');
 
-      set((state) => ({ ...state, players }));
+      set((state) => ({
+        ...state,
+        players,
+        playersCount: Object.keys(players).length,
+      }));
     });
   }
 };

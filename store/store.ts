@@ -31,6 +31,8 @@ let collider: THREE.Mesh;
 
 const players: IPlayers = {};
 
+const playersCount: number = 0;
+
 // export const cameras = ['DEFAULT', 'FIRST_PERSON', 'BIRD_EYE'] as const;
 // export type Camera = typeof cameras[number];
 
@@ -49,6 +51,7 @@ export interface IState {
   controls: Controls;
   test: boolean;
   players: IPlayers;
+  playersCount: number;
   collider: THREE.Mesh;
   get: Getter;
   set: Setter;
@@ -72,6 +75,7 @@ const useStoreImplementation = create(
         test,
         players,
         collider,
+        playersCount,
         get,
         set,
       };
