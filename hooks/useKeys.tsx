@@ -20,8 +20,7 @@ const keys: Keys = {
 };
 
 export function Keyboard() {
-  const { set, get } = useStore(({ get, set }) => ({ get, set }));
-  const state = get();
+  const { set } = useStore(({ set }) => ({ set }));
 
   useEffect(() => {
     document.addEventListener('keydown', onKeyDown, { passive: true });

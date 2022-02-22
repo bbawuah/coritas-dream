@@ -3,16 +3,18 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry';
 import { getState, useStore } from '../../../store/store';
-import { Text } from '@react-three/drei';
+import { Html } from '@react-three/drei';
 
 interface Props {
-  playerId?: string;
+  playerId: string;
 }
 
 export const InstancedUsers: React.FC<Props> = (props) => {
   const { playerId } = props;
   const instancedMeshRef = useRef<THREE.InstancedMesh>();
-  const { playersCount } = useStore(({ playersCount }) => ({ playersCount }));
+  const { playersCount } = useStore(({ playersCount }) => ({
+    playersCount,
+  }));
 
   const dummy = new THREE.Object3D();
 
@@ -43,15 +45,48 @@ export const InstancedUsers: React.FC<Props> = (props) => {
   });
 
   return (
-    <>
-      <instancedMesh
-        ref={instancedMeshRef}
-        args={[
-          new RoundedBoxGeometry(1.0, 2.0, 1.0, 10, 0.5),
-          new THREE.MeshStandardMaterial({ color: new THREE.Color('#00ff00') }),
-          playersCount,
-        ]}
-      />
-    </>
+    <instancedMesh
+      ref={instancedMeshRef}
+      args={[
+        new RoundedBoxGeometry(1.0, 2.0, 1.0, 10, 0.5),
+        new THREE.MeshStandardMaterial({ color: new THREE.Color('#00ff00') }),
+        playersCount,
+      ]}
+      onClick={(e) => handleClickedPlayer(e.instanceId)}
+    >
+      {renderPlayerLabels()}
+    </instancedMesh>
   );
+
+  function renderPlayerLabels() {
+    const players = getState().players;
+    const ids = Object.keys(players);
+
+    return ids.map((id) => {
+      const vector = new THREE.Vector3(
+        players[id].x,
+        players[id].y + 1.5,
+        players[id].z
+      );
+      return (
+        <Html
+          key={id}
+          position={vector}
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+          }}
+        >
+          <span>{id}</span>
+        </Html>
+      );
+    });
+  }
+
+  function handleClickedPlayer(index?: number) {
+    const players = getState().players;
+    const ids = Object.keys(players).filter((id) => id !== playerId);
+
+    console.log(`Clicked on player ${index ? ids[index] : ids[0]}`);
+  }
 };

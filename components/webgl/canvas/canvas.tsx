@@ -20,7 +20,7 @@ import { IPlayers } from '../../../hooks/useColyseus';
 interface Props {
   client: Client;
   room?: Room;
-  id: string | undefined;
+  id: string;
 }
 
 interface StatsProps {
@@ -53,7 +53,13 @@ function Stats(props: StatsProps) {
 }
 
 const CanvasComponent: React.FC<Props> = (props) => {
-  const { client, room, id } = props;
+  const { room, id } = props;
+  const { players } = useStore(({ players }) => ({ players }));
+  const startingPosition = new THREE.Vector3(
+    players[id].x,
+    players[id].y,
+    players[id].z
+  );
 
   return (
     <div className={styles.container}>
@@ -61,7 +67,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
         <color attach="background" args={['#ffffff']} />
         <ambientLight intensity={0.5} />
         <directionalLight color="white" position={[0, 3, 0]} />
-        {renderUser()}
+        <User position={startingPosition} rotation={new THREE.Euler(0, 0, 0)} />
         <InstancedUsers playerId={id} />
         <Floor />
         <Keyboard />
@@ -69,16 +75,6 @@ const CanvasComponent: React.FC<Props> = (props) => {
       </Canvas>
     </div>
   );
-
-  function renderUser() {
-    return (
-      <User
-        position={new THREE.Vector3(0, 1, 0)}
-        rotation={new THREE.Euler(0, 0, 0)}
-        id={'user'}
-      />
-    );
-  }
 };
 
 export default CanvasComponent;

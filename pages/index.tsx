@@ -21,7 +21,7 @@ const Home: NextPage = () => {
   );
 
   function renderPage() {
-    if (!client) {
+    if (!client || !id) {
       return null;
     }
 

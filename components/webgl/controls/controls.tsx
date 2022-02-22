@@ -5,12 +5,10 @@ interface Props {}
 
 export const Controls: React.FC<Props> = (props) => {
   return (
-    <>
-      <OrbitControls
-        enablePan={false}
-        enableZoom={false}
-        maxPolarAngle={Math.PI / 2}
-      />
-    </>
+    <OrbitControls
+      enablePan={false}
+      enableZoom={false}
+      maxPolarAngle={Math.PI / 2}
+    />
   );
 };

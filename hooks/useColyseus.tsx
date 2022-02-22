@@ -9,7 +9,7 @@ export interface IPlayers {
 }
 
 export const useColyseus = () => {
-  const { set, get } = useStore(({ set, get }) => ({ set, get }));
+  const { set } = useStore(({ set }) => ({ set }));
   const [client, setClient] = useState<Client>();
   const [id, setId] = useState<string>();
 

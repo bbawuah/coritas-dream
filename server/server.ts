@@ -2,7 +2,6 @@ import { Server } from '@colyseus/core';
 import express, { Express } from 'express';
 import * as http from 'http';
 import next, { NextApiHandler } from 'next';
-import parse from 'url';
 import { WebSocketTransport } from '@colyseus/ws-transport';
 import { Gallery } from './room/room';
 

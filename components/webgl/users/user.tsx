@@ -10,7 +10,6 @@ import { useCustomVariables } from '../../../hooks/useCustomVariables';
 interface Props {
   position: THREE.Vector3;
   rotation: THREE.Euler;
-  id: string;
 }
 
 interface PlayerInfo extends THREE.Mesh {
