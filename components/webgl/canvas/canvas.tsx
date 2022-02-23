@@ -1,57 +1,77 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { Debug, Physics } from '@react-three/cannon';
 import * as THREE from 'three';
-import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { BoxLineGeometry } from 'three/examples/jsm/geometries/BoxLineGeometry';
 import * as styles from './canvas.module.scss';
+import {
+  Canvas,
+  addEffect,
+  addAfterEffect,
+  useFrame,
+} from '@react-three/fiber';
+import { User } from '../users/user';
+import { Floor } from '../floor/floor';
+import StatsImpl from 'stats.js';
+import { subscribe, useStore } from '../../../store/store';
+import { Keyboard } from '../../../hooks/useKeys';
+import { InstancedUsers } from '../users/instancedUsers';
+import { Client, Room } from 'colyseus.js';
+import { IPlayers } from '../../../hooks/useColyseus';
 
-interface Props {}
+interface Props {
+  client: Client;
+  room?: Room;
+  id: string;
+}
 
-const Room: React.FC = () => {
-  const ref = useRef();
+interface StatsProps {
+  showPanel?: number;
+  className?: string;
+}
 
-  if (ref.current) {
-    (ref.current as THREE.LineSegments).geometry.translate(0, 1.5, 0);
-  }
+function Stats(props: StatsProps) {
+  const { showPanel = 0, className } = props;
+  const [stats] = useState(() => new StatsImpl());
+  useEffect(() => {
+    const node = document.body;
 
-  return (
-    <lineSegments
-      ref={ref}
-      geometry={new BoxLineGeometry(10, 6, 6, 10, 10, 10)}
-      material={new THREE.LineBasicMaterial({ color: 0x808080 })}
-    />
-  );
-};
+    stats.showPanel(showPanel);
+    node.appendChild(stats.dom);
 
-const Box: React.FC = () => {
-  const ref = useRef();
+    if (className) stats.dom.classList.add(className);
 
-  if (ref.current) {
-  }
+    const begin = addEffect(() => stats.begin());
+    const end = addAfterEffect(() => stats.end());
 
-  useFrame((state, delta) => {
-    if (ref.current) {
-      (ref.current as any).rotation.x = (ref.current as any).rotation.z +=
-        delta;
-    }
-  });
-
-  return (
-    <mesh ref={ref} position={[0, 1, 0]}>
-      <boxGeometry args={[1, 1, 1]} />
-      <meshStandardMaterial />
-    </mesh>
-  );
-};
+    return () => {
+      node.removeChild(stats.dom);
+      begin();
+      end();
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parent]);
+  return null;
+}
 
 const CanvasComponent: React.FC<Props> = (props) => {
+  const { room, id } = props;
+  const { players } = useStore(({ players }) => ({ players }));
+  const startingPosition = new THREE.Vector3(
+    players[id].x,
+    players[id].y,
+    players[id].z
+  );
+
   return (
     <div className={styles.container}>
-      <Canvas camera={{ fov: 80, position: [0, 1.6, 3] }}>
-        <color attach="background" args={['#505050']} />
-        <Room />
-        <ambientLight intensity={0.1} />
-        <directionalLight color="red" position={[0, 0, 7]} />
-        <Box />
+      <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
+        <color attach="background" args={['#ffffff']} />
+        <ambientLight intensity={0.5} />
+        <directionalLight color="white" position={[0, 3, 0]} />
+        <User position={startingPosition} rotation={new THREE.Euler(0, 0, 0)} />
+        <InstancedUsers playerId={id} />
+        <Floor />
+        <Keyboard />
+        <Stats />
       </Canvas>
     </div>
   );
