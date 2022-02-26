@@ -18,7 +18,7 @@ export const Floor: React.FC<Props> = (props) => {
       set((state) => {
         if (ref.current) {
           // (ref.current.material as THREE.MeshStandardMaterial).wireframe = true;
-          (ref.current.material as THREE.MeshStandardMaterial).opacity = 0.5;
+          (ref.current.material as THREE.MeshStandardMaterial).opacity = 0.2;
 
           return { ...state, collider: ref.current };
         }
@@ -27,10 +27,10 @@ export const Floor: React.FC<Props> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // useHelper(ref, MeshBVHVisualizer);
+  useHelper(ref, MeshBVHVisualizer);
 
   return (
-    <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]}>
+    <mesh ref={ref} rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]}>
       <planeGeometry args={[100, 100]} />
       <meshStandardMaterial opacity={1} color={'#99EAF5'} />
     </mesh>

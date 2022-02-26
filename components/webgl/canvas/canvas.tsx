@@ -11,15 +11,13 @@ import {
 import { User } from '../users/user';
 import { Floor } from '../floor/floor';
 import StatsImpl from 'stats.js';
-import { subscribe, useStore } from '../../../store/store';
-import { Keyboard } from '../../../hooks/useKeys';
+import { useStore } from '../../../store/store';
 import { InstancedUsers } from '../users/instancedUsers';
 import { Client, Room } from 'colyseus.js';
-import { IPlayers } from '../../../hooks/useColyseus';
 
 interface Props {
   client: Client;
-  room?: Room;
+  room: Room;
   id: string;
 }
 
@@ -67,10 +65,9 @@ const CanvasComponent: React.FC<Props> = (props) => {
         <color attach="background" args={['#ffffff']} />
         <ambientLight intensity={0.5} />
         <directionalLight color="white" position={[0, 3, 0]} />
-        <User position={startingPosition} rotation={new THREE.Euler(0, 0, 0)} />
-        <InstancedUsers playerId={id} />
+        <User position={startingPosition} room={room} />
+        <InstancedUsers playerId={id} room={room} />
         <Floor />
-        <Keyboard />
         <Stats />
       </Canvas>
     </div>

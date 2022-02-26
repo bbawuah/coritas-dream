@@ -6,6 +6,7 @@ import type { GetState, SetState, StateSelector } from 'zustand';
 import * as THREE from 'three';
 import dynamic from 'next/dynamic';
 import { Camera } from 'three';
+import { IUserDirection } from '../server/physics/types';
 
 const controls = {
   backward: false,
@@ -23,9 +24,13 @@ export type IPlayers = Record<
   }
 >;
 
+const userDirection: IUserDirection = 'idle';
+
 const clients = {};
 
 const test = false;
+
+const azimuthalAngle: number = 0;
 
 let collider: THREE.Mesh;
 
@@ -50,8 +55,10 @@ export interface IState {
   actions: Record<ActionNames, (camera: Camera) => void>;
   controls: Controls;
   test: boolean;
+  userDirection: IUserDirection;
   players: IPlayers;
   playersCount: number;
+  azimuthalAngle: number;
   collider: THREE.Mesh;
   get: Getter;
   set: Setter;
@@ -74,6 +81,8 @@ const useStoreImplementation = create(
         clients,
         test,
         players,
+        userDirection,
+        azimuthalAngle,
         collider,
         playersCount,
         get,

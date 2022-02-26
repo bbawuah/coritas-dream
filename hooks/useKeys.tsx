@@ -1,4 +1,7 @@
+import { useFrame, useThree } from '@react-three/fiber';
+import { Room } from 'colyseus.js';
 import { useEffect } from 'react';
+import { IHandlePhysicsProps, IUserDirection } from '../server/physics/types';
 import { useStore } from '../store/store';
 
 const controls = {
@@ -9,7 +12,7 @@ const controls = {
 };
 
 interface Keys {
-  [x: string]: string;
+  [x: string]: IUserDirection;
 }
 
 const keys: Keys = {
@@ -19,7 +22,9 @@ const keys: Keys = {
   d: 'right',
 };
 
-export function Keyboard() {
+// Data to server should be send in this component
+
+export const useKeys = () => {
   const { set } = useStore(({ set }) => ({ set }));
 
   useEffect(() => {
@@ -30,6 +35,7 @@ export function Keyboard() {
       document.removeEventListener('keydown', onKeyDown),
       document.removeEventListener('keyup', onKeyUp)
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function onKeyDown(ev: KeyboardEvent) {
@@ -37,7 +43,7 @@ export function Keyboard() {
     if (objectKeys.includes(ev.key)) {
       set((state) => ({
         ...state,
-        controls: { ...state.controls, [keys[ev.key]]: true },
+        userDirection: keys[ev.key],
       }));
     }
   }
@@ -47,10 +53,10 @@ export function Keyboard() {
     if (objectKeys.includes(ev.key)) {
       set((state) => ({
         ...state,
-        controls: { ...state.controls, [keys[ev.key]]: false },
+        userDirection: 'idle',
       }));
     }
   }
 
   return null;
-}
+};
