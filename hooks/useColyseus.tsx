@@ -37,7 +37,6 @@ export const useColyseus = () => {
         setRoom(room);
         onSpawnPlayer(room);
         onRemovePlayer(room);
-        onMovePlayer(room);
         onMessage(room);
       } catch (e) {
         console.log(e);
@@ -81,14 +80,6 @@ export const useColyseus = () => {
         players,
         playersCount: Object.keys(players).length,
       }));
-    });
-  }
-
-  function onMovePlayer(room: Room) {
-    room.onMessage('move', (data: any) => {
-      const { players } = data;
-
-      // console.log(players);
     });
   }
 };
