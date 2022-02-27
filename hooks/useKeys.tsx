@@ -1,15 +1,9 @@
 import { useEffect } from 'react';
+import { IUserDirection } from '../server/physics/types';
 import { useStore } from '../store/store';
 
-const controls = {
-  backward: false,
-  forward: false,
-  left: false,
-  right: false,
-};
-
 interface Keys {
-  [x: string]: string;
+  [x: string]: IUserDirection;
 }
 
 const keys: Keys = {
@@ -19,7 +13,9 @@ const keys: Keys = {
   d: 'right',
 };
 
-export function Keyboard() {
+// Data to server should be send in this component
+
+export const useKeyboardEvents = () => {
   const { set } = useStore(({ set }) => ({ set }));
 
   useEffect(() => {
@@ -30,6 +26,7 @@ export function Keyboard() {
       document.removeEventListener('keydown', onKeyDown),
       document.removeEventListener('keyup', onKeyUp)
     );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function onKeyDown(ev: KeyboardEvent) {
@@ -37,7 +34,7 @@ export function Keyboard() {
     if (objectKeys.includes(ev.key)) {
       set((state) => ({
         ...state,
-        controls: { ...state.controls, [keys[ev.key]]: true },
+        userDirection: keys[ev.key],
       }));
     }
   }
@@ -47,10 +44,10 @@ export function Keyboard() {
     if (objectKeys.includes(ev.key)) {
       set((state) => ({
         ...state,
-        controls: { ...state.controls, [keys[ev.key]]: false },
+        userDirection: 'idle',
       }));
     }
   }
 
   return null;
-}
+};

@@ -1,16 +1,18 @@
 import { useFrame } from '@react-three/fiber';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry';
 import { getState, useStore } from '../../../store/store';
 import { Html } from '@react-three/drei';
+import { Room } from 'colyseus.js';
 
 interface Props {
   playerId: string;
+  room: Room;
 }
 
 export const InstancedUsers: React.FC<Props> = (props) => {
-  const { playerId } = props;
+  const { playerId, room } = props;
   const instancedMeshRef = useRef<THREE.InstancedMesh>();
   const { playersCount } = useStore(({ playersCount }) => ({
     playersCount,
@@ -26,19 +28,22 @@ export const InstancedUsers: React.FC<Props> = (props) => {
     }
   }, []);
 
+  // Listen directly to websocket in renderloop
   useFrame(() => {
     if (instancedMeshRef.current) {
-      const players = getState().players;
-      const ids = Object.keys(players);
+      room.onMessage('move', (data) => {
+        const { players } = data;
+        const ids = Object.keys(players);
 
-      ids
-        .filter((id) => id !== playerId)
-        .forEach((id, index) => {
-          dummy.position.set(players[id].x, players[id].y, players[id].z);
+        ids
+          .filter((id) => id !== playerId)
+          .forEach((id, index) => {
+            dummy.position.set(players[id].x, players[id].y, players[id].z);
 
-          dummy.updateMatrix();
-          instancedMeshRef?.current?.setMatrixAt(index, dummy.matrix);
-        });
+            dummy.updateMatrix();
+            instancedMeshRef?.current?.setMatrixAt(index, dummy.matrix);
+          });
+      });
 
       instancedMeshRef.current.instanceMatrix.needsUpdate = true;
     }
@@ -60,27 +65,29 @@ export const InstancedUsers: React.FC<Props> = (props) => {
 
   function renderPlayerLabels() {
     const players = getState().players;
-    const ids = Object.keys(players);
+    const ids = Object.keys(players); //Probably need to refactor this to a React.Ref
 
-    return ids.map((id) => {
-      const vector = new THREE.Vector3(
-        players[id].x,
-        players[id].y + 1.5,
-        players[id].z
-      );
-      return (
-        <Html
-          key={id}
-          position={vector}
-          style={{
-            display: 'flex',
-            justifyContent: 'center',
-          }}
-        >
-          <span>{id}</span>
-        </Html>
-      );
-    });
+    return ids
+      .filter((id) => id !== playerId)
+      .map((id) => {
+        const vector = new THREE.Vector3(
+          players[id].x,
+          players[id].y + 1.5,
+          players[id].z
+        );
+        return (
+          <Html
+            key={id}
+            position={vector}
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+            }}
+          >
+            <span>{id}</span>
+          </Html>
+        );
+      });
   }
 
   function handleClickedPlayer(index?: number) {
