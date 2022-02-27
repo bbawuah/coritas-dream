@@ -37,7 +37,7 @@ export class Player extends Schema {
     this.y = 1;
     this.z = Math.floor(Math.random() * 6) + 1;
 
-    this.physicalBody = physics.createPhysics<Player>(this.mesh.geometry, this); // Create phyisical represenatation of player
+    this.physicalBody = physics.createPlayerPhysics<Player>(this); // Create phyisical represenatation of player
 
     physics.physicsWorld.addBody(this.physicalBody);
   }
@@ -66,8 +66,6 @@ export class Player extends Schema {
       this.physicalBody.velocity.y,
       this.direction.z
     );
-
-    // For some reason, the position is not updating..
 
     this.x = this.physicalBody.position.x;
     this.y = this.physicalBody.position.y;

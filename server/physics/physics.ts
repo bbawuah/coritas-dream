@@ -28,18 +28,29 @@ export class Physics {
 
   public createPhysics<T extends IPositionType>(
     geometry: BufferGeometry,
-    object: T
+    object: T,
+    hasMass: boolean
   ): CANNON.Body {
     const shape = this.createTrimesh(geometry);
 
     const body = new CANNON.Body({
-      mass: 0,
+      mass: hasMass ? 1 : 0,
       shape: shape,
     });
 
     body.position.x = object.x;
     body.position.y = object.y;
     body.position.z = object.z;
+
+    return body;
+  }
+
+  public createPlayerPhysics<T extends IPositionType>(object: T) {
+    const body = new CANNON.Body({
+      mass: 1,
+      position: new CANNON.Vec3(object.x, object.y, object.z),
+      shape: new CANNON.Sphere(0.45),
+    });
 
     return body;
   }

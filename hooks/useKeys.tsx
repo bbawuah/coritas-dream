@@ -1,15 +1,6 @@
-import { useFrame, useThree } from '@react-three/fiber';
-import { Room } from 'colyseus.js';
 import { useEffect } from 'react';
-import { IHandlePhysicsProps, IUserDirection } from '../server/physics/types';
+import { IUserDirection } from '../server/physics/types';
 import { useStore } from '../store/store';
-
-const controls = {
-  backward: false,
-  forward: false,
-  left: false,
-  right: false,
-};
 
 interface Keys {
   [x: string]: IUserDirection;
@@ -24,7 +15,7 @@ const keys: Keys = {
 
 // Data to server should be send in this component
 
-export const useKeys = () => {
+export const useKeyboardEvents = () => {
   const { set } = useStore(({ set }) => ({ set }));
 
   useEffect(() => {

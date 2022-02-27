@@ -5,8 +5,6 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 import { getState, useStore } from '../../../store/store';
 import { Html } from '@react-three/drei';
 import { Room } from 'colyseus.js';
-import { Player } from '../../../server/player/player';
-import { MapSchema } from '@colyseus/schema';
 
 interface Props {
   playerId: string;
@@ -40,7 +38,7 @@ export const InstancedUsers: React.FC<Props> = (props) => {
         ids
           .filter((id) => id !== playerId)
           .forEach((id, index) => {
-            dummy.position.set(players[id].x, 1, players[id].z);
+            dummy.position.set(players[id].x, players[id].y, players[id].z);
 
             dummy.updateMatrix();
             instancedMeshRef?.current?.setMatrixAt(index, dummy.matrix);
