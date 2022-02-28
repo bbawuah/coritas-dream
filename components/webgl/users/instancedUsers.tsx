@@ -1,9 +1,9 @@
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry';
 import { getState, useStore } from '../../../store/store';
-import { Html } from '@react-three/drei';
+import { Html, Text } from '@react-three/drei';
 import { Room } from 'colyseus.js';
 
 interface Props {
@@ -11,9 +11,13 @@ interface Props {
   room: Room;
 }
 
+type ILabelsType = Record<string, any>;
+
 export const InstancedUsers: React.FC<Props> = (props) => {
   const { playerId, room } = props;
+  const { camera } = useThree();
   const instancedMeshRef = useRef<THREE.InstancedMesh>();
+  const labelsRef = useRef<ILabelsType>({});
   const { playersCount } = useStore(({ playersCount }) => ({
     playersCount,
   }));
@@ -21,7 +25,7 @@ export const InstancedUsers: React.FC<Props> = (props) => {
   const dummy = new THREE.Object3D();
 
   useEffect(() => {
-    if (instancedMeshRef.current) {
+    if (instancedMeshRef.current && labelsRef.current) {
       instancedMeshRef.current.castShadow = true;
       instancedMeshRef.current.receiveShadow = true;
       instancedMeshRef.current.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
@@ -39,9 +43,17 @@ export const InstancedUsers: React.FC<Props> = (props) => {
           .filter((id) => id !== playerId)
           .forEach((id, index) => {
             dummy.position.set(players[id].x, players[id].y, players[id].z);
-
             dummy.updateMatrix();
             instancedMeshRef?.current?.setMatrixAt(index, dummy.matrix);
+
+            if (labelsRef.current[id]) {
+              labelsRef.current[id].position.set(
+                players[id].x,
+                players[id].y + 1.5,
+                players[id].z
+              );
+              labelsRef.current[id].quaternion.copy(camera.quaternion);
+            }
           });
       });
 
@@ -70,22 +82,19 @@ export const InstancedUsers: React.FC<Props> = (props) => {
     return ids
       .filter((id) => id !== playerId)
       .map((id) => {
-        const vector = new THREE.Vector3(
-          players[id].x,
-          players[id].y + 1.5,
-          players[id].z
-        );
         return (
-          <Html
+          <Text
             key={id}
-            position={vector}
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
+            ref={(element) => {
+              return (labelsRef.current[id] = element);
             }}
+            color={'#000'}
+            fontSize={0.25}
+            letterSpacing={0.03}
+            lineHeight={1}
           >
-            <span>{id}</span>
-          </Html>
+            {id}
+          </Text>
         );
       });
   }
