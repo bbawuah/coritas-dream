@@ -7,6 +7,8 @@ import { getState } from '../../../store/store';
 import { Room } from 'colyseus.js';
 import { IUserDirection } from '../../../server/physics/types';
 import { useKeyboardEvents } from '../../../hooks/useKeys';
+import { useSphere } from '@react-three/cannon';
+import { IDirection } from '../../../server/player/types';
 
 interface Props {
   room: Room;
@@ -15,14 +17,34 @@ interface Props {
 
 export const User: React.FC<Props> = (props) => {
   const { id, room } = props;
+  const players = getState().players;
   const userRef = useRef<THREE.Mesh>();
+  const [ref, api] = useSphere(() => ({
+    args: [0.45],
+    mass: 1,
+    position: [players[id].x, players[id].y, players[id].z],
+  }));
   const controlsRef = useRef<any>();
-  useKeyboardEvents(); //Use keyboard events
   let userDirection: IUserDirection;
+  const direction = useRef<THREE.Vector3>(new THREE.Vector3());
+  const frontVector = useRef<THREE.Vector3>(new THREE.Vector3());
+  const sideVector = useRef<THREE.Vector3>(new THREE.Vector3());
+  const upVector = useRef<THREE.Vector3>(new THREE.Vector3(0, 1, 0));
+  const movement = useRef<IDirection>({
+    forward: false,
+    backward: false,
+    right: false,
+    left: false,
+    idle: false,
+  });
+  const velocity = useRef([0, 0, 0]);
+  const playerSpeed = 10;
+  useKeyboardEvents(); //Use keyboard events
 
   useEffect(() => {
-    if (userRef.current) {
-      const players = getState().players;
+    const unsubscribe = api.velocity.subscribe((v) => (velocity.current = v));
+
+    if (userRef.current && ref.current) {
       const startingPosition = new THREE.Vector3(
         players[id].x,
         players[id].y,
@@ -32,6 +54,8 @@ export const User: React.FC<Props> = (props) => {
       // Set starting position on mount
       userRef.current.position.copy(startingPosition);
     }
+
+    return unsubscribe;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -43,6 +67,8 @@ export const User: React.FC<Props> = (props) => {
         userDirection,
         azimuthalAngle: controlsRef.current.getAzimuthalAngle(),
       });
+
+      // handleClientSidePrediction();
 
       room.onMessage('move', (data) => {
         const { players } = data;
@@ -81,4 +107,50 @@ export const User: React.FC<Props> = (props) => {
       />
     </>
   );
+
+  function handleClientSidePrediction() {
+    for (let move in movement.current) {
+      const key = move as IUserDirection;
+      resetMovement(key, userDirection);
+    }
+
+    movement.current[userDirection] = true;
+
+    handleClientSideCalculations(controlsRef.current.getAzimuthalAngle());
+  }
+
+  function resetMovement(
+    property: IUserDirection,
+    userDirection: IUserDirection
+  ) {
+    if (movement.current[property] === movement.current[userDirection]) {
+      movement.current[property] = true;
+    }
+    movement.current[property] = false;
+  }
+
+  function handleClientSideCalculations(angle: number) {
+    frontVector.current.setZ(
+      Number(movement.current.backward) - Number(movement.current.forward)
+    );
+    sideVector.current.setX(
+      Number(movement.current.left) - Number(movement.current.right)
+    );
+
+    direction.current
+      .subVectors(frontVector.current, sideVector.current)
+      .normalize()
+      .multiplyScalar(playerSpeed)
+      .applyAxisAngle(upVector.current, angle);
+
+    api.velocity.set(
+      direction.current.x,
+      velocity.current[1],
+      direction.current.z
+    );
+
+    // api.position.subscribe((value) => {
+    //   userRef.current?.position.fromArray(value);
+    // });
+  }
 };

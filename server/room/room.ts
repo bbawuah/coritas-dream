@@ -74,8 +74,8 @@ export class Gallery extends Room {
     state: State
   ): void {
     const { userDirection, azimuthalAngle } = data;
-    // Get the player
 
+    // Get the player
     const player = state.players.get(client.sessionId);
 
     if (player) {

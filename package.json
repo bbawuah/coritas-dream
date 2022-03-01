@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@colyseus/schema": "^1.0.33",
-    "@react-three/cannon": "^4.7.0",
+    "@react-three/cannon": "^4.8.0",
     "@react-three/drei": "^8.8.1",
     "@react-three/fiber": "^7.0.26",
     "@types/express": "^4.17.13",

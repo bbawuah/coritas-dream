@@ -17,7 +17,6 @@ export class Player extends Schema {
   public frontVector: THREE.Vector3 = new THREE.Vector3();
   public sideVector: THREE.Vector3 = new THREE.Vector3();
   public upVector: THREE.Vector3 = new THREE.Vector3(0, 1, 0);
-  public temporaryVector: THREE.Vector3 = new THREE.Vector3(0, 0, 0);
 
   public movement: IDirection = {
     forward: false,
@@ -39,16 +38,11 @@ export class Player extends Schema {
   }
 
   public handleUserDirection(angle: number): void {
-    this.frontVector = new THREE.Vector3(
-      0,
-      0,
+    this.frontVector.setZ(
       Number(this.movement.backward) - Number(this.movement.forward)
     );
-
-    this.sideVector = new THREE.Vector3(
-      Number(this.movement.left) - Number(this.movement.right),
-      0,
-      0
+    this.sideVector.setX(
+      Number(this.movement.left) - Number(this.movement.right)
     );
 
     this.direction
