@@ -77,7 +77,7 @@ export const InstancedUsers: React.FC<Props> = (props) => {
 
   function renderPlayerLabels() {
     const players = getState().players;
-    const ids = Object.keys(players); //Probably need to refactor this to a React.Ref
+    const ids = Object.keys(players);
 
     return ids
       .filter((id) => id !== playerId)
