@@ -11,10 +11,6 @@ export class Player extends Schema {
   @type('number') z: number = 0;
 
   public playerSpeed: number = 10;
-  public mesh: THREE.Mesh = new THREE.Mesh(
-    new THREE.BoxGeometry(1, 1, 1, 1),
-    new THREE.MeshStandardMaterial()
-  ); //Might be nice to look for a cleaner way to get geometry
   public physicalBody: CANNON.Body;
 
   public direction: THREE.Vector3 = new THREE.Vector3();

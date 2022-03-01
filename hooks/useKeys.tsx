@@ -13,8 +13,6 @@ const keys: Keys = {
   d: 'right',
 };
 
-// Data to server should be send in this component
-
 export const useKeyboardEvents = () => {
   const { set } = useStore(({ set }) => ({ set }));
 

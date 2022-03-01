@@ -8,6 +8,4 @@ npm run dev
 yarn dev
 ```
 
-You can the documentation of this project [here](https://lab-bawuah.notion.site/Productbiografie-897c8f690bc64b74a1058aadfb25f8e8)
-
-
+You can find the documentation of this project [here](https://lab-bawuah.notion.site/Productbiografie-897c8f690bc64b74a1058aadfb25f8e8)
