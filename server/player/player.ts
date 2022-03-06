@@ -1,14 +1,15 @@
 import { Schema, type } from '@colyseus/schema';
 import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
-import { Physics } from '../physics/physics';
+import { Physics } from '../../shared/physics/physics';
 import { IDirection } from './types';
-import { IUserDirection } from '../physics/types';
+import { IUserDirection } from '../../shared/physics/types';
 
 export class Player extends Schema {
   @type('number') x: number = 0;
   @type('number') y: number = 0;
   @type('number') z: number = 0;
+  @type('number') timestamp: number = Date.now();
 
   public playerSpeed: number = 10;
   public physicalBody: CANNON.Body;

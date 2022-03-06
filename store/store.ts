@@ -3,7 +3,7 @@ import create from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import shallow from 'zustand/shallow';
 import type { GetState, SetState, StateSelector } from 'zustand';
-import { IUserDirection } from '../server/physics/types';
+import { IUserDirection } from '../shared/physics/types';
 
 const controls = {
   backward: false,
@@ -12,14 +12,14 @@ const controls = {
   right: false,
 };
 
-export type IPlayers = Record<
-  string,
-  {
-    x: number;
-    y: number;
-    z: number;
-  }
->;
+export type IPlayerType = Record<string, IPlayerCoordinations>;
+
+export interface IPlayerCoordinations {
+  timestamp: number;
+  x: number;
+  y: number;
+  z: number;
+}
 
 const userDirection: IUserDirection = 'idle';
 
@@ -27,7 +27,7 @@ const clients = {};
 
 const azimuthalAngle: number = 0;
 
-const players: IPlayers = {};
+const players: IPlayerType = {};
 
 const playersCount: number = 0;
 
@@ -44,7 +44,7 @@ interface ICoordinates {
 export interface IState {
   controls: Controls;
   userDirection: IUserDirection;
-  players: IPlayers;
+  players: IPlayerType;
   playersCount: number;
   azimuthalAngle: number;
   get: Getter;

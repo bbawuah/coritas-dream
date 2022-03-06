@@ -1,6 +1,9 @@
 import { Client, Room } from 'colyseus';
-import { Physics } from '../physics/physics';
-import { IHandlePhysicsProps, IUserDirection } from '../physics/types';
+import { Physics } from '../../shared/physics/physics';
+import {
+  IHandlePhysicsProps,
+  IUserDirection,
+} from '../../shared/physics/types';
 import { Player } from '../player/player';
 import { State } from '../state/state';
 
@@ -43,10 +46,8 @@ export class Gallery extends Room {
 
     // Called every time this room receives a "move" message
     this.onMessage('move', (client, data) =>
-      this.handleMovement(client, data, this.state)
+      this.handleMovement(client, data, this.state, this.physics, deltaTime)
     );
-
-    this.physics.updatePhysics(deltaTime); //Update physics 60 fps
   }
 
   public onLeave(client: Client) {
@@ -71,34 +72,24 @@ export class Gallery extends Room {
   public handleMovement(
     client: Client,
     data: IHandlePhysicsProps,
-    state: State
+    state: State,
+    physics: Physics,
+    dt: number
   ): void {
-    const { userDirection, azimuthalAngle } = data;
+    const { userDirection, azimuthalAngle, timestamp } = data;
 
     // Get the player
     const player = state.players.get(client.sessionId);
 
     if (player) {
-      for (let movement in player.movement) {
-        const key = movement as IUserDirection;
-        this.resetMovement(key, player, userDirection);
-      }
-
       player.movement[userDirection] = true;
       player.handleUserDirection(azimuthalAngle);
+      player.timestamp = timestamp;
+      player.movement[userDirection] = false;
 
       this.broadcast('move', { players: state.players });
-    }
-  }
 
-  public resetMovement(
-    property: IUserDirection,
-    player: Player,
-    userDirection: IUserDirection
-  ): void {
-    if (player.movement[property] === player.movement[userDirection]) {
-      player.movement[property] = true;
+      physics.updatePhysics(dt); //Update physics 60 fps
     }
-    player.movement[property] = false;
   }
 }
