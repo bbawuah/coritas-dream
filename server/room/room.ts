@@ -7,7 +7,7 @@ import {
 import { Player } from '../player/player';
 import { State } from '../state/state';
 
-export class Gallery extends Room {
+export class Gallery extends Room<State> {
   public maxClients = 30;
   private physics: Physics;
 
@@ -25,7 +25,10 @@ export class Gallery extends Room {
   // Called every time a client joins
   public onJoin(client: Client, options: any) {
     console.log('user joined');
-    this.state.players.set(client.sessionId, new Player(this.physics)); //Store instance of user in state
+    this.state.players.set(
+      client.sessionId,
+      new Player(client.sessionId, this.physics)
+    ); //Store instance of user in state
 
     client.send('id', { id: client.sessionId });
 
@@ -45,15 +48,34 @@ export class Gallery extends Room {
     // this is a good place to update the room state
 
     // Called every time this room receives a "move" message
-    this.onMessage('move', (client, data) =>
-      this.handleMovement(client, data, this.state, this.physics, deltaTime)
-    );
+    this.onMessage('move', (client, data) => {
+      const player = this.state.players.get(client.sessionId);
+      this.handleMovement(player, data, this.state);
+      this.physics.updatePhysics(deltaTime);
+
+      this.broadcast('move', { player });
+    });
+
+    this.onMessage('idle', (client, data) => {
+      const { azimuthalAngle } = data;
+      const player = this.state.players.get(client.sessionId);
+
+      if (player) {
+        for (let movement in player.movement) {
+          const key = movement as IUserDirection;
+          player.movement[key] = false;
+        }
+
+        player.handleUserDirection(azimuthalAngle);
+        this.physics.updatePhysics(deltaTime);
+      }
+    });
   }
 
   public onLeave(client: Client) {
     this.state.players.delete(client.sessionId);
 
-    const players = (this.state as State).players;
+    const players = this.state.players;
 
     this.broadcast('messages', `${client.sessionId} left.`);
 
@@ -70,26 +92,17 @@ export class Gallery extends Room {
   }
 
   public handleMovement(
-    client: Client,
+    player: Player | undefined,
     data: IHandlePhysicsProps,
-    state: State,
-    physics: Physics,
-    dt: number
+    state: State
   ): void {
     const { userDirection, azimuthalAngle, timestamp } = data;
-
     // Get the player
-    const player = state.players.get(client.sessionId);
-
     if (player) {
       player.movement[userDirection] = true;
       player.handleUserDirection(azimuthalAngle);
       player.timestamp = timestamp;
       player.movement[userDirection] = false;
-
-      this.broadcast('move', { players: state.players });
-
-      physics.updatePhysics(dt); //Update physics 60 fps
     }
   }
 }

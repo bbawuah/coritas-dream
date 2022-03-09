@@ -15,6 +15,7 @@ const controls = {
 export type IPlayerType = Record<string, IPlayerCoordinations>;
 
 export interface IPlayerCoordinations {
+  id: string;
   timestamp: number;
   x: number;
   y: number;

@@ -5,6 +5,7 @@ import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeom
 import { getState, useStore } from '../../../store/store';
 import { Html, Text } from '@react-three/drei';
 import { Room } from 'colyseus.js';
+import { OnMoveProps } from './types';
 
 interface Props {
   playerId: string;
@@ -35,26 +36,28 @@ export const InstancedUsers: React.FC<Props> = (props) => {
   // Listen directly to websocket in renderloop
   useFrame(() => {
     if (instancedMeshRef.current) {
-      room.onMessage('move', (data) => {
-        const { players } = data;
+      room.onMessage('move', (data: OnMoveProps) => {
+        const { player } = data;
+        const players = getState().players;
         const ids = Object.keys(players);
 
-        ids
-          .filter((id) => id !== playerId)
-          .forEach((id, index) => {
-            dummy.position.set(players[id].x, players[id].y, players[id].z);
-            dummy.updateMatrix();
-            instancedMeshRef?.current?.setMatrixAt(index, dummy.matrix);
+        if (players[player.id].id !== playerId) {
+          dummy.position.set(player.x, player.y, player.z);
+          dummy.updateMatrix();
+          instancedMeshRef?.current?.setMatrixAt(
+            ids.indexOf(player.id),
+            dummy.matrix
+          );
 
-            if (labelsRef.current[id]) {
-              labelsRef.current[id].position.set(
-                players[id].x,
-                players[id].y + 1.5,
-                players[id].z
-              );
-              labelsRef.current[id].quaternion.copy(camera.quaternion);
-            }
-          });
+          if (labelsRef.current[player.id]) {
+            labelsRef.current[player.id].position.set(
+              player.x,
+              player.y + 1.5,
+              player.z
+            );
+            labelsRef.current[player.id].quaternion.copy(camera.quaternion);
+          }
+        }
       });
 
       instancedMeshRef.current.instanceMatrix.needsUpdate = true;
@@ -79,7 +82,7 @@ export const InstancedUsers: React.FC<Props> = (props) => {
     const players = getState().players;
     const ids = Object.keys(players);
 
-    return ids
+    const jsx = ids
       .filter((id) => id !== playerId)
       .map((id) => {
         return (
@@ -97,6 +100,10 @@ export const InstancedUsers: React.FC<Props> = (props) => {
           </Text>
         );
       });
+
+    console.log(labelsRef);
+
+    return jsx;
   }
 
   function handleClickedPlayer(index?: number) {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { IUserDirection } from '../shared/physics/types';
 import { useStore } from '../store/store';
 
@@ -19,7 +19,7 @@ interface Props {
 }
 
 export const useKeyboardEvents = (props: Props) => {
-  const [userDirection, setUserDirection] = useState<IUserDirection>();
+  const userDirection = useRef<IUserDirection>();
   const { set } = useStore(({ set }) => ({ set }));
 
   useEffect(() => {
@@ -36,7 +36,7 @@ export const useKeyboardEvents = (props: Props) => {
   function onKeyDown(ev: KeyboardEvent) {
     const objectKeys = Object.keys(keys);
     if (objectKeys.includes(ev.key)) {
-      setUserDirection(keys[ev.key]);
+      userDirection.current = keys[ev.key];
       props.keyDownEvent(keys[ev.key]);
     }
   }
@@ -44,10 +44,18 @@ export const useKeyboardEvents = (props: Props) => {
   function onKeyUp(ev: KeyboardEvent) {
     const objectKeys = Object.keys(keys);
     if (objectKeys.includes(ev.key)) {
-      setUserDirection('idle');
+      userDirection.current = 'idle';
       props.keyUpEvent(keys[ev.key]);
     }
   }
 
-  return [userDirection];
+  function getDirection(): IUserDirection | undefined {
+    if (!userDirection.current) {
+      return;
+    }
+
+    return userDirection.current;
+  }
+
+  return [getDirection];
 };

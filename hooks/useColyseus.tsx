@@ -52,7 +52,6 @@ export const useColyseus = () => {
   function onSpawnPlayer(room: Room) {
     room.onMessage('spawnPlayer', (data) => {
       const { players } = data;
-      console.log(players);
       console.log('new player joined');
 
       set((state) => ({

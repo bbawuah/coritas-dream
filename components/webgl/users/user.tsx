@@ -17,6 +17,8 @@ import {
 import { useKeyboardEvents } from '../../../hooks/useKeys';
 import { IDirection } from '../../../server/player/types';
 import { Physics } from '../../../shared/physics/physics';
+import { Player } from '../../../server/player/player';
+import { OnMoveProps } from './types';
 
 interface Props {
   room: Room;
@@ -54,10 +56,10 @@ export const User: React.FC<Props> = (props) => {
     idle: false,
   });
 
-  const velocity = useRef([0, 0, 0]);
+  const counter = useRef<number>(0);
   const playerSpeed = 10;
 
-  const [userDirection] = useKeyboardEvents({
+  const [getDirection] = useKeyboardEvents({
     keyDownEvent,
     keyUpEvent,
   }); //Use keyboard events
@@ -80,6 +82,7 @@ export const User: React.FC<Props> = (props) => {
       // Update processed position
       processedAction.current = {
         [id]: {
+          id: players[id].id,
           timestamp: players[id].timestamp,
           x: players[id].x,
           y: players[id].y,
@@ -96,15 +99,22 @@ export const User: React.FC<Props> = (props) => {
 
   useFrame((state, dt) => {
     if (userRef.current && controlsRef) {
-      if (userDirection) {
-        if (userDirection !== 'idle') {
+      const direction = getDirection();
+      if (direction) {
+        if (direction !== 'idle') {
           currentAction.current = {
-            timestamp: Date.now(),
-            userDirection,
+            timestamp: counter.current,
+            userDirection: direction,
             azimuthalAngle: controlsRef.current.getAzimuthalAngle(),
           };
 
           room.send('move', currentAction.current);
+
+          if (counter.current >= 10) {
+            counter.current = 0;
+          } else {
+            counter.current++;
+          }
         }
 
         if (currentAction.current) {
@@ -112,27 +122,7 @@ export const User: React.FC<Props> = (props) => {
           handleUserDirection(currentAction.current, dt);
         }
 
-        room.onMessage('move', (data) => {
-          const { players } = data;
-          const ids = Object.keys(players);
-
-          const playerId = ids.filter((playerId) => playerId === id)[0];
-
-          processedAction.current = {
-            [id]: {
-              timestamp: players[id].timestamp,
-              x: players[id].x,
-              y: players[id].y,
-              z: players[id].z,
-            },
-          };
-
-          userRef.current?.position.set(
-            players[playerId].x,
-            players[playerId].y,
-            players[playerId].z
-          );
-        });
+        room.onMessage('move', handleOnMessageMove);
       }
 
       state.camera.position.sub(controlsRef.current.target);
@@ -166,6 +156,10 @@ export const User: React.FC<Props> = (props) => {
 
   function keyUpEvent(direction: IUserDirection) {
     movement.current[direction] = false;
+
+    room.send('idle', {
+      azimuthalAngle: controlsRef.current.getAzimuthalAngle(),
+    });
   }
 
   function handleUserDirection(action: IHandlePhysicsProps, dt: number) {
@@ -201,6 +195,24 @@ export const User: React.FC<Props> = (props) => {
           processedAction.current[id].z
         );
       }
+    }
+  }
+
+  function handleOnMessageMove(data: OnMoveProps) {
+    const { player } = data;
+
+    if (player.id === id) {
+      processedAction.current = {
+        [player.id]: {
+          id: players[id].id,
+          timestamp: player.timestamp,
+          x: player.x,
+          y: player.y,
+          z: player.z,
+        },
+      };
+
+      userRef.current?.position.set(player.x, player.y, player.z);
     }
   }
 };
