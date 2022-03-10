@@ -1,61 +1,129 @@
 import React, { useEffect, useRef } from 'react';
 import { OrbitControls } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
+import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
-import { getState } from '../../../store/store';
+import {
+  getState,
+  IPlayerCoordinations,
+  IPlayerType,
+} from '../../../store/store';
 import { Room } from 'colyseus.js';
-import { IUserDirection } from '../../../server/physics/types';
+import {
+  IHandlePhysicsProps,
+  IUserDirection,
+} from '../../../shared/physics/types';
 import { useKeyboardEvents } from '../../../hooks/useKeys';
+import { IDirection } from '../../../server/player/types';
+import { Physics } from '../../../shared/physics/physics';
+import { Player } from '../../../server/player/player';
+import { OnMoveProps } from './types';
 
 interface Props {
   room: Room;
   id: string;
+  physics: Physics;
 }
 
+/*
+User component should contain an variable where the last action processed by the server get stored.
+Every time the server sends a new processed action to client, we update this variable with this value.
+
+The server sends actions from the late past. The client is the actual presence. 
+To compensate this we predict actions on the client.
+Inside of the renderloop, we should check if the already processed action is equal to the latest action send by the client.
+If the server did not process it, we use clientside prediction to determine where the users action.
+*/
+
 export const User: React.FC<Props> = (props) => {
-  const { id, room } = props;
+  const { id, room, physics } = props;
+  const players = getState().players;
   const userRef = useRef<THREE.Mesh>();
   const controlsRef = useRef<any>();
-  useKeyboardEvents(); //Use keyboard events
-  let userDirection: IUserDirection;
+  const processedAction = useRef<IPlayerType | null>(null);
+  const currentAction = useRef<IHandlePhysicsProps | null>(null);
+  const physicalBody = useRef<CANNON.Body | null>(null);
+  const direction = useRef<THREE.Vector3>(new THREE.Vector3());
+  const frontVector = useRef<THREE.Vector3>(new THREE.Vector3());
+  const sideVector = useRef<THREE.Vector3>(new THREE.Vector3());
+  const upVector = useRef<THREE.Vector3>(new THREE.Vector3(0, 1, 0));
+  const movement = useRef<IDirection>({
+    forward: false,
+    backward: false,
+    right: false,
+    left: false,
+    idle: false,
+  });
+
+  const counter = useRef<number>(0);
+  const playerSpeed = 10;
+
+  const [getDirection] = useKeyboardEvents({
+    keyDownEvent,
+    keyUpEvent,
+  }); //Use keyboard events
 
   useEffect(() => {
     if (userRef.current) {
-      const players = getState().players;
+      // Create physics
+      physicalBody.current = physics.createPlayerPhysics<IPlayerCoordinations>(
+        players[id]
+      ); // Create phyisical represenatation of player
+      physics.physicsWorld.addBody(physicalBody.current); //Add to physics world
+
+      // Create vector3
       const startingPosition = new THREE.Vector3(
         players[id].x,
         players[id].y,
         players[id].z
       );
 
+      // Update processed position
+      processedAction.current = {
+        [id]: {
+          id: players[id].id,
+          timestamp: players[id].timestamp,
+          x: players[id].x,
+          y: players[id].y,
+          z: players[id].z,
+        },
+      };
+
       // Set starting position on mount
       userRef.current.position.copy(startingPosition);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useFrame((state, dt) => {
-    userDirection = getState().userDirection;
-
     if (userRef.current && controlsRef) {
-      room.send('move', {
-        userDirection,
-        azimuthalAngle: controlsRef.current.getAzimuthalAngle(),
-      });
+      const direction = getDirection();
+      if (direction) {
+        if (direction !== 'idle') {
+          currentAction.current = {
+            timestamp: counter.current,
+            userDirection: direction,
+            azimuthalAngle: controlsRef.current.getAzimuthalAngle(),
+          };
 
-      room.onMessage('move', (data) => {
-        const { players } = data;
-        const ids = Object.keys(players);
+          room.send('move', currentAction.current);
 
-        const playerId = ids.filter((playerId) => playerId === id)[0];
+          if (counter.current >= 10) {
+            counter.current = 0;
+          } else {
+            counter.current++;
+          }
+        }
 
-        userRef.current?.position.set(
-          players[playerId].x,
-          players[playerId].y,
-          players[playerId].z
-        );
-      });
+        if (currentAction.current) {
+          // Handle client prediction
+          handleUserDirection(currentAction.current, dt);
+        }
+
+        room.onMessage('move', handleOnMessageMove);
+      }
 
       state.camera.position.sub(controlsRef.current.target);
       controlsRef.current.target.copy(userRef.current.position);
@@ -81,4 +149,68 @@ export const User: React.FC<Props> = (props) => {
       />
     </>
   );
+
+  function keyDownEvent(direction: IUserDirection) {
+    movement.current[direction] = true;
+  }
+
+  function keyUpEvent(direction: IUserDirection) {
+    movement.current[direction] = false;
+
+    room.send('idle');
+  }
+
+  function handleUserDirection(action: IHandlePhysicsProps, dt: number) {
+    if (processedAction.current) {
+      frontVector.current.setZ(
+        Number(movement.current.backward) - Number(movement.current.forward)
+      );
+      sideVector.current.setX(
+        Number(movement.current.left) - Number(movement.current.right)
+      );
+
+      direction.current
+        .subVectors(frontVector.current, sideVector.current)
+        .normalize()
+        .multiplyScalar(playerSpeed)
+        .applyAxisAngle(
+          upVector.current,
+          controlsRef.current.getAzimuthalAngle()
+        );
+
+      if (action.timestamp !== processedAction.current[id].timestamp) {
+        physicalBody?.current?.velocity.set(
+          direction.current.x,
+          physicalBody.current.velocity.y,
+          direction.current.z
+        );
+
+        physics.updatePhysics(dt); //Update physics 60 fps
+      } else {
+        userRef.current?.position.set(
+          processedAction.current[id].x,
+          processedAction.current[id].y,
+          processedAction.current[id].z
+        );
+      }
+    }
+  }
+
+  function handleOnMessageMove(data: OnMoveProps) {
+    const { player } = data;
+
+    if (player.id === id) {
+      processedAction.current = {
+        [player.id]: {
+          id: players[id].id,
+          timestamp: player.timestamp,
+          x: player.x,
+          y: player.y,
+          z: player.z,
+        },
+      };
+
+      userRef.current?.position.set(player.x, player.y, player.z);
+    }
+  }
 };

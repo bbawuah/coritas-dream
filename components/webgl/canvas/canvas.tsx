@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as styles from './canvas.module.scss';
+import classNames from 'classnames';
 import { Canvas, addEffect, addAfterEffect } from '@react-three/fiber';
 import { User } from '../users/user';
 import { Floor } from '../floor/floor';
 import StatsImpl from 'stats.js';
 import { InstancedUsers } from '../users/instancedUsers';
 import { Client, Room } from 'colyseus.js';
+import { Physics } from '../../../shared/physics/physics';
+import { getState, useStore } from '../../../store/store';
 
 interface Props {
   client: Client;
@@ -43,21 +46,46 @@ function Stats(props: StatsProps) {
 }
 
 const CanvasComponent: React.FC<Props> = (props) => {
+  // TODO: Add grabbing cursor
+  const [hovered, setHovered] = useState<boolean>(false);
   const { room, id } = props;
+  const [physics, setPhysics] = useState<Physics | null>(null);
 
-  return (
-    <div className={styles.container}>
+  const classes = classNames([
+    styles.container,
+    {
+      [styles.grab]: true,
+      [styles.pointer]: false,
+    },
+  ]);
+
+  useEffect(() => {
+    setPhysics(new Physics());
+  }, []);
+
+  return <div className={classes}>{renderCanvas()}</div>;
+
+  function renderCanvas() {
+    if (!physics) {
+      return null;
+    }
+
+    return (
       <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
         <color attach="background" args={['#ffffff']} />
         <ambientLight intensity={0.5} />
         <directionalLight color="white" position={[0, 3, 0]} />
-        <User id={id} room={room} />
-        <InstancedUsers playerId={id} room={room} />
+        <User id={id} room={room} physics={physics} />
+        <InstancedUsers
+          playerId={id}
+          onPointerOver={() => setHovered(true)}
+          onPointerOut={() => setHovered(false)}
+        />
         <Floor />
         <Stats />
       </Canvas>
-    </div>
-  );
+    );
+  }
 };
 
 export default CanvasComponent;

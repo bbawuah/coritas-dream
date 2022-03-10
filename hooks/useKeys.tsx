@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { IUserDirection } from '../server/physics/types';
+import { useEffect, useRef, useState } from 'react';
+import { IUserDirection } from '../shared/physics/types';
 import { useStore } from '../store/store';
 
 interface Keys {
@@ -13,7 +13,13 @@ const keys: Keys = {
   d: 'right',
 };
 
-export const useKeyboardEvents = () => {
+interface Props {
+  keyDownEvent: (d: IUserDirection) => void;
+  keyUpEvent: (d: IUserDirection) => void;
+}
+
+export const useKeyboardEvents = (props: Props) => {
+  const userDirection = useRef<IUserDirection>();
   const { set } = useStore(({ set }) => ({ set }));
 
   useEffect(() => {
@@ -30,22 +36,26 @@ export const useKeyboardEvents = () => {
   function onKeyDown(ev: KeyboardEvent) {
     const objectKeys = Object.keys(keys);
     if (objectKeys.includes(ev.key)) {
-      set((state) => ({
-        ...state,
-        userDirection: keys[ev.key],
-      }));
+      userDirection.current = keys[ev.key];
+      props.keyDownEvent(keys[ev.key]);
     }
   }
 
   function onKeyUp(ev: KeyboardEvent) {
     const objectKeys = Object.keys(keys);
     if (objectKeys.includes(ev.key)) {
-      set((state) => ({
-        ...state,
-        userDirection: 'idle',
-      }));
+      userDirection.current = 'idle';
+      props.keyUpEvent(keys[ev.key]);
     }
   }
 
-  return null;
+  function getDirection(): IUserDirection | undefined {
+    if (!userDirection.current) {
+      return;
+    }
+
+    return userDirection.current;
+  }
+
+  return [getDirection];
 };

@@ -3,18 +3,18 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry';
 import { getState, useStore } from '../../../store/store';
-import { Html, Text } from '@react-three/drei';
-import { Room } from 'colyseus.js';
+import { Text } from '@react-three/drei';
 
 interface Props {
   playerId: string;
-  room: Room;
+  onPointerOver: () => void;
+  onPointerOut: () => void;
 }
 
 type ILabelsType = Record<string, any>;
 
 export const InstancedUsers: React.FC<Props> = (props) => {
-  const { playerId, room } = props;
+  const { playerId, onPointerOver, onPointerOut } = props;
   const { camera } = useThree();
   const instancedMeshRef = useRef<THREE.InstancedMesh>();
   const labelsRef = useRef<ILabelsType>({});
@@ -35,51 +35,54 @@ export const InstancedUsers: React.FC<Props> = (props) => {
   // Listen directly to websocket in renderloop
   useFrame(() => {
     if (instancedMeshRef.current) {
-      room.onMessage('move', (data) => {
-        const { players } = data;
-        const ids = Object.keys(players);
+      const players = getState().players;
+      const ids = Object.keys(players);
 
-        ids
-          .filter((id) => id !== playerId)
-          .forEach((id, index) => {
-            dummy.position.set(players[id].x, players[id].y, players[id].z);
-            dummy.updateMatrix();
-            instancedMeshRef?.current?.setMatrixAt(index, dummy.matrix);
+      ids
+        .filter((id) => id !== playerId)
+        .forEach((player, index) => {
+          dummy.position.set(
+            players[player].x,
+            players[player].y,
+            players[player].z
+          );
 
-            if (labelsRef.current[id]) {
-              labelsRef.current[id].position.set(
-                players[id].x,
-                players[id].y + 1.5,
-                players[id].z
-              );
-              labelsRef.current[id].quaternion.copy(camera.quaternion);
-            }
-          });
-      });
+          dummy.updateMatrix();
+          instancedMeshRef?.current?.setMatrixAt(index, dummy.matrix);
+
+          labelsRef.current[player].position.set(
+            players[player].x,
+            players[player].y + 1.5,
+            players[player].z
+          );
+
+          labelsRef.current[player].quaternion.copy(camera.quaternion);
+        });
 
       instancedMeshRef.current.instanceMatrix.needsUpdate = true;
     }
   });
 
   return (
-    <instancedMesh
-      ref={instancedMeshRef}
-      args={[
-        new RoundedBoxGeometry(1.0, 2.0, 1.0, 10, 0.5),
-        new THREE.MeshStandardMaterial({ color: new THREE.Color('#00ff00') }),
-        playersCount,
-      ]}
-      onClick={(e) => handleClickedPlayer(e.instanceId)}
-    >
+    <>
+      <instancedMesh
+        ref={instancedMeshRef}
+        args={[
+          new RoundedBoxGeometry(1.0, 2.0, 1.0, 10, 0.5),
+          new THREE.MeshStandardMaterial({ color: new THREE.Color('#00ff00') }),
+          playersCount,
+        ]}
+        onClick={(e) => handleClickedPlayer(e.instanceId)}
+      />
       {renderPlayerLabels()}
-    </instancedMesh>
+    </>
   );
 
   function renderPlayerLabels() {
     const players = getState().players;
     const ids = Object.keys(players);
 
-    return ids
+    const jsx = ids
       .filter((id) => id !== playerId)
       .map((id) => {
         return (
@@ -97,6 +100,8 @@ export const InstancedUsers: React.FC<Props> = (props) => {
           </Text>
         );
       });
+
+    return jsx;
   }
 
   function handleClickedPlayer(index?: number) {
