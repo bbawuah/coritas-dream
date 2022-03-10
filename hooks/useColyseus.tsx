@@ -1,13 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Client, Room } from 'colyseus.js';
-import * as THREE from 'three';
 import { getState, useStore } from '../store/store';
 import { OnMoveProps } from '../components/webgl/users/types';
-
-export interface IPlayers {
-  id: string;
-  position: THREE.Vector3;
-}
 
 export const useColyseus = () => {
   const { set } = useStore(({ set }) => ({ set }));
