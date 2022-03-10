@@ -21,7 +21,6 @@ export const InstancedUsers: React.FC<Props> = (props) => {
   const { playersCount } = useStore(({ playersCount }) => ({
     playersCount,
   }));
-  const t = Math.max(Math.min(0.0 / 0.1, 1.0), 0.0);
 
   const dummy = new THREE.Object3D();
 
@@ -65,17 +64,18 @@ export const InstancedUsers: React.FC<Props> = (props) => {
   });
 
   return (
-    <instancedMesh
-      ref={instancedMeshRef}
-      args={[
-        new RoundedBoxGeometry(1.0, 2.0, 1.0, 10, 0.5),
-        new THREE.MeshStandardMaterial({ color: new THREE.Color('#00ff00') }),
-        playersCount,
-      ]}
-      onClick={(e) => handleClickedPlayer(e.instanceId)}
-    >
+    <>
+      <instancedMesh
+        ref={instancedMeshRef}
+        args={[
+          new RoundedBoxGeometry(1.0, 2.0, 1.0, 10, 0.5),
+          new THREE.MeshStandardMaterial({ color: new THREE.Color('#00ff00') }),
+          playersCount,
+        ]}
+        onClick={(e) => handleClickedPlayer(e.instanceId)}
+      />
       {renderPlayerLabels()}
-    </instancedMesh>
+    </>
   );
 
   function renderPlayerLabels() {
