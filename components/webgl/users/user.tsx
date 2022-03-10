@@ -157,9 +157,7 @@ export const User: React.FC<Props> = (props) => {
   function keyUpEvent(direction: IUserDirection) {
     movement.current[direction] = false;
 
-    room.send('idle', {
-      azimuthalAngle: controlsRef.current.getAzimuthalAngle(),
-    });
+    room.send('idle');
   }
 
   function handleUserDirection(action: IHandlePhysicsProps, dt: number) {

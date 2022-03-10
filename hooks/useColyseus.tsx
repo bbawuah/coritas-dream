@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Client, Room } from 'colyseus.js';
 import * as THREE from 'three';
-import { useStore } from '../store/store';
+import { getState, useStore } from '../store/store';
+import { OnMoveProps } from '../components/webgl/users/types';
 
 export interface IPlayers {
   id: string;
@@ -36,7 +37,7 @@ export const useColyseus = () => {
         setRoom(room);
         onSpawnPlayer(room);
         onRemovePlayer(room);
-        onMessage(room);
+        onMove(room);
       } catch (e) {
         console.log(e);
       }
@@ -62,10 +63,17 @@ export const useColyseus = () => {
     });
   }
 
-  // TODO: Should remove later
-  function onMessage(room: Room) {
-    room.onMessage('messages', (data) => {
-      console.log(data);
+  function onMove(room: Room) {
+    room.onMessage('move', (data: OnMoveProps) => {
+      const { player } = data;
+      const players = getState().players;
+
+      const obj = { ...players, [player.id]: player };
+
+      set((state) => ({
+        ...state,
+        players: obj,
+      }));
     });
   }
 

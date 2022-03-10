@@ -10,7 +10,6 @@ import { State } from '../state/state';
 export class Gallery extends Room<State> {
   public maxClients = 30;
   private physics: Physics;
-
   constructor() {
     super();
     this.physics = new Physics();
@@ -20,6 +19,30 @@ export class Gallery extends Room<State> {
     // initialize empty room state
     this.setState(new State());
     this.setSimulationInterval((deltaTime) => this.update(deltaTime));
+
+    // Called every time this room receives a "move" message
+    this.onMessage('move', (client, data) => {
+      const player = this.state.players.get(client.sessionId);
+      this.handleMovement(player, data);
+
+      this.broadcast('move', { player });
+    });
+
+    this.onMessage('idle', (client, data) => {
+      const player = this.state.players.get(client.sessionId);
+
+      if (player) {
+        for (let movement in player.movement) {
+          const key = movement as IUserDirection;
+          player.movement[key] = false;
+        }
+
+        player.physicalBody.velocity.setZero();
+        player.physicalBody.initVelocity.setZero();
+        player.physicalBody.angularVelocity.setZero();
+        player.physicalBody.initAngularVelocity.setZero();
+      }
+    });
   }
 
   // Called every time a client joins
@@ -47,29 +70,7 @@ export class Gallery extends Room<State> {
     // implement your physics or world updates here!
     // this is a good place to update the room state
 
-    // Called every time this room receives a "move" message
-    this.onMessage('move', (client, data) => {
-      const player = this.state.players.get(client.sessionId);
-      this.handleMovement(player, data, this.state);
-      this.physics.updatePhysics(deltaTime);
-
-      this.broadcast('move', { player });
-    });
-
-    this.onMessage('idle', (client, data) => {
-      const { azimuthalAngle } = data;
-      const player = this.state.players.get(client.sessionId);
-
-      if (player) {
-        for (let movement in player.movement) {
-          const key = movement as IUserDirection;
-          player.movement[key] = false;
-        }
-
-        player.handleUserDirection(azimuthalAngle);
-        this.physics.updatePhysics(deltaTime);
-      }
-    });
+    this.physics.updatePhysics(deltaTime);
   }
 
   public onLeave(client: Client) {
@@ -93,8 +94,7 @@ export class Gallery extends Room<State> {
 
   public handleMovement(
     player: Player | undefined,
-    data: IHandlePhysicsProps,
-    state: State
+    data: IHandlePhysicsProps
   ): void {
     const { userDirection, azimuthalAngle, timestamp } = data;
     // Get the player

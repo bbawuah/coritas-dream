@@ -3,25 +3,25 @@ import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry';
 import { getState, useStore } from '../../../store/store';
-import { Html, Text } from '@react-three/drei';
-import { Room } from 'colyseus.js';
-import { OnMoveProps } from './types';
+import { Text } from '@react-three/drei';
 
 interface Props {
   playerId: string;
-  room: Room;
+  onPointerOver: () => void;
+  onPointerOut: () => void;
 }
 
 type ILabelsType = Record<string, any>;
 
 export const InstancedUsers: React.FC<Props> = (props) => {
-  const { playerId, room } = props;
+  const { playerId, onPointerOver, onPointerOut } = props;
   const { camera } = useThree();
   const instancedMeshRef = useRef<THREE.InstancedMesh>();
   const labelsRef = useRef<ILabelsType>({});
   const { playersCount } = useStore(({ playersCount }) => ({
     playersCount,
   }));
+  const t = Math.max(Math.min(0.0 / 0.1, 1.0), 0.0);
 
   const dummy = new THREE.Object3D();
 
@@ -36,29 +36,29 @@ export const InstancedUsers: React.FC<Props> = (props) => {
   // Listen directly to websocket in renderloop
   useFrame(() => {
     if (instancedMeshRef.current) {
-      room.onMessage('move', (data: OnMoveProps) => {
-        const { player } = data;
-        const players = getState().players;
-        const ids = Object.keys(players);
+      const players = getState().players;
+      const ids = Object.keys(players);
 
-        if (players[player.id].id !== playerId) {
-          dummy.position.set(player.x, player.y, player.z);
-          dummy.updateMatrix();
-          instancedMeshRef?.current?.setMatrixAt(
-            ids.indexOf(player.id),
-            dummy.matrix
+      ids
+        .filter((id) => id !== playerId)
+        .forEach((player, index) => {
+          dummy.position.set(
+            players[player].x,
+            players[player].y,
+            players[player].z
           );
 
-          if (labelsRef.current[player.id]) {
-            labelsRef.current[player.id].position.set(
-              player.x,
-              player.y + 1.5,
-              player.z
-            );
-            labelsRef.current[player.id].quaternion.copy(camera.quaternion);
-          }
-        }
-      });
+          dummy.updateMatrix();
+          instancedMeshRef?.current?.setMatrixAt(index, dummy.matrix);
+
+          labelsRef.current[player].position.set(
+            players[player].x,
+            players[player].y + 1.5,
+            players[player].z
+          );
+
+          labelsRef.current[player].quaternion.copy(camera.quaternion);
+        });
 
       instancedMeshRef.current.instanceMatrix.needsUpdate = true;
     }
@@ -100,8 +100,6 @@ export const InstancedUsers: React.FC<Props> = (props) => {
           </Text>
         );
       });
-
-    console.log(labelsRef);
 
     return jsx;
   }

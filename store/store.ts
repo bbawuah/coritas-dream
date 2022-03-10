@@ -1,9 +1,7 @@
-import React from 'react';
 import create from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import shallow from 'zustand/shallow';
 import type { GetState, SetState, StateSelector } from 'zustand';
-import { IUserDirection } from '../shared/physics/types';
 
 const controls = {
   backward: false,
@@ -22,11 +20,7 @@ export interface IPlayerCoordinations {
   z: number;
 }
 
-const userDirection: IUserDirection = 'idle';
-
 const clients = {};
-
-const azimuthalAngle: number = 0;
 
 const players: IPlayerType = {};
 
@@ -37,17 +31,15 @@ export type Controls = typeof controls;
 const actionNames = ['idle', 'walking'] as const;
 export type ActionNames = typeof actionNames[number];
 
-interface ICoordinates {
-  position: [x: number, y: number, z: number];
-  rotation: [x: number, y: number, z: number];
-}
+const cursorState: CursorStates = 'grab';
+
+type CursorStates = 'grab' | 'pointer';
 
 export interface IState {
   controls: Controls;
-  userDirection: IUserDirection;
   players: IPlayerType;
   playersCount: number;
-  azimuthalAngle: number;
+  cursorState: CursorStates;
   get: Getter;
   set: Setter;
 }
@@ -62,9 +54,8 @@ const useStoreImplementation = create(
         controls,
         clients,
         players,
-        userDirection,
-        azimuthalAngle,
         playersCount,
+        cursorState,
         get,
         set,
       };
