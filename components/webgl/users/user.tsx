@@ -17,7 +17,6 @@ import {
 import { useKeyboardEvents } from '../../../hooks/useKeys';
 import { IDirection } from '../../../server/player/types';
 import { Physics } from '../../../shared/physics/physics';
-import { Player } from '../../../server/player/player';
 import { OnMoveProps } from './types';
 
 interface Props {
