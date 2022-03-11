@@ -1,10 +1,12 @@
 import * as CANNON from 'cannon-es';
 import { BufferGeometry } from 'three';
-import { IHandlePhysicsProps, IPositionType } from './types';
+import { IPositionType } from './types';
 
 export class Physics {
   private planeBody: CANNON.Body;
   public physicsWorld: CANNON.World;
+  public GROUP1: number = 1;
+  public GROUP2: number = 2;
 
   constructor() {
     this.physicsWorld = new CANNON.World({
@@ -17,6 +19,8 @@ export class Physics {
     this.planeBody = new CANNON.Body({
       position: new CANNON.Vec3(0, 0, 0),
       shape: new CANNON.Plane(),
+      collisionFilterGroup: this.GROUP2,
+      collisionFilterMask: this.GROUP1,
     });
     this.planeBody.quaternion.setFromAxisAngle(
       new CANNON.Vec3(1, 0, 0),
@@ -50,6 +54,8 @@ export class Physics {
       mass: 1,
       position: new CANNON.Vec3(object.x, object.y, object.z),
       shape: new CANNON.Sphere(0.45),
+      collisionFilterGroup: this.GROUP1,
+      collisionFilterMask: this.GROUP2,
     });
 
     return body;

@@ -1,4 +1,4 @@
-import { Player } from '../player/player';
+import { Player } from '../../server/player/player';
 
 export interface IPositionType {
   x: number;
@@ -7,6 +7,7 @@ export interface IPositionType {
 }
 
 export interface IHandlePhysicsProps {
+  timestamp: number;
   userDirection: IUserDirection;
   azimuthalAngle: number;
 }

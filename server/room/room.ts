@@ -1,12 +1,16 @@
 import { Client, Room } from 'colyseus';
-import { Physics } from '../physics/physics';
-import { IHandlePhysicsProps, IUserDirection } from '../physics/types';
+import { Physics } from '../../shared/physics/physics';
+import {
+  IHandlePhysicsProps,
+  IUserDirection,
+} from '../../shared/physics/types';
 import { Player } from '../player/player';
 import { State } from '../state/state';
 
-export class Gallery extends Room {
+export class Gallery extends Room<State> {
   public maxClients = 30;
   private physics: Physics;
+  public patchRate = 100;
 
   constructor() {
     super();
@@ -17,12 +21,47 @@ export class Gallery extends Room {
     // initialize empty room state
     this.setState(new State());
     this.setSimulationInterval((deltaTime) => this.update(deltaTime));
+
+    // Called every time this room receives a "move" message
+    this.onMessage('move', (client, data) => {
+      const player = this.state.players.get(client.sessionId);
+      this.handleMovement(player, data);
+
+      // Loopen door nieuwe array en voor elke positie
+
+      this.broadcast(
+        'move',
+        { player },
+        {
+          afterNextPatch: true,
+        }
+      );
+    });
+
+    this.onMessage('idle', (client, data) => {
+      const player = this.state.players.get(client.sessionId);
+
+      if (player) {
+        for (let movement in player.movement) {
+          const key = movement as IUserDirection;
+          player.movement[key] = false;
+        }
+
+        player.physicalBody.velocity.setZero();
+        player.physicalBody.initVelocity.setZero();
+        player.physicalBody.angularVelocity.setZero();
+        player.physicalBody.initAngularVelocity.setZero();
+      }
+    });
   }
 
   // Called every time a client joins
   public onJoin(client: Client, options: any) {
     console.log('user joined');
-    this.state.players.set(client.sessionId, new Player(this.physics)); //Store instance of user in state
+    this.state.players.set(
+      client.sessionId,
+      new Player(client.sessionId, this.physics)
+    ); //Store instance of user in state
 
     client.send('id', { id: client.sessionId });
 
@@ -41,18 +80,13 @@ export class Gallery extends Room {
     // implement your physics or world updates here!
     // this is a good place to update the room state
 
-    // Called every time this room receives a "move" message
-    this.onMessage('move', (client, data) =>
-      this.handleMovement(client, data, this.state)
-    );
-
-    this.physics.updatePhysics(deltaTime); //Update physics 60 fps
+    this.physics.updatePhysics(deltaTime / 1000);
   }
 
   public onLeave(client: Client) {
     this.state.players.delete(client.sessionId);
 
-    const players = (this.state as State).players;
+    const players = this.state.players;
 
     this.broadcast('messages', `${client.sessionId} left.`);
 
@@ -69,36 +103,16 @@ export class Gallery extends Room {
   }
 
   public handleMovement(
-    client: Client,
-    data: IHandlePhysicsProps,
-    state: State
+    player: Player | undefined,
+    data: IHandlePhysicsProps
   ): void {
-    const { userDirection, azimuthalAngle } = data;
+    const { userDirection, azimuthalAngle, timestamp } = data;
     // Get the player
-
-    const player = state.players.get(client.sessionId);
-
     if (player) {
-      for (let movement in player.movement) {
-        const key = movement as IUserDirection;
-        this.resetMovement(key, player, userDirection);
-      }
-
       player.movement[userDirection] = true;
       player.handleUserDirection(azimuthalAngle);
-
-      this.broadcast('move', { players: state.players });
+      player.timestamp = timestamp;
+      player.movement[userDirection] = false;
     }
-  }
-
-  public resetMovement(
-    property: IUserDirection,
-    player: Player,
-    userDirection: IUserDirection
-  ): void {
-    if (player.movement[property] === player.movement[userDirection]) {
-      player.movement[property] = true;
-    }
-    player.movement[property] = false;
   }
 }
