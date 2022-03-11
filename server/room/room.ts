@@ -10,6 +10,8 @@ import { State } from '../state/state';
 export class Gallery extends Room<State> {
   public maxClients = 30;
   private physics: Physics;
+  private timeStep: number = 100;
+
   constructor() {
     super();
     this.physics = new Physics();
@@ -25,7 +27,9 @@ export class Gallery extends Room<State> {
       const player = this.state.players.get(client.sessionId);
       this.handleMovement(player, data);
 
-      this.broadcast('move', { player });
+      setTimeout(() => {
+        this.broadcast('move', { player });
+      }, this.timeStep);
     });
 
     this.onMessage('idle', (client, data) => {
@@ -70,7 +74,7 @@ export class Gallery extends Room<State> {
     // implement your physics or world updates here!
     // this is a good place to update the room state
 
-    this.physics.updatePhysics(deltaTime);
+    this.physics.updatePhysics(deltaTime / 1000);
   }
 
   public onLeave(client: Client) {
