@@ -1,6 +1,6 @@
 import * as CANNON from 'cannon-es';
 import { BufferGeometry } from 'three';
-import { IHandlePhysicsProps, IPositionType } from './types';
+import { IPositionType } from './types';
 
 export class Physics {
   private planeBody: CANNON.Body;

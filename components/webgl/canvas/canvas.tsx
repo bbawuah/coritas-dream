@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
 import { Canvas, addEffect, addAfterEffect } from '@react-three/fiber';
@@ -8,7 +8,6 @@ import StatsImpl from 'stats.js';
 import { InstancedUsers } from '../users/instancedUsers';
 import { Client, Room } from 'colyseus.js';
 import { Physics } from '../../../shared/physics/physics';
-import { getState, useStore } from '../../../store/store';
 
 interface Props {
   client: Client;

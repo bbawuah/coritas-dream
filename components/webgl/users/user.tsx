@@ -17,7 +17,6 @@ import {
 import { useKeyboardEvents } from '../../../hooks/useKeys';
 import { IDirection } from '../../../server/player/types';
 import { Physics } from '../../../shared/physics/physics';
-import { Player } from '../../../server/player/player';
 import { OnMoveProps } from './types';
 
 interface Props {
@@ -25,16 +24,6 @@ interface Props {
   id: string;
   physics: Physics;
 }
-
-/*
-User component should contain an variable where the last action processed by the server get stored.
-Every time the server sends a new processed action to client, we update this variable with this value.
-
-The server sends actions from the late past. The client is the actual presence. 
-To compensate this we predict actions on the client.
-Inside of the renderloop, we should check if the already processed action is equal to the latest action send by the client.
-If the server did not process it, we use clientside prediction to determine where the users action.
-*/
 
 export const User: React.FC<Props> = (props) => {
   const { id, room, physics } = props;
@@ -55,9 +44,11 @@ export const User: React.FC<Props> = (props) => {
     left: false,
     idle: false,
   });
-
+  const processedVector = useRef<THREE.Vector3>(new THREE.Vector3());
+  const physicalBodyVector = useRef<CANNON.Vec3>(new CANNON.Vec3());
   const counter = useRef<number>(0);
   const playerSpeed = 10;
+  const frameTime = useRef<number>(0.0);
 
   const [getDirection] = useKeyboardEvents({
     keyDownEvent,
@@ -98,6 +89,7 @@ export const User: React.FC<Props> = (props) => {
   }, []);
 
   useFrame((state, dt) => {
+    frameTime.current += state.clock.getElapsedTime();
     if (userRef.current && controlsRef) {
       const direction = getDirection();
       if (direction) {
@@ -110,7 +102,7 @@ export const User: React.FC<Props> = (props) => {
 
           room.send('move', currentAction.current);
 
-          if (counter.current >= 10) {
+          if (counter.current >= 99) {
             counter.current = 0;
           } else {
             counter.current++;
@@ -128,6 +120,7 @@ export const User: React.FC<Props> = (props) => {
       state.camera.position.sub(controlsRef.current.target);
       controlsRef.current.target.copy(userRef.current.position);
       state.camera.position.add(userRef.current.position);
+      physics.updatePhysics(dt); //Update physics 60 fps
     }
   });
 
@@ -158,41 +151,71 @@ export const User: React.FC<Props> = (props) => {
     movement.current[direction] = false;
 
     room.send('idle');
+
+    userRef.current?.position.lerp(processedVector.current, 0.01);
   }
 
   function handleUserDirection(action: IHandlePhysicsProps, dt: number) {
-    if (processedAction.current) {
-      frontVector.current.setZ(
-        Number(movement.current.backward) - Number(movement.current.forward)
-      );
-      sideVector.current.setX(
-        Number(movement.current.left) - Number(movement.current.right)
+    const processedTimeStamp = processedAction.current
+      ? processedAction.current[id].timestamp
+      : -1;
+
+    frontVector.current.setZ(
+      Number(movement.current.backward) - Number(movement.current.forward)
+    );
+    sideVector.current.setX(
+      Number(movement.current.left) - Number(movement.current.right)
+    );
+
+    direction.current
+      .subVectors(frontVector.current, sideVector.current)
+      .normalize()
+      .multiplyScalar(playerSpeed)
+      .applyAxisAngle(
+        upVector.current,
+        controlsRef.current.getAzimuthalAngle()
       );
 
-      direction.current
-        .subVectors(frontVector.current, sideVector.current)
-        .normalize()
-        .multiplyScalar(playerSpeed)
-        .applyAxisAngle(
-          upVector.current,
-          controlsRef.current.getAzimuthalAngle()
-        );
-
-      if (action.timestamp !== processedAction.current[id].timestamp) {
-        physicalBody?.current?.velocity.set(
+    // If action is not equal to processedAction, predict position
+    if (action.timestamp !== processedTimeStamp) {
+      if (physicalBody?.current) {
+        physicalBody.current?.wakeUp();
+        physicalBody.current.velocity.set(
           direction.current.x,
           physicalBody.current.velocity.y,
           direction.current.z
         );
 
-        physics.updatePhysics(dt); //Update physics 60 fps
-      } else {
         userRef.current?.position.set(
-          processedAction.current[id].x,
-          processedAction.current[id].y,
-          processedAction.current[id].z
+          physicalBody.current.position.x,
+          physicalBody.current.position.y,
+          physicalBody.current.position.z
         );
       }
+    } else {
+      handleServerReconsiliation();
+    }
+  }
+
+  function handleServerReconsiliation() {
+    // Reconsile with server
+    if (processedAction.current) {
+      // Processed vector
+      processedVector.current.set(
+        processedAction.current[id].x,
+        processedAction.current[id].y,
+        processedAction.current[id].z
+      );
+
+      physicalBodyVector.current.set(
+        processedAction.current[id].x,
+        processedAction.current[id].y,
+        processedAction.current[id].z
+      );
+
+      physicalBody.current?.position.copy(physicalBodyVector.current);
+      userRef.current?.position.copy(processedVector.current);
+      physicalBody.current?.sleep();
     }
   }
 

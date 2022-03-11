@@ -59,6 +59,8 @@ export class Player extends Schema {
       this.direction.z
     );
 
+    // Misschien position in een array pushen?
+
     this.x = this.physicalBody.position.x;
     this.y = this.physicalBody.position.y;
     this.z = this.physicalBody.position.z;
