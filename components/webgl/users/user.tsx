@@ -26,16 +26,6 @@ interface Props {
   physics: Physics;
 }
 
-/*
-User component should contain an variable where the last action processed by the server get stored.
-Every time the server sends a new processed action to client, we update this variable with this value.
-
-The server sends actions from the late past. The client is the actual presence. 
-To compensate this we predict actions on the client.
-Inside of the renderloop, we should check if the already processed action is equal to the latest action send by the client.
-If the server did not process it, we use clientside prediction to determine where the users action.
-*/
-
 export const User: React.FC<Props> = (props) => {
   const { id, room, physics } = props;
   const players = getState().players;
@@ -57,7 +47,6 @@ export const User: React.FC<Props> = (props) => {
   });
   const processedVector = useRef<THREE.Vector3>(new THREE.Vector3());
   const physicalBodyVector = useRef<CANNON.Vec3>(new CANNON.Vec3());
-  const shouldReconsileWithServer = useRef<boolean>(false);
   const counter = useRef<number>(0);
   const playerSpeed = 10;
   const frameTime = useRef<number>(0.0);

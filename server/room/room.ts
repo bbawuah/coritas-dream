@@ -10,7 +10,7 @@ import { State } from '../state/state';
 export class Gallery extends Room<State> {
   public maxClients = 30;
   private physics: Physics;
-  private timeStep: number = 100;
+  public patchRate = 100;
 
   constructor() {
     super();
@@ -27,9 +27,15 @@ export class Gallery extends Room<State> {
       const player = this.state.players.get(client.sessionId);
       this.handleMovement(player, data);
 
-      setTimeout(() => {
-        this.broadcast('move', { player });
-      }, this.timeStep);
+      // Loopen door nieuwe array en voor elke positie
+
+      this.broadcast(
+        'move',
+        { player },
+        {
+          afterNextPatch: true,
+        }
+      );
     });
 
     this.onMessage('idle', (client, data) => {

@@ -23,6 +23,10 @@ export const InstancedUsers: React.FC<Props> = (props) => {
   }));
 
   const dummy = new THREE.Object3D();
+  const temporaryVector = new THREE.Object3D();
+  const tempMatrix = new THREE.Matrix4();
+  const tempVector = new THREE.Vector3();
+  const temporaryLabelVector = useRef<THREE.Vector3>(new THREE.Vector3());
 
   useEffect(() => {
     if (instancedMeshRef.current && labelsRef.current) {
@@ -41,22 +45,31 @@ export const InstancedUsers: React.FC<Props> = (props) => {
       ids
         .filter((id) => id !== playerId)
         .forEach((player, index) => {
-          dummy.position.set(
-            players[player].x,
-            players[player].y,
-            players[player].z
-          );
+          instancedMeshRef.current?.getMatrixAt(index, tempMatrix);
+          tempVector.setFromMatrixPosition(tempMatrix);
+
+          dummy.position.x = lerp(tempVector.x, players[player].x, 0.05);
+          dummy.position.y = lerp(tempVector.y, players[player].y, 0.05);
+          dummy.position.z = lerp(tempVector.z, players[player].z, 0.05);
 
           dummy.updateMatrix();
-          instancedMeshRef?.current?.setMatrixAt(index, dummy.matrix);
 
-          labelsRef.current[player].position.set(
-            players[player].x,
-            players[player].y + 1.5,
-            players[player].z
-          );
+          instancedMeshRef.current?.setMatrixAt(index, dummy.matrix);
 
-          labelsRef.current[player].quaternion.copy(camera.quaternion);
+          if (labelsRef.current[player]) {
+            temporaryLabelVector.current.set(
+              players[player].x,
+              players[player].y + 1.5,
+              players[player].z
+            );
+
+            labelsRef.current[player].position.lerp(
+              temporaryLabelVector.current,
+              0.05
+            );
+
+            labelsRef.current[player].quaternion.copy(camera.quaternion);
+          }
         });
 
       instancedMeshRef.current.instanceMatrix.needsUpdate = true;
@@ -77,6 +90,10 @@ export const InstancedUsers: React.FC<Props> = (props) => {
       {renderPlayerLabels()}
     </>
   );
+
+  function lerp(v0: number, v1: number, t: number) {
+    return v0 * (1 - t) + v1 * t;
+  }
 
   function renderPlayerLabels() {
     const players = getState().players;
