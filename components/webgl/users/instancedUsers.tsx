@@ -23,10 +23,11 @@ export const InstancedUsers: React.FC<Props> = (props) => {
   }));
 
   const dummy = new THREE.Object3D();
-  const temporaryVector = new THREE.Object3D();
   const tempMatrix = new THREE.Matrix4();
-  const tempVector = new THREE.Vector3();
-  const temporaryLabelVector = useRef<THREE.Vector3>(new THREE.Vector3());
+  const oldPosition = useRef<THREE.Vector3>(new THREE.Vector3());
+  const newPosition = useRef<THREE.Vector3>(new THREE.Vector3());
+  const newPositionLabel = useRef<THREE.Vector3>(new THREE.Vector3());
+  const lerpAlpha = 0.1;
 
   useEffect(() => {
     if (instancedMeshRef.current && labelsRef.current) {
@@ -36,42 +37,52 @@ export const InstancedUsers: React.FC<Props> = (props) => {
     }
   }, []);
 
+  useEffect(() => {
+    // Players should be spawned and removed in here
+    console.log('changed');
+  }, [playersCount]);
+
   // Listen directly to websocket in renderloop
   useFrame(() => {
     if (instancedMeshRef.current) {
+      // Only move players in here
       const players = getState().players;
       const ids = Object.keys(players);
-
       ids
         .filter((id) => id !== playerId)
         .forEach((player, index) => {
           instancedMeshRef.current?.getMatrixAt(index, tempMatrix);
-          tempVector.setFromMatrixPosition(tempMatrix);
+          oldPosition.current.setFromMatrixPosition(tempMatrix);
 
-          dummy.position.x = lerp(tempVector.x, players[player].x, 0.05);
-          dummy.position.y = lerp(tempVector.y, players[player].y, 0.05);
-          dummy.position.z = lerp(tempVector.z, players[player].z, 0.05);
+          newPosition.current.set(
+            players[player].x,
+            players[player].y,
+            players[player].z
+          );
+
+          dummy.position.lerpVectors(
+            oldPosition.current,
+            newPosition.current,
+            lerpAlpha
+          );
 
           dummy.updateMatrix();
-
           instancedMeshRef.current?.setMatrixAt(index, dummy.matrix);
 
           if (labelsRef.current[player]) {
-            temporaryLabelVector.current.set(
+            newPositionLabel.current.set(
               players[player].x,
               players[player].y + 1.5,
               players[player].z
             );
-
             labelsRef.current[player].position.lerp(
-              temporaryLabelVector.current,
-              0.05
+              newPositionLabel.current,
+              lerpAlpha
             );
-
+            newPositionLabel.current.set(0, 0, 0);
             labelsRef.current[player].quaternion.copy(camera.quaternion);
           }
         });
-
       instancedMeshRef.current.instanceMatrix.needsUpdate = true;
     }
   });
@@ -83,17 +94,13 @@ export const InstancedUsers: React.FC<Props> = (props) => {
         args={[
           new RoundedBoxGeometry(1.0, 2.0, 1.0, 10, 0.5),
           new THREE.MeshStandardMaterial({ color: new THREE.Color('#00ff00') }),
-          playersCount,
+          playersCount - 1,
         ]}
         onClick={(e) => handleClickedPlayer(e.instanceId)}
       />
       {renderPlayerLabels()}
     </>
   );
-
-  function lerp(v0: number, v1: number, t: number) {
-    return v0 * (1 - t) + v1 * t;
-  }
 
   function renderPlayerLabels() {
     const players = getState().players;
