@@ -60,7 +60,6 @@ export const useColyseus = () => {
   function onMove(room: Room) {
     room.onMessage('move', (data: OnMoveProps) => {
       const { player } = data;
-      console.log(player);
       const players = getState().players;
 
       const obj = { ...players, [player.id]: player };

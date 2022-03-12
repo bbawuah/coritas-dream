@@ -8,11 +8,13 @@ import StatsImpl from 'stats.js';
 import { InstancedUsers } from '../users/instancedUsers';
 import { Client, Room } from 'colyseus.js';
 import { Physics } from '../../../shared/physics/physics';
+import { VRCanvas } from '@react-three/xr';
 
 interface Props {
   client: Client;
   room: Room;
   id: string;
+  isWebXrSupported: boolean;
 }
 
 interface StatsProps {
@@ -47,7 +49,7 @@ function Stats(props: StatsProps) {
 const CanvasComponent: React.FC<Props> = (props) => {
   // TODO: Add grabbing cursor
   const [hovered, setHovered] = useState<boolean>(false);
-  const { room, id } = props;
+  const { isWebXrSupported, room, id } = props;
   const [physics, setPhysics] = useState<Physics | null>(null);
 
   const classes = classNames([
@@ -67,6 +69,24 @@ const CanvasComponent: React.FC<Props> = (props) => {
   function renderCanvas() {
     if (!physics) {
       return null;
+    }
+
+    if (isWebXrSupported) {
+      return (
+        <VRCanvas>
+          <color attach="background" args={['#ffffff']} />
+          <ambientLight intensity={0.5} />
+          <directionalLight color="white" position={[0, 3, 0]} />
+          <User id={id} room={room} physics={physics} />
+          <InstancedUsers
+            playerId={id}
+            onPointerOver={() => setHovered(true)}
+            onPointerOut={() => setHovered(false)}
+          />
+          <Floor />
+          <Stats />
+        </VRCanvas>
+      );
     }
 
     return (

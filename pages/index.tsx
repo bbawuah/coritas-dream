@@ -3,11 +3,25 @@ import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import styles from '../styles/Home.module.scss';
 import { useColyseus } from '../hooks/useColyseus';
+import { useEffect, useState } from 'react';
+import type { Navigator } from 'webxr';
 
-const Canvas = dynamic(() => import('../components/webgl/canvas/canvas'));
+const Canvas = dynamic(() => import('../components/webgl/canvas/canvas'), {
+  ssr: false,
+});
 
 const Home: NextPage = () => {
   const { client, id, room } = useColyseus();
+  const [webXRIsSupported, setWebXRIsSupported] = useState<boolean>();
+
+  useEffect(() => {
+    const webXRNavigator: Navigator = navigator as any as Navigator;
+    if ('xr' in webXRNavigator) {
+      webXRNavigator.xr.isSessionSupported('immersive-vr').then((supported) => {
+        setWebXRIsSupported(supported);
+      });
+    }
+  }, []);
 
   return (
     <div className={styles.container}>
@@ -25,7 +39,14 @@ const Home: NextPage = () => {
       return null;
     }
 
-    return <Canvas client={client} id={id} room={room} />;
+    return (
+      <Canvas
+        isWebXrSupported={webXRIsSupported ?? false}
+        client={client}
+        id={id}
+        room={room}
+      />
+    );
   }
 };
 
