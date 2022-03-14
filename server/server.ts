@@ -15,7 +15,9 @@ nextApp.prepare().then(async () => {
 
   const server: http.Server = http.createServer(app);
 
-  const wss = new WebSocketTransport();
+  const wss = new WebSocketTransport({
+    // server
+  });
 
   app.all('*', (req: any, res: any) => nextHandler(req, res));
 

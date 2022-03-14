@@ -8,7 +8,7 @@ import StatsImpl from 'stats.js';
 import { InstancedUsers } from '../users/instancedUsers';
 import { Client, Room } from 'colyseus.js';
 import { Physics } from '../../../shared/physics/physics';
-import { VRCanvas } from '@react-three/xr';
+import { XRCanvas } from './xrCanvas';
 
 interface Props {
   client: Client;
@@ -71,22 +71,9 @@ const CanvasComponent: React.FC<Props> = (props) => {
       return null;
     }
 
+    // If user is not on a desktop, tablet or a phone. He should be on a vr headset
     if (isWebXrSupported) {
-      return (
-        <VRCanvas>
-          <color attach="background" args={['#ffffff']} />
-          <ambientLight intensity={0.5} />
-          <directionalLight color="white" position={[0, 3, 0]} />
-          <User id={id} room={room} physics={physics} />
-          <InstancedUsers
-            playerId={id}
-            onPointerOver={() => setHovered(true)}
-            onPointerOut={() => setHovered(false)}
-          />
-          <Floor />
-          <Stats />
-        </VRCanvas>
-      );
+      return <XRCanvas id={id} room={room} physics={physics} />;
     }
 
     return (

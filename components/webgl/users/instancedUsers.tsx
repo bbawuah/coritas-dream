@@ -1,5 +1,5 @@
 import { useFrame, useThree } from '@react-three/fiber';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry';
 import { getState, useStore } from '../../../store/store';
@@ -24,6 +24,15 @@ export const InstancedUsers: React.FC<Props> = (props) => {
 
   const dummy = new THREE.Object3D();
   const tempMatrix = new THREE.Matrix4();
+
+  const maxPlayers = 150;
+  const [matrice] = useState(() => {
+    const mArray = new Float32Array(maxPlayers * 16); //Create Float32Array with length max amount of players
+    for (let i = 0; i < maxPlayers; i++)
+      tempMatrix.identity().toArray(mArray, i * 16); //Store matrix in Float32Array
+
+    return mArray; //Return array
+  });
   const oldPosition = useRef<THREE.Vector3>(new THREE.Vector3());
   const newPosition = useRef<THREE.Vector3>(new THREE.Vector3());
   const newPositionLabel = useRef<THREE.Vector3>(new THREE.Vector3());
@@ -83,7 +92,11 @@ export const InstancedUsers: React.FC<Props> = (props) => {
             labelsRef.current[player].quaternion.copy(camera.quaternion);
           }
         });
+
       instancedMeshRef.current.instanceMatrix.needsUpdate = true;
+      instancedMeshRef.current.instanceMatrix.updateRange.count =
+        (playersCount - 1) * 16;
+      instancedMeshRef.current.count = playersCount - 1;
     }
   });
 
@@ -93,11 +106,20 @@ export const InstancedUsers: React.FC<Props> = (props) => {
         ref={instancedMeshRef}
         args={[
           new RoundedBoxGeometry(1.0, 2.0, 1.0, 10, 0.5),
-          new THREE.MeshStandardMaterial({ color: new THREE.Color('#00ff00') }),
+          undefined,
           playersCount - 1,
         ]}
         onClick={(e) => handleClickedPlayer(e.instanceId)}
-      />
+      >
+        <instancedBufferAttribute
+          attach="instanceMatrix"
+          count={matrice.length / 16}
+          array={matrice}
+          itemSize={16}
+          usage={THREE.DynamicDrawUsage}
+        />
+        <meshStandardMaterial color={0x00ff00} />
+      </instancedMesh>
       {renderPlayerLabels()}
     </>
   );
