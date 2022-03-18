@@ -1,54 +1,77 @@
 import * as THREE from 'three';
-import { useThree } from '@react-three/fiber';
-import { useXREvent, XRController, XREvent } from '@react-three/xr';
-import React, { useEffect, useRef } from 'react';
+import { useFrame, useThree } from '@react-three/fiber';
+import {
+  useXR,
+  useXREvent,
+  useXRFrame,
+  XRController,
+  XREvent,
+} from '@react-three/xr';
+import React, { useEffect, useRef, useState } from 'react';
+import { NavigationLine } from './navigationLine';
 
-interface Props {
-  XRController: XRController;
-}
+interface Props {}
 
 export const XRTeleport: React.FC<Props> = (props) => {
-  const { XRController } = props;
-  const { controller, inputSource } = XRController;
-  const lineRef = useRef<any>(null);
+  const { player } = useXR();
   const bufferRef = useRef<THREE.BufferGeometry>();
-  const lineSegments = 10;
-  const lineGeometryVertices = new Float32Array((lineSegments + 1) * 3);
-  lineGeometryVertices.fill(0);
-  const lineGeometryColors = new Float32Array((lineSegments + 1) * 3);
-  lineGeometryColors.fill(0.5);
-  const { gl, camera } = useThree();
+  const { gl, camera, scene } = useThree();
   const g = new THREE.Vector3(0, -9.8, 0); //Gravity
   const tempVector = useRef<THREE.Vector3>(new THREE.Vector3());
   const tempVector1 = useRef<THREE.Vector3>(new THREE.Vector3());
   const tempVectorP = useRef<THREE.Vector3>(new THREE.Vector3());
   const tempVectorV = useRef<THREE.Vector3>(new THREE.Vector3());
-  let guidingController = useRef<THREE.Group | null>(null);
 
-  useXREvent('selectstart', onSelectStart);
-  useXREvent('selectend', onSelectEnd);
+  const [isPressed, setIsPressed] = useState<boolean>(false);
+  let guidingController = useRef<THREE.Group | null>(null);
+  const lineRef = useRef<NavigationLine>(new NavigationLine(scene));
+
+  useXREvent('selectstart', onSelectStart, { handedness: 'right' });
+  useXREvent('selectend', onSelectEnd, { handedness: 'right' });
 
   useEffect(() => {
-    if (bufferRef.current) {
-      bufferRef.current.setAttribute(
-        'position',
-        new THREE.BufferAttribute(lineGeometryVertices, 3)
-      );
-
-      //   bufferRef.current.setAttribute(
-      //     'color',
-      //     new THREE.BufferAttribute(lineGeometryColors, 3)
-      //   );
+    if (isPressed) {
+      console.log(lineRef.current);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [isPressed]);
 
-  return (
-    <line ref={lineRef}>
-      <bufferGeometry ref={bufferRef} />
-      <lineBasicMaterial color={0x888888} blending={THREE.AdditiveBlending} />
-    </line>
-  );
+  useFrame(() => {
+    if (guidingController.current && lineRef.current) {
+      const vertex = tempVector.current.set(0, 0, 0);
+
+      if (guidingController.current) {
+        // Controller start position
+        const p = guidingController.current.getWorldPosition(
+          tempVectorP.current
+        );
+        // Set Vector V to the direction of the controller, at 1m/s
+        const v = guidingController.current.getWorldDirection(
+          tempVectorV.current
+        );
+
+        // Scale the initial velocity to 6m/s
+        v.multiplyScalar(6);
+        const t = (-v.y + Math.sqrt(v.y ** 2 - 2 * p.y * g.y)) / g.y;
+
+        for (let i = 1; i <= lineRef.current.lineSegments; i++) {
+          // set vertex to current position of the virtual ball at time t
+          positionAtT(vertex, (i * t) / lineRef.current.lineSegments, p, v, g);
+
+          guidingController.current.worldToLocal(vertex);
+          // Copy it to the Array Buffer
+          vertex.toArray(lineRef.current.lineGeometryVertices, i * 3);
+        }
+
+        if (lineRef.current) {
+          lineRef.current.guideline.geometry.attributes.position.needsUpdate =
+            true;
+        }
+      }
+    }
+  });
+
+  return null;
 
   function positionAtT(
     inVec: THREE.Vector3,
@@ -66,24 +89,28 @@ export const XRTeleport: React.FC<Props> = (props) => {
   function onSelectStart(e: XREvent) {
     // This is e.data is an XRInputSource and if
     // it has a hand and being handled by hand tracking so do nothing
-    if (e.controller.hand) {
+    const { originalEvent, controller } = e;
+    if (originalEvent && originalEvent.data && originalEvent.data.hand) {
       return;
     }
 
+    setIsPressed(true);
+    guidingController.current = controller.controller;
+
     if (lineRef.current) {
-      console.log('startGuide', controller);
-      guidingController.current = controller;
-      controller.add(lineRef.current);
+      controller.controller.add(lineRef.current.guideline as any as THREE.Line);
     }
   }
 
   function onSelectEnd(e: XREvent) {
-    const feetPos = gl.xr
-      .getCamera(camera)
-      .getWorldPosition(tempVector.current);
-    feetPos.y = 0;
-
+    const { controller } = e;
     if (guidingController.current) {
+      const feetPos = gl.xr
+        .getCamera(camera)
+        .getWorldPosition(tempVector.current);
+
+      feetPos.y = 0;
+
       // cursor position
       // Controller start position
       const p = guidingController.current.getWorldPosition(tempVectorP.current);
@@ -91,6 +118,7 @@ export const XRTeleport: React.FC<Props> = (props) => {
       const v = guidingController.current.getWorldDirection(
         tempVectorV.current
       );
+
       // Scale the initial velocity to 6m/s
       v.multiplyScalar(6);
       const t = (-v.y + Math.sqrt(v.y ** 2 - 2 * p.y * g.y)) / g.y;
@@ -101,11 +129,11 @@ export const XRTeleport: React.FC<Props> = (props) => {
       const offset = cursorPos.addScaledVector(feetPos, -1);
 
       // Do the locomotion
-      //  locomotion(offset);
+      player.position.copy(offset);
 
       // Clean up
       guidingController.current = null;
-      lineRef.current.re;
+      controller.controller.remove(lineRef.current.guideline);
     }
   }
 };

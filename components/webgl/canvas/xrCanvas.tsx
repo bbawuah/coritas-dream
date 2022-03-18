@@ -18,16 +18,7 @@ interface Props {
 
 export const XRCanvas: React.FC<Props> = (props) => {
   const { room, id, physics } = props;
-  const players = getState().players;
-  const { player, isPresenting, controllers } = useXR();
-  const [hovered, setHovered] = useState<boolean>(false);
-  const [isMobile] = useDeviceCheck();
 
-  useEffect(() => {
-    if (isPresenting) {
-      console.log('is presenting');
-    }
-  }, [isPresenting]);
   return (
     <>
       <Sky
@@ -39,25 +30,13 @@ export const XRCanvas: React.FC<Props> = (props) => {
         mieDirectionalG={0.08}
       />
       <DefaultXRControllers />
-      {handleTeleport()}
+      <XRTeleport />;
       <color attach="background" args={['#ffffff']} />
       <ambientLight intensity={0.5} />
       <directionalLight color="white" position={[0, 3, 0]} />
       <User id={id} room={room} physics={physics} />
-      <InstancedUsers
-        playerId={id}
-        onPointerOver={() => setHovered(true)}
-        onPointerOut={() => setHovered(false)}
-      />
+      <InstancedUsers playerId={id} />
       <Floor />
     </>
   );
-
-  function handleTeleport() {
-    if (controllers) {
-      controllers.map((controller, index) => {
-        return <XRTeleport key={index} controller={controller} />;
-      });
-    }
-  }
 };
