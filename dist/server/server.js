@@ -35,21 +35,21 @@ const nextHandler = nextApp.getRequestHandler();
 nextApp.prepare().then(async () => {
     const app = (0, express_1.default)();
     const server = http.createServer(app);
-    const wss = new ws_transport_1.WebSocketTransport();
+    const wss = new ws_transport_1.WebSocketTransport({
+        server,
+    });
     app.all('*', (req, res) => nextHandler(req, res));
     const gameServer = new core_1.Server({
         transport: wss,
     });
     gameServer.define('gallery', room_1.Gallery);
+    // DEV SETUP in production only one server should run
     gameServer
-        .listen(8080)
+        .listen(3000)
         .then(() => {
         console.log('game server is running ');
     })
         .catch((e) => {
         console.log(e);
-    });
-    server.listen(port, () => {
-        console.log('app is running');
     });
 });

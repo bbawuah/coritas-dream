@@ -88,8 +88,6 @@ export class Gallery extends Room<State> {
 
     const players = this.state.players;
 
-    this.broadcast('messages', `${client.sessionId} left.`);
-
     if (players) {
       //Optimize this to only sending the player that left
       this.broadcast('removePlayer', {

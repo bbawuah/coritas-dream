@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from 'react';
 import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
-import { Canvas, addEffect, addAfterEffect } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { User } from '../users/user';
 import { Floor } from '../floor/floor';
-import StatsImpl from 'stats.js';
 import { InstancedUsers } from '../users/instancedUsers';
 import { Client, Room } from 'colyseus.js';
 import { Physics } from '../../../shared/physics/physics';
 import { XRCanvas } from './xrCanvas';
+import { Sky } from '@react-three/drei';
+import { VRCanvas } from '@react-three/xr';
+import { Perf } from 'r3f-perf';
+import { useStore } from '../../../store/store';
 
 interface Props {
   client: Client;
@@ -17,46 +20,15 @@ interface Props {
   isWebXrSupported: boolean;
 }
 
-interface StatsProps {
-  showPanel?: number;
-  className?: string;
-}
-
-function Stats(props: StatsProps) {
-  const { showPanel = 0, className } = props;
-  const [stats] = useState(() => new StatsImpl());
-  useEffect(() => {
-    const node = document.body;
-
-    stats.showPanel(showPanel);
-    node.appendChild(stats.dom);
-
-    if (className) stats.dom.classList.add(className);
-
-    const begin = addEffect(() => stats.begin());
-    const end = addAfterEffect(() => stats.end());
-
-    return () => {
-      node.removeChild(stats.dom);
-      begin();
-      end();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parent]);
-  return null;
-}
-
 const CanvasComponent: React.FC<Props> = (props) => {
-  // TODO: Add grabbing cursor
-  const [hovered, setHovered] = useState<boolean>(false);
+  const { hovered } = useStore(({ hovered }) => ({ hovered })); //Maybe refactor this later
   const { isWebXrSupported, room, id } = props;
   const [physics, setPhysics] = useState<Physics | null>(null);
-
   const classes = classNames([
     styles.container,
     {
-      [styles.grab]: true,
-      [styles.pointer]: false,
+      [styles.grab]: !hovered,
+      [styles.pointer]: hovered,
     },
   ]);
 
@@ -73,22 +45,30 @@ const CanvasComponent: React.FC<Props> = (props) => {
 
     // If user is not on a desktop, tablet or a phone. He should be on a vr headset
     if (isWebXrSupported) {
-      return <XRCanvas id={id} room={room} physics={physics} />;
+      return (
+        <VRCanvas>
+          <XRCanvas id={id} room={room} physics={physics} />
+          <Perf />
+        </VRCanvas>
+      );
     }
 
     return (
       <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
-        <color attach="background" args={['#ffffff']} />
-        <ambientLight intensity={0.5} />
-        <directionalLight color="white" position={[0, 3, 0]} />
-        <User id={id} room={room} physics={physics} />
-        <InstancedUsers
-          playerId={id}
-          onPointerOver={() => setHovered(true)}
-          onPointerOut={() => setHovered(false)}
+        <Sky
+          distance={3000}
+          turbidity={8}
+          rayleigh={6}
+          inclination={0.51}
+          mieCoefficient={0.0045}
+          mieDirectionalG={0.08}
         />
+        <ambientLight intensity={0.7} />
+        <directionalLight color="white" position={[-3, 3, -2]} />
+        <User id={id} room={room} physics={physics} />
+        <InstancedUsers playerId={id} />
         <Floor />
-        <Stats />
+        <Perf />
       </Canvas>
     );
   }

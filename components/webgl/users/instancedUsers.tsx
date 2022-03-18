@@ -1,25 +1,24 @@
-import { useFrame, useThree } from '@react-three/fiber';
-import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
+import { useFrame, useThree } from '@react-three/fiber';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry';
 import { getState, useStore } from '../../../store/store';
 import { Text } from '@react-three/drei';
 
 interface Props {
   playerId: string;
-  onPointerOver: () => void;
-  onPointerOut: () => void;
 }
 
 type ILabelsType = Record<string, any>;
 
 export const InstancedUsers: React.FC<Props> = (props) => {
-  const { playerId, onPointerOver, onPointerOut } = props;
+  const { playerId } = props;
   const { camera } = useThree();
   const instancedMeshRef = useRef<THREE.InstancedMesh>();
   const labelsRef = useRef<ILabelsType>({});
-  const { playersCount } = useStore(({ playersCount }) => ({
+  const { playersCount, set } = useStore(({ playersCount, set }) => ({
     playersCount,
+    set,
   }));
 
   const dummy = new THREE.Object3D();
@@ -45,11 +44,6 @@ export const InstancedUsers: React.FC<Props> = (props) => {
       instancedMeshRef.current.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     }
   }, []);
-
-  useEffect(() => {
-    // Players should be spawned and removed in here
-    console.log('changed');
-  }, [playersCount]);
 
   // Listen directly to websocket in renderloop
   useFrame(() => {
@@ -101,7 +95,7 @@ export const InstancedUsers: React.FC<Props> = (props) => {
   });
 
   return (
-    <>
+    <Suspense fallback={null}>
       <instancedMesh
         ref={instancedMeshRef}
         args={[
@@ -110,6 +104,10 @@ export const InstancedUsers: React.FC<Props> = (props) => {
           playersCount - 1,
         ]}
         onClick={(e) => handleClickedPlayer(e.instanceId)}
+        onPointerOver={() => {
+          set((state) => ({ ...state, hovered: true }));
+        }}
+        onPointerOut={() => set((state) => ({ ...state, hovered: false }))}
       >
         <instancedBufferAttribute
           attach="instanceMatrix"
@@ -121,7 +119,7 @@ export const InstancedUsers: React.FC<Props> = (props) => {
         <meshStandardMaterial color={0x00ff00} />
       </instancedMesh>
       {renderPlayerLabels()}
-    </>
+    </Suspense>
   );
 
   function renderPlayerLabels() {
