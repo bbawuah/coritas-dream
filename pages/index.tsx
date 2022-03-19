@@ -5,7 +5,6 @@ import styles from '../styles/Home.module.scss';
 import { useColyseus } from '../hooks/useColyseus';
 import { useEffect, useState } from 'react';
 import type { Navigator } from 'webxr';
-import { useDeviceCheck } from '../hooks/useDeviceCheck';
 
 const Canvas = dynamic(() => import('../components/webgl/canvas/canvas'), {
   ssr: false,
