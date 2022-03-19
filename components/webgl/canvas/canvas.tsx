@@ -24,7 +24,7 @@ interface Props {
 const CanvasComponent: React.FC<Props> = (props) => {
   const { hovered } = useStore(({ hovered }) => ({ hovered })); //Maybe refactor this later
   const { isWebXrSupported, room, id } = props;
-  const [isMobile, isTablet, isDesktop, isInVR] = useDeviceCheck();
+  const [isInVR] = useDeviceCheck();
   const [physics, setPhysics] = useState<Physics | null>(null);
   const classes = classNames([
     styles.container,
