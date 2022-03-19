@@ -12,6 +12,7 @@ import { Sky } from '@react-three/drei';
 import { VRCanvas } from '@react-three/xr';
 import { Perf } from 'r3f-perf';
 import { useStore } from '../../../store/store';
+import { useDeviceCheck } from '../../../hooks/useDeviceCheck';
 
 interface Props {
   client: Client;
@@ -23,6 +24,7 @@ interface Props {
 const CanvasComponent: React.FC<Props> = (props) => {
   const { hovered } = useStore(({ hovered }) => ({ hovered })); //Maybe refactor this later
   const { isWebXrSupported, room, id } = props;
+  const [isMobile, isTablet, isDesktop, isInVR] = useDeviceCheck();
   const [physics, setPhysics] = useState<Physics | null>(null);
   const classes = classNames([
     styles.container,
@@ -44,7 +46,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
     }
 
     // If user is not on a desktop, tablet or a phone. He should be on a vr headset
-    if (isWebXrSupported) {
+    if (isWebXrSupported && isInVR) {
       return (
         <VRCanvas>
           <XRCanvas id={id} room={room} physics={physics} />

@@ -14,6 +14,7 @@ export class NavigationLine {
     new THREE.LineBasicMaterial({
       color: 0x888888,
       blending: THREE.AdditiveBlending,
+      linewidth: 2,
     });
 
   constructor(scene: THREE.Scene) {

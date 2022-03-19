@@ -11,6 +11,10 @@ const keys: Keys = {
   s: 'backward',
   a: 'left',
   d: 'right',
+  W: 'forward',
+  S: 'backward',
+  A: 'left',
+  D: 'right',
 };
 
 interface Props {

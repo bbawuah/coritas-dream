@@ -5,6 +5,7 @@ import styles from '../styles/Home.module.scss';
 import { useColyseus } from '../hooks/useColyseus';
 import { useEffect, useState } from 'react';
 import type { Navigator } from 'webxr';
+import { useDeviceCheck } from '../hooks/useDeviceCheck';
 
 const Canvas = dynamic(() => import('../components/webgl/canvas/canvas'), {
   ssr: false,
@@ -13,9 +14,13 @@ const Canvas = dynamic(() => import('../components/webgl/canvas/canvas'), {
 const Home: NextPage = () => {
   const { client, id, room } = useColyseus();
   const [webXRIsSupported, setWebXRIsSupported] = useState<boolean>();
+  const [isMobile, isTablet, isDesktop, isInVR] = useDeviceCheck();
+  const [agent, setAgent] = useState<string>();
 
   useEffect(() => {
     const webXRNavigator: Navigator = navigator as any as Navigator;
+    let userAgentData = navigator.userAgent;
+    setAgent(navigator.userAgent);
     if ('xr' in webXRNavigator) {
       webXRNavigator.xr.isSessionSupported('immersive-vr').then((supported) => {
         setWebXRIsSupported(supported);

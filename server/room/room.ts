@@ -1,4 +1,5 @@
 import { Client, Room } from 'colyseus';
+import { XRTeleportationData } from '../../components/webgl/vr/types';
 import { Physics } from '../../shared/physics/physics';
 import {
   IHandlePhysicsProps,
@@ -52,6 +53,25 @@ export class Gallery extends Room<State> {
         player.physicalBody.angularVelocity.setZero();
         player.physicalBody.initAngularVelocity.setZero();
       }
+    });
+
+    this.onMessage('teleport', (client, data: XRTeleportationData) => {
+      const player = this.state.players.get(client.sessionId);
+      const { position } = data;
+
+      if (player) {
+        player.x = position.x;
+        player.y = position.y;
+        player.z = position.z;
+      }
+
+      this.broadcast(
+        'move',
+        { player },
+        {
+          afterNextPatch: true,
+        }
+      );
     });
   }
 
