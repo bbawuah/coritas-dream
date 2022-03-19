@@ -15,7 +15,9 @@ nextApp.prepare().then(async () => {
 
   const server: http.Server = http.createServer(app);
 
-  const wss = new WebSocketTransport();
+  const wss = new WebSocketTransport({
+    // server
+  });
 
   app.all('*', (req: any, res: any) => nextHandler(req, res));
 
@@ -25,6 +27,7 @@ nextApp.prepare().then(async () => {
 
   gameServer.define('gallery', Gallery);
 
+  // DEV SETUP in production only
   gameServer
     .listen(8080)
     .then(() => {
@@ -33,6 +36,11 @@ nextApp.prepare().then(async () => {
     .catch((e) => {
       console.log(e);
     });
+
+  if (dev) {
+    // simulate 200ms latency between server and client.
+    gameServer.simulateLatency(200);
+  }
 
   server.listen(port, () => {
     console.log('app is running');

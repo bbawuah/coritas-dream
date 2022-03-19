@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { OrbitControls } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
@@ -49,6 +49,12 @@ export const User: React.FC<Props> = (props) => {
   const counter = useRef<number>(0);
   const playerSpeed = 10;
   const frameTime = useRef<number>(0.0);
+  const idealOffset = useRef<THREE.Vector3>(new THREE.Vector3(-15, 20, -30));
+  // const lines = useLines({
+  //   count: 20,
+  //   radius: 10,
+  //   colors: ['#1572A1', '#9AD0EC', '#EFDAD7', '#E3BEC6'],
+  // });
 
   const [getDirection] = useKeyboardEvents({
     keyDownEvent,
@@ -134,6 +140,18 @@ export const User: React.FC<Props> = (props) => {
       >
         <meshStandardMaterial shadowSide={2} />
       </mesh>
+      {/* {lines.map((props, index) => {
+          const { curve, speed, color, width } = props;
+          return (
+            <UserParticles
+              key={index}
+              curve={curve}
+              speed={speed}
+              color={color}
+              width={width}
+            />
+          );
+        })} */}
       <OrbitControls
         ref={controlsRef}
         enablePan={false}
@@ -153,6 +171,10 @@ export const User: React.FC<Props> = (props) => {
     room.send('idle');
 
     userRef.current?.position.lerp(processedVector.current, 0.01);
+  }
+
+  function calculateCameraOffset() {
+    idealOffset.current.add(controlsRef.current.target.rotation);
   }
 
   function handleUserDirection(action: IHandlePhysicsProps, dt: number) {
@@ -235,5 +257,11 @@ export const User: React.FC<Props> = (props) => {
 
       userRef.current?.position.set(player.x, player.y, player.z);
     }
+  }
+
+  function getRandomFloat(min: number, max: number): number {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.random() * (max - min) + min; //The maximum is exclusive and the minimum is inclusive
   }
 };

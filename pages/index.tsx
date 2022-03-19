@@ -16,6 +16,7 @@ const Home: NextPage = () => {
 
   useEffect(() => {
     const webXRNavigator: Navigator = navigator as any as Navigator;
+
     if ('xr' in webXRNavigator) {
       webXRNavigator.xr.isSessionSupported('immersive-vr').then((supported) => {
         setWebXRIsSupported(supported);

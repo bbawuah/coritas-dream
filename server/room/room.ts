@@ -1,4 +1,5 @@
 import { Client, Room } from 'colyseus';
+import { XRTeleportationData } from '../../components/webgl/vr/types';
 import { Physics } from '../../shared/physics/physics';
 import {
   IHandlePhysicsProps,
@@ -53,6 +54,25 @@ export class Gallery extends Room<State> {
         player.physicalBody.initAngularVelocity.setZero();
       }
     });
+
+    this.onMessage('teleport', (client, data: XRTeleportationData) => {
+      const player = this.state.players.get(client.sessionId);
+      const { position } = data;
+
+      if (player) {
+        player.x = position.x;
+        player.y = position.y;
+        player.z = position.z;
+      }
+
+      this.broadcast(
+        'move',
+        { player },
+        {
+          afterNextPatch: true,
+        }
+      );
+    });
   }
 
   // Called every time a client joins
@@ -87,8 +107,6 @@ export class Gallery extends Room<State> {
     this.state.players.delete(client.sessionId);
 
     const players = this.state.players;
-
-    this.broadcast('messages', `${client.sessionId} left.`);
 
     if (players) {
       //Optimize this to only sending the player that left
