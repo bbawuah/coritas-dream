@@ -24,7 +24,7 @@ interface Props {
 const CanvasComponent: React.FC<Props> = (props) => {
   const { hovered } = useStore(({ hovered }) => ({ hovered })); //Maybe refactor this later
   const { isWebXrSupported, room, id } = props;
-  const [isInVR] = useDeviceCheck();
+  const { isInVR, isDesktop } = useDeviceCheck();
   const [physics, setPhysics] = useState<Physics | null>(null);
   const classes = classNames([
     styles.container,
@@ -46,7 +46,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
     }
 
     // If user is not on a desktop, tablet or a phone. He should be on a vr headset
-    if (isWebXrSupported && isInVR) {
+    if (isWebXrSupported && isInVR && isDesktop) {
       return (
         <VRCanvas>
           <XRCanvas id={id} room={room} physics={physics} />

@@ -24,10 +24,10 @@ interface Props {
   color: string;
 }
 
-// Particles are not working yet. Could be a next js issue
-export const UserParticles: React.FC<Props> = (props) => {
+export const Particles: React.FC<Props> = (props) => {
   const { curve, width, speed, color } = props;
   const material = useRef<THREE.ShaderMaterial>();
+
   useFrame(() => {
     if (material.current) {
       material.current.uniforms.dashOffset.value -= speed;

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { OrbitControls } from '@react-three/drei';
-import { useFrame, useThree } from '@react-three/fiber';
+import { useFrame } from '@react-three/fiber';
 import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
@@ -98,30 +98,17 @@ export const User: React.FC<Props> = (props) => {
     frameTime.current += state.clock.getElapsedTime();
     if (userRef.current && controlsRef) {
       const direction = getDirection();
-      if (direction) {
-        if (direction !== 'idle') {
-          currentAction.current = {
-            timestamp: counter.current,
-            userDirection: direction,
-            azimuthalAngle: controlsRef.current.getAzimuthalAngle(),
-          };
 
-          room.send('move', currentAction.current);
-
-          if (counter.current >= 99) {
-            counter.current = 0;
-          } else {
-            counter.current++;
-          }
-        }
-
-        if (currentAction.current) {
-          // Handle client prediction
-          handleUserDirection(currentAction.current, dt);
-        }
-
-        room.onMessage('move', handleOnMessageMove);
+      if (direction !== 'idle') {
+        handleSendPosition(direction);
       }
+
+      if (currentAction.current) {
+        // Handle client prediction
+        handleUserDirection(currentAction.current);
+      }
+
+      room.onMessage('move', handleOnMessageMove);
 
       state.camera.position.sub(controlsRef.current.target);
       controlsRef.current.target.copy(userRef.current.position);
@@ -140,18 +127,6 @@ export const User: React.FC<Props> = (props) => {
       >
         <meshStandardMaterial shadowSide={2} />
       </mesh>
-      {/* {lines.map((props, index) => {
-          const { curve, speed, color, width } = props;
-          return (
-            <UserParticles
-              key={index}
-              curve={curve}
-              speed={speed}
-              color={color}
-              width={width}
-            />
-          );
-        })} */}
       <OrbitControls
         ref={controlsRef}
         enablePan={false}
@@ -171,13 +146,10 @@ export const User: React.FC<Props> = (props) => {
     room.send('idle');
 
     userRef.current?.position.lerp(processedVector.current, 0.01);
+    physicalBody.current?.sleep();
   }
 
-  function calculateCameraOffset() {
-    idealOffset.current.add(controlsRef.current.target.rotation);
-  }
-
-  function handleUserDirection(action: IHandlePhysicsProps, dt: number) {
+  function handleUserDirection(action: IHandlePhysicsProps) {
     const processedTimeStamp = processedAction.current
       ? processedAction.current[id].timestamp
       : -1;
@@ -235,9 +207,8 @@ export const User: React.FC<Props> = (props) => {
         processedAction.current[id].z
       );
 
+      userRef.current?.position.lerp(processedVector.current, 0.1);
       physicalBody.current?.position.copy(physicalBodyVector.current);
-      userRef.current?.position.copy(processedVector.current);
-      physicalBody.current?.sleep();
     }
   }
 
@@ -254,14 +225,22 @@ export const User: React.FC<Props> = (props) => {
           z: player.z,
         },
       };
-
-      userRef.current?.position.set(player.x, player.y, player.z);
     }
   }
 
-  function getRandomFloat(min: number, max: number): number {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.random() * (max - min) + min; //The maximum is exclusive and the minimum is inclusive
+  function handleSendPosition(direction: IUserDirection) {
+    currentAction.current = {
+      timestamp: counter.current,
+      userDirection: direction,
+      azimuthalAngle: controlsRef.current.getAzimuthalAngle(),
+    };
+
+    room.send('move', currentAction.current);
+
+    if (counter.current >= 99) {
+      counter.current = 0;
+    } else {
+      counter.current++;
+    }
   }
 };

@@ -4,7 +4,7 @@ export const useDeviceCheck = () => {
   const [isMobile, setIsMobile] = useState<boolean>();
   const [isTablet, setIsTablet] = useState<boolean>();
   const [isDesktop, setIsDesktop] = useState<boolean>();
-  const [isInVR, setIsInVR] = useState<boolean>(false);
+  const [isInVR, setIsInVR] = useState<boolean>();
 
   useEffect(() => {
     const userAgent = navigator.userAgent.toLowerCase();
@@ -15,14 +15,15 @@ export const useDeviceCheck = () => {
 
     const isMobile = handleIsMobile();
     const isDesktop = handleIsDesktop();
+    const isInVR = navigator.userAgent.includes('VR');
 
     setIsTablet(isTablet);
     setIsMobile(isMobile);
     setIsDesktop(isDesktop);
-    setIsInVR(navigator.userAgent.includes('VR'));
+    setIsInVR(isInVR);
   }, []);
 
-  return [isMobile, isTablet, isDesktop, isInVR];
+  return { isMobile, isTablet, isDesktop, isInVR };
 
   function handleIsMobile() {
     let hasTouchScreen = false;

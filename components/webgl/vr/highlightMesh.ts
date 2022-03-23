@@ -32,7 +32,6 @@ export class HighlightMesh {
         }
         `,
       transparent: true,
-      side: THREE.DoubleSide,
     });
 
     this.mesh = new THREE.Mesh(this.geometry, this.material);

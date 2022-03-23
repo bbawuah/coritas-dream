@@ -1,4 +1,4 @@
-// Based on the repo https://github.com/SamsungInternet/xr-locomotion-starter
+// Based on the xr-locomotion-starter https://github.com/SamsungInternet/xr-locomotion-starter
 import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import { useController, useXR, useXREvent, XREvent } from '@react-three/xr';
@@ -35,8 +35,8 @@ export const XRTeleport: React.FC<Props> = (props) => {
   const processedAction = useRef<IPlayerType | null>(null);
   const worldDirection = new THREE.Vector3();
 
-  useXREvent('selectstart', onSelectStart, { handedness: 'right' });
-  useXREvent('selectend', onSelectEnd, { handedness: 'right' });
+  useXREvent('selectstart', onSelectStart, { handedness: 'right' }); //Handedness Should come from option menu
+  useXREvent('selectend', onSelectEnd, { handedness: 'right' }); //Handedness Should come from option menu
 
   useEffect(() => {
     // Probeer iets met de gamepad
@@ -193,11 +193,11 @@ export const XRTeleport: React.FC<Props> = (props) => {
   //   function handleMove({detail}) {
   //     // Turn left
   //     if (detail.value > 0) {
-  //         cameraGroup.rotation.y -= Math.PI/4;
+  //         player.rotation.y -= Math.PI/4;
   //     }
   //     // Turn right
   //     if (detail.value < 0) {
-  //         cameraGroup.rotation.y += Math.PI/4;
+  //         player.rotation.y += Math.PI/4;
   //     }
   // }
 };

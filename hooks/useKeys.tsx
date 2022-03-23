@@ -23,7 +23,7 @@ interface Props {
 }
 
 export const useKeyboardEvents = (props: Props) => {
-  const userDirection = useRef<IUserDirection>();
+  const userDirection = useRef<IUserDirection>('idle');
   const { set } = useStore(({ set }) => ({ set }));
 
   useEffect(() => {
@@ -53,11 +53,7 @@ export const useKeyboardEvents = (props: Props) => {
     }
   }
 
-  function getDirection(): IUserDirection | undefined {
-    if (!userDirection.current) {
-      return;
-    }
-
+  function getDirection(): IUserDirection {
     return userDirection.current;
   }
 

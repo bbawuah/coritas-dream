@@ -25,6 +25,7 @@ export const InstancedUsers: React.FC<Props> = (props) => {
   const tempMatrix = new THREE.Matrix4();
 
   const maxPlayers = 150;
+
   const [matrice] = useState(() => {
     const mArray = new Float32Array(maxPlayers * 16); //Create Float32Array with length max amount of players
     for (let i = 0; i < maxPlayers; i++)
@@ -32,6 +33,7 @@ export const InstancedUsers: React.FC<Props> = (props) => {
 
     return mArray; //Return array
   });
+
   const oldPosition = useRef<THREE.Vector3>(new THREE.Vector3());
   const newPosition = useRef<THREE.Vector3>(new THREE.Vector3());
   const newPositionLabel = useRef<THREE.Vector3>(new THREE.Vector3());
