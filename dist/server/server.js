@@ -36,20 +36,36 @@ nextApp.prepare().then(async () => {
     const app = (0, express_1.default)();
     const server = http.createServer(app);
     const wss = new ws_transport_1.WebSocketTransport({
-        server,
+        server: !dev ? server : undefined,
     });
     app.all('*', (req, res) => nextHandler(req, res));
     const gameServer = new core_1.Server({
         transport: wss,
     });
     gameServer.define('gallery', room_1.Gallery);
-    // DEV SETUP in production only one server should run
-    gameServer
-        .listen(3000)
-        .then(() => {
-        console.log('game server is running ');
-    })
-        .catch((e) => {
-        console.log(e);
-    });
+    if (dev) {
+        // DEV SETUP
+        gameServer
+            .listen(8080)
+            .then(() => {
+            console.log('game server is running ');
+        })
+            .catch((e) => {
+            console.log(e);
+        });
+        gameServer.simulateLatency(200); // simulate 200ms latency between server and client.
+        server.listen(port, () => {
+            console.log('app is running');
+        });
+    }
+    else {
+        gameServer
+            .listen(port)
+            .then(() => {
+            console.log('game server is running ');
+        })
+            .catch((e) => {
+            console.log(e);
+        });
+    }
 });

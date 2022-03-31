@@ -38,6 +38,18 @@ class Gallery extends colyseus_1.Room {
                 player.physicalBody.initAngularVelocity.setZero();
             }
         });
+        this.onMessage('teleport', (client, data) => {
+            const player = this.state.players.get(client.sessionId);
+            const { position } = data;
+            if (player) {
+                player.x = position.x;
+                player.y = position.y;
+                player.z = position.z;
+            }
+            this.broadcast('move', { player }, {
+                afterNextPatch: true,
+            });
+        });
     }
     // Called every time a client joins
     onJoin(client, options) {
@@ -60,7 +72,6 @@ class Gallery extends colyseus_1.Room {
     onLeave(client) {
         this.state.players.delete(client.sessionId);
         const players = this.state.players;
-        this.broadcast('messages', `${client.sessionId} left.`);
         if (players) {
             //Optimize this to only sending the player that left
             this.broadcast('removePlayer', {

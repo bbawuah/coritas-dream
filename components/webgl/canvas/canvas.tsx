@@ -45,7 +45,6 @@ const CanvasComponent: React.FC<Props> = (props) => {
       return null;
     }
 
-    // If user is not on a desktop, tablet or a phone. He should be on a vr headset
     if (isWebXrSupported && isInVR && isDesktop) {
       return (
         <VRCanvas>
