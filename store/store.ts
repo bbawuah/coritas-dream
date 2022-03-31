@@ -26,6 +26,8 @@ const players: IPlayerType = {};
 
 const playersCount: number = 0;
 
+const hovered: boolean = false;
+
 export type Controls = typeof controls;
 
 const actionNames = ['idle', 'walking'] as const;
@@ -40,6 +42,7 @@ export interface IState {
   players: IPlayerType;
   playersCount: number;
   cursorState: CursorStates;
+  hovered: boolean;
   get: Getter;
   set: Setter;
 }
@@ -55,6 +58,7 @@ const useStoreImplementation = create(
         clients,
         players,
         playersCount,
+        hovered,
         cursorState,
         get,
         set,

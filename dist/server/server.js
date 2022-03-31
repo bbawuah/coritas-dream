@@ -35,21 +35,37 @@ const nextHandler = nextApp.getRequestHandler();
 nextApp.prepare().then(async () => {
     const app = (0, express_1.default)();
     const server = http.createServer(app);
-    const wss = new ws_transport_1.WebSocketTransport();
+    const wss = new ws_transport_1.WebSocketTransport({
+        server: !dev ? server : undefined,
+    });
     app.all('*', (req, res) => nextHandler(req, res));
     const gameServer = new core_1.Server({
         transport: wss,
     });
     gameServer.define('gallery', room_1.Gallery);
-    gameServer
-        .listen(8080)
-        .then(() => {
-        console.log('game server is running ');
-    })
-        .catch((e) => {
-        console.log(e);
-    });
-    server.listen(port, () => {
-        console.log('app is running');
-    });
+    if (dev) {
+        // DEV SETUP
+        gameServer
+            .listen(8080)
+            .then(() => {
+            console.log('game server is running ');
+        })
+            .catch((e) => {
+            console.log(e);
+        });
+        gameServer.simulateLatency(200); // simulate 200ms latency between server and client.
+        server.listen(port, () => {
+            console.log('app is running');
+        });
+    }
+    else {
+        gameServer
+            .listen(port)
+            .then(() => {
+            console.log('game server is running ');
+        })
+            .catch((e) => {
+            console.log(e);
+        });
+    }
 });

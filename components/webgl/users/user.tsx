@@ -49,6 +49,12 @@ export const User: React.FC<Props> = (props) => {
   const counter = useRef<number>(0);
   const playerSpeed = 10;
   const frameTime = useRef<number>(0.0);
+  const idealOffset = useRef<THREE.Vector3>(new THREE.Vector3(-15, 20, -30));
+  // const lines = useLines({
+  //   count: 20,
+  //   radius: 10,
+  //   colors: ['#1572A1', '#9AD0EC', '#EFDAD7', '#E3BEC6'],
+  // });
 
   const [getDirection] = useKeyboardEvents({
     keyDownEvent,
@@ -92,30 +98,17 @@ export const User: React.FC<Props> = (props) => {
     frameTime.current += state.clock.getElapsedTime();
     if (userRef.current && controlsRef) {
       const direction = getDirection();
-      if (direction) {
-        if (direction !== 'idle') {
-          currentAction.current = {
-            timestamp: counter.current,
-            userDirection: direction,
-            azimuthalAngle: controlsRef.current.getAzimuthalAngle(),
-          };
 
-          room.send('move', currentAction.current);
-
-          if (counter.current >= 99) {
-            counter.current = 0;
-          } else {
-            counter.current++;
-          }
-        }
-
-        if (currentAction.current) {
-          // Handle client prediction
-          handleUserDirection(currentAction.current, dt);
-        }
-
-        room.onMessage('move', handleOnMessageMove);
+      if (direction !== 'idle') {
+        handleSendPosition(direction);
       }
+
+      if (currentAction.current) {
+        // Handle client prediction
+        handleUserDirection(currentAction.current);
+      }
+
+      room.onMessage('move', handleOnMessageMove);
 
       state.camera.position.sub(controlsRef.current.target);
       controlsRef.current.target.copy(userRef.current.position);
@@ -153,9 +146,10 @@ export const User: React.FC<Props> = (props) => {
     room.send('idle');
 
     userRef.current?.position.lerp(processedVector.current, 0.01);
+    physicalBody.current?.sleep();
   }
 
-  function handleUserDirection(action: IHandlePhysicsProps, dt: number) {
+  function handleUserDirection(action: IHandlePhysicsProps) {
     const processedTimeStamp = processedAction.current
       ? processedAction.current[id].timestamp
       : -1;
@@ -213,9 +207,8 @@ export const User: React.FC<Props> = (props) => {
         processedAction.current[id].z
       );
 
+      userRef.current?.position.lerp(processedVector.current, 0.1);
       physicalBody.current?.position.copy(physicalBodyVector.current);
-      userRef.current?.position.copy(processedVector.current);
-      physicalBody.current?.sleep();
     }
   }
 
@@ -232,8 +225,22 @@ export const User: React.FC<Props> = (props) => {
           z: player.z,
         },
       };
+    }
+  }
 
-      userRef.current?.position.set(player.x, player.y, player.z);
+  function handleSendPosition(direction: IUserDirection) {
+    currentAction.current = {
+      timestamp: counter.current,
+      userDirection: direction,
+      azimuthalAngle: controlsRef.current.getAzimuthalAngle(),
+    };
+
+    room.send('move', currentAction.current);
+
+    if (counter.current >= 99) {
+      counter.current = 0;
+    } else {
+      counter.current++;
     }
   }
 };

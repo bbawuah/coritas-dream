@@ -2,6 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { Client, Room } from 'colyseus.js';
 import { getState, useStore } from '../store/store';
 import { OnMoveProps } from '../components/webgl/users/types';
+const dev: boolean = process.env.NODE_ENV !== 'production';
+const port: number = parseInt(process.env.PORT || '3000', 10);
+
+const endpoint = dev ? `ws://localhost:${port}` : undefined;
 
 export const useColyseus = () => {
   const { set } = useStore(({ set }) => ({ set }));
@@ -10,7 +14,7 @@ export const useColyseus = () => {
   const [id, setId] = useState<string>();
 
   useEffect(() => {
-    setClient(new Client('ws://localhost:8080'));
+    setClient(new Client(endpoint));
   }, []);
 
   useEffect(() => {
