@@ -25,6 +25,7 @@
     "r3f-perf": "^5.5.0",
     "react": "17.0.2",
     "react-dom": "17.0.2",
+    "next-transpile-modules": "^9.0.0",
     "sass": "^1.49.7",
     "stats.js": "^0.17.0",
     "three": "^0.137.5",
@@ -43,7 +44,6 @@
     "eslint": "8.8.0",
     "eslint-config-next": "12.0.10",
     "eslint-config-prettier": "^8.3.0",
-    "next-transpile-modules": "^9.0.0",
     "nodemon": "^2.0.15",
     "prettier": "^2.5.1",
     "typescript": "4.5.5"
