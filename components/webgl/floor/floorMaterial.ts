@@ -24,10 +24,10 @@ class FloorMaterial extends THREE.RawShaderMaterial {
 
       void main() {
         float strengthY = mod(vUv.y * 10.0, 1.);
-        strengthY = step(0.5, strengthY);
+        strengthY = step(0.08, strengthY);
 
         float strengthX = mod(vUv.x * 10.0, 1.);
-        strengthX = step(0.5, strengthX);
+        strengthX = step(0.08, strengthX);
 
         vec3 color = vec3(strengthY * strengthX);
         gl_FragColor = vec4(color, 1.);
