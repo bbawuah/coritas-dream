@@ -17,7 +17,7 @@ extend({ FloorMaterial });
 
 interface Props {}
 
-// When loading a scene, you should consider merging the geometry before creating MeshBVH instance
+// This is comment written in vim  
 export const Floor: React.FC<Props> = (props) => {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>
