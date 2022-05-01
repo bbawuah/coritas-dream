@@ -1,6 +1,6 @@
 import { extend, ReactThreeFiber } from '@react-three/fiber';
 import React from 'react';
-import { FloorMaterial } from './floorMaterial';
+import { FloorMaterial } from './floorMaterial'; //This is a temporary material
 
 declare global {
   namespace JSX {
@@ -17,7 +17,6 @@ extend({ FloorMaterial });
 
 interface Props {}
 
-// This is comment written in vim  
 export const Floor: React.FC<Props> = (props) => {
   return (
     <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -1, 0]}>

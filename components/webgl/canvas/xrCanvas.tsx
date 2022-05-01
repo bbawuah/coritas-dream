@@ -1,10 +1,12 @@
 import { Sky } from '@react-three/drei';
 import { DefaultXRControllers } from '@react-three/xr';
 import { Room } from 'colyseus.js';
+import { Suspense } from 'react';
 import { Physics } from '../../../shared/physics/physics';
 import { Floor } from '../floor/floor';
 import { InstancedUsers } from '../users/instancedUsers';
 import { XRTeleport } from '../vr/teleport';
+import { Model } from '../environment/Environment';
 
 interface Props {
   room: Room;
@@ -31,7 +33,9 @@ export const XRCanvas: React.FC<Props> = (props) => {
       <ambientLight intensity={0.5} />
       <directionalLight color="white" position={[0, 3, 0]} />
       <InstancedUsers playerId={id} />
-      <Floor />
+      <Suspense fallback={null}>
+        <Model />
+      </Suspense>
     </>
   );
 };

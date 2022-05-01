@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
 import { Canvas } from '@react-three/fiber';
@@ -8,11 +8,12 @@ import { InstancedUsers } from '../users/instancedUsers';
 import { Client, Room } from 'colyseus.js';
 import { Physics } from '../../../shared/physics/physics';
 import { XRCanvas } from './xrCanvas';
-import { Sky } from '@react-three/drei';
+import { Cloud, Sky } from '@react-three/drei';
 import { VRCanvas } from '@react-three/xr';
 import { Perf } from 'r3f-perf';
 import { useStore } from '../../../store/store';
 import { useDeviceCheck } from '../../../hooks/useDeviceCheck';
+import { Model } from '../environment/Environment';
 
 interface Props {
   client: Client;
@@ -64,12 +65,15 @@ const CanvasComponent: React.FC<Props> = (props) => {
           mieCoefficient={0.0045}
           mieDirectionalG={0.08}
         />
-        <ambientLight intensity={0.7} />
+
+        <ambientLight intensity={0.9} />
         <directionalLight color="white" position={[-3, 3, -2]} />
         <User id={id} room={room} physics={physics} />
         <InstancedUsers playerId={id} />
-        <Floor />
         <Perf />
+        <Suspense fallback={null}>
+          <Model />
+        </Suspense>
       </Canvas>
     );
   }
