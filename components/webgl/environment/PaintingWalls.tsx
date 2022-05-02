@@ -1,0 +1,92 @@
+import React from 'react';
+import { ComponentProps } from './types/types';
+
+export const PaintingWalls: React.FC<ComponentProps> = (props) => {
+  const { nodes, material } = props;
+
+  return (
+    <>
+      <mesh geometry={nodes['painting-walls'].geometry} material={material} />
+      <mesh
+        geometry={nodes['painting-walls001'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls002'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls003'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls004'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls005'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls006'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls007'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls008'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls009'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls010'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls011'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls012'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls013'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls014'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls015'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls016'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls017'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls018'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls019'].geometry}
+        material={material}
+      />
+      <mesh
+        geometry={nodes['painting-walls020'].geometry}
+        material={material}
+      />
+    </>
+  );
+};
