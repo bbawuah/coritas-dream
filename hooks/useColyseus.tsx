@@ -3,7 +3,8 @@ import { Client, Room } from 'colyseus.js';
 import { getState, useStore } from '../store/store';
 import { OnMoveProps } from '../components/webgl/users/types';
 const dev: boolean = process.env.NODE_ENV !== 'production';
-const port: number = parseInt(process.env.PORT || '8080', 10);
+const developmentPort: string = dev ? '8080' : '3000';
+const port: number = parseInt(process.env.PORT || developmentPort, 10);
 
 const endpoint = dev ? `ws://localhost:${port}` : undefined;
 

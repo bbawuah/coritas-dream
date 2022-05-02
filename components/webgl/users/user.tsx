@@ -50,6 +50,7 @@ export const User: React.FC<Props> = (props) => {
   const playerSpeed = 10;
   const frameTime = useRef<number>(0.0);
   const idealOffset = useRef<THREE.Vector3>(new THREE.Vector3(-15, 20, -30));
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
   // const lines = useLines({
   //   count: 20,
   //   radius: 10,
@@ -127,6 +128,7 @@ export const User: React.FC<Props> = (props) => {
       >
         <meshStandardMaterial shadowSide={2} />
       </mesh>
+      {/* <directionalLightHelper light={directionalLight} /> */}
       <OrbitControls
         ref={controlsRef}
         enablePan={false}

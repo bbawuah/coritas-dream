@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useState } from 'react';
 import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
 import { Canvas } from '@react-three/fiber';
 import { User } from '../users/user';
-import { Floor } from '../floor/floor';
 import { InstancedUsers } from '../users/instancedUsers';
 import { Client, Room } from 'colyseus.js';
 import { Physics } from '../../../shared/physics/physics';
@@ -13,6 +12,15 @@ import { VRCanvas } from '@react-three/xr';
 import { Perf } from 'r3f-perf';
 import { useStore } from '../../../store/store';
 import { useDeviceCheck } from '../../../hooks/useDeviceCheck';
+import { Environment } from '../environment/Environment';
+import { BlendFunction } from 'postprocessing';
+
+import {
+  EffectComposer,
+  Bloom,
+  Noise,
+  BrightnessContrast,
+} from '@react-three/postprocessing';
 
 interface Props {
   client: Client;
@@ -57,19 +65,27 @@ const CanvasComponent: React.FC<Props> = (props) => {
     return (
       <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
         <Sky
-          distance={3000}
-          turbidity={8}
-          rayleigh={6}
+          turbidity={10.2}
+          rayleigh={0}
           inclination={0.51}
-          mieCoefficient={0.0045}
-          mieDirectionalG={0.08}
+          mieCoefficient={0.003}
+          mieDirectionalG={0.029}
+          azimuth={91.5}
         />
-        <ambientLight intensity={0.7} />
+
+        <ambientLight intensity={0.9} />
         <directionalLight color="white" position={[-3, 3, -2]} />
         <User id={id} room={room} physics={physics} />
         <InstancedUsers playerId={id} />
-        <Floor />
         <Perf />
+        <Suspense fallback={null}>
+          <Environment />
+        </Suspense>
+        <EffectComposer>
+          <Noise opacity={0.3} premultiply blendFunction={BlendFunction.ADD} />
+          <BrightnessContrast brightness={-0.07} contrast={0.1} />
+          <Bloom />
+        </EffectComposer>
       </Canvas>
     );
   }

@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import styles from '../styles/Home.module.scss';
 import { useColyseus } from '../hooks/useColyseus';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { Navigator } from 'webxr';
 import { useDeviceCheck } from '../hooks/useDeviceCheck';
 
@@ -15,6 +15,7 @@ const Home: NextPage = () => {
   const { isInVR } = useDeviceCheck();
   const { client, id, room } = useColyseus();
   const [webXRIsSupported, setWebXRIsSupported] = useState<boolean>();
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
     const webXRNavigator: Navigator = navigator as any as Navigator;
