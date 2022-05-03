@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { OrbitControls } from '@react-three/drei';
+import { OrbitControls, useHelper } from '@react-three/drei';
 import { useFrame } from '@react-three/fiber';
 import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
@@ -50,12 +50,6 @@ export const User: React.FC<Props> = (props) => {
   const playerSpeed = 10;
   const frameTime = useRef<number>(0.0);
   const idealOffset = useRef<THREE.Vector3>(new THREE.Vector3(-15, 20, -30));
-  const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
-  // const lines = useLines({
-  //   count: 20,
-  //   radius: 10,
-  //   colors: ['#1572A1', '#9AD0EC', '#EFDAD7', '#E3BEC6'],
-  // });
 
   const [getDirection] = useKeyboardEvents({
     keyDownEvent,
@@ -114,6 +108,7 @@ export const User: React.FC<Props> = (props) => {
       state.camera.position.sub(controlsRef.current.target);
       controlsRef.current.target.copy(userRef.current.position);
       state.camera.position.add(userRef.current.position);
+
       physics.updatePhysics(dt); //Update physics 60 fps
     }
   });
@@ -128,7 +123,7 @@ export const User: React.FC<Props> = (props) => {
       >
         <meshStandardMaterial shadowSide={2} />
       </mesh>
-      {/* <directionalLightHelper light={directionalLight} /> */}
+
       <OrbitControls
         ref={controlsRef}
         enablePan={false}

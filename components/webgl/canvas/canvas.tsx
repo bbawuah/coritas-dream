@@ -1,7 +1,7 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, extend, ReactThreeFiber } from '@react-three/fiber';
 import { User } from '../users/user';
 import { InstancedUsers } from '../users/instancedUsers';
 import { Client, Room } from 'colyseus.js';
@@ -14,14 +14,12 @@ import { useStore } from '../../../store/store';
 import { useDeviceCheck } from '../../../hooks/useDeviceCheck';
 import { Environment } from '../environment/Environment';
 import { BlendFunction } from 'postprocessing';
-
 import {
   EffectComposer,
   Bloom,
   Noise,
   BrightnessContrast,
 } from '@react-three/postprocessing';
-
 interface Props {
   client: Client;
   room: Room;
@@ -72,7 +70,6 @@ const CanvasComponent: React.FC<Props> = (props) => {
           mieDirectionalG={0.029}
           azimuth={91.5}
         />
-
         <ambientLight intensity={0.9} />
         <directionalLight color="white" position={[-3, 3, -2]} />
         <User id={id} room={room} physics={physics} />

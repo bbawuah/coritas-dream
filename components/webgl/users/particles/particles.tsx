@@ -40,7 +40,7 @@ export const Particles: React.FC<Props> = (props) => {
         <meshLine attach="geometry" points={curve} />
         <meshLineMaterial
           ref={material}
-          depthTest={false}
+          depthTest={true}
           color={color}
           lineWidth={width}
           dashArray={0.1}

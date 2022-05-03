@@ -18,7 +18,7 @@ export const VideoScreen: React.FC<ComponentProps> = (props) => {
     map: videoTexture,
   });
 
-  useEffect(() => void video.play(), [video]);
+  // useEffect(() => void video.play(), [video]);
 
   return <mesh geometry={nodes.screen001.geometry} material={material} />;
 };
