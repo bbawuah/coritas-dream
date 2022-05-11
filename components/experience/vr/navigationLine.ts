@@ -12,14 +12,15 @@ export class NavigationLine {
   public guideline: THREE.Line;
   public guideLineMaterial: THREE.LineBasicMaterial =
     new THREE.LineBasicMaterial({
-      color: 0x888888,
       blending: THREE.AdditiveBlending,
-      linewidth: 2,
+      linewidth: 10,
     });
 
-  constructor(scene: THREE.Scene) {
+  constructor(scene: THREE.Scene, color: THREE.ColorRepresentation) {
     this.lineGeometryVertices.fill(0);
     this.lineGeometryColors.fill(0.5);
+
+    this.guideLineMaterial.color = new THREE.Color(color);
 
     this.bufferGeometry.setAttribute(
       'position',

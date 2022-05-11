@@ -8,6 +8,9 @@ export class HighlightMesh {
   constructor() {
     this.geometry = new THREE.CylinderGeometry(0.4, 0.4, 0.6, 20, 5, true);
     this.material = new THREE.RawShaderMaterial({
+      uniforms: {
+        u_color: { value: new THREE.Color(0xfefefe) },
+      },
       vertexShader: `
         attribute vec3 position;
         attribute vec2 uv;
@@ -24,10 +27,11 @@ export class HighlightMesh {
         `,
       fragmentShader: `
         precision mediump float;
+        uniform vec3 u_color;
         varying vec2 v_uv;
         void main() {
           float strength = 1.0 - v_uv.y;
-          vec3 color = vec3(0.95, 0.86, 0.8);
+          vec3 color = u_color;
           gl_FragColor = vec4(color, strength);
         }
         `,

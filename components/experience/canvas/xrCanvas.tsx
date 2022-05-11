@@ -6,15 +6,17 @@ import { Physics } from '../../../shared/physics/physics';
 import { InstancedUsers } from '../users/instancedUsers';
 import { XRTeleport } from '../vr/teleport';
 import { Environment } from '../environment/Environment';
+import { GLTFNodes } from '../environment/types/types';
 
 interface Props {
   room: Room;
   id: string;
   physics: Physics;
+  nodes: GLTFNodes;
 }
 
 export const XRCanvas: React.FC<Props> = (props) => {
-  const { room, id, physics } = props;
+  const { room, id, physics, nodes } = props;
 
   return (
     <>
@@ -27,14 +29,16 @@ export const XRCanvas: React.FC<Props> = (props) => {
         azimuth={91.5}
       />
       <DefaultXRControllers />
-      <XRTeleport room={room} id={id} />
+      <XRTeleport
+        room={room}
+        id={id}
+        navMeshGeometry={nodes['pathfinding-navmesh'].geometry}
+      />
       <color attach="background" args={['#ffffff']} />
       <ambientLight intensity={0.5} />
       <directionalLight color="white" position={[0, 3, 0]} />
       <InstancedUsers playerId={id} />
-      <Suspense fallback={null}>
-        <Environment />
-      </Suspense>
+      <Environment nodes={nodes} />
     </>
   );
 };

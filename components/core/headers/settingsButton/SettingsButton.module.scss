@@ -1,0 +1,21 @@
+.menu {
+  position: absolute;
+  right: 0;
+  margin: 1rem;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  padding: 0.2rem;
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  transition: 0.325s ease-in-out;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 1);
+  }
+}
+
+.clicked {
+  background: rgba(255, 255, 255, 1);
+}

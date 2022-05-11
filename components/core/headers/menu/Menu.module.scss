@@ -1,0 +1,39 @@
+.modal {
+  position: absolute;
+  right: 5px;
+  top: 60px;
+  border-radius: 0.8rem;
+  background: rgba(255, 255, 255, 0.7);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  padding: 1.25rem;
+  z-index: 2;
+}
+
+.menu {
+  height: 350px;
+  width: 250px;
+}
+
+.menuContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  //   border-bottom: 0.2px solid #000;
+}
+
+.menuTitle {
+  font-weight: 700;
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.button {
+  border-radius: 25px;
+  height: 35px;
+  cursor: pointer;
+  border: none;
+  padding: 0.5rem;
+  background-color: #d4d3d3;
+  color: #2f2f2f;
+}

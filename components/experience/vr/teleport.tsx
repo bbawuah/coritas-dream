@@ -8,14 +8,16 @@ import { HighlightMesh } from './highlightMesh';
 import { Room } from 'colyseus.js';
 import { getState, IPlayerType } from '../../../store/store';
 import { XRTeleportationData } from './types';
+// import { Pathfinding } from 'three-pathfinding';
 
 interface Props {
   room: Room;
   id: string;
+  navMeshGeometry: THREE.BufferGeometry;
 }
 
 export const XRTeleport: React.FC<Props> = (props) => {
-  const { room, id } = props;
+  const { room, id, navMeshGeometry } = props;
   const { player } = useXR();
   const { gl, camera, scene } = useThree();
   const players = getState().players;
@@ -28,19 +30,47 @@ export const XRTeleport: React.FC<Props> = (props) => {
   const tempVectorV = useRef<THREE.Vector3>(new THREE.Vector3());
 
   let guidingController = useRef<THREE.Group | null>(null);
-  const lineRef = useRef<NavigationLine>(new NavigationLine(scene));
-  const highLightPosition = useRef<HighlightMesh>(new HighlightMesh());
+  const lineRef = useRef<NavigationLine>(new NavigationLine(scene, 0x888888));
+  const highLightMesh = useRef<HighlightMesh>(new HighlightMesh());
 
   const counter = useRef<number>(0);
   const processedAction = useRef<IPlayerType | null>(null);
   const worldDirection = new THREE.Vector3();
+  const green = new THREE.Color(0x00ff00);
+  const red = new THREE.Color(0xff0000);
+  // const pathfinding = new Pathfinding();
+  // const ZONE = 'level';
+  // const zone = Pathfinding.createZone(navMeshGeometry);
+  // pathfinding.setZoneData(ZONE, zone);
+  const rotationMatrix = useRef<THREE.Matrix4>(new THREE.Matrix4());
+  // const groupID = pathfinding.getGroup(ZONE, player.position);
+  const raycaster = useRef<THREE.Raycaster>(new THREE.Raycaster());
+  raycaster.current.params.Line = {
+    threshold: 3,
+  };
+
+  const navMesh = useRef<THREE.Mesh>(
+    new THREE.Mesh(
+      navMeshGeometry,
+      new THREE.MeshBasicMaterial({
+        color: 0x00ff00,
+        opacity: 0.3,
+        transparent: true,
+      })
+    )
+  );
+
+  navMesh.current.position.set(0, 0, 0);
+  navMesh.current.visible = false;
+
+  scene.add(navMesh.current);
 
   useXREvent('selectstart', onSelectStart, { handedness: 'right' }); //Handedness Should come from option menu
   useXREvent('selectend', onSelectEnd, { handedness: 'right' }); //Handedness Should come from option menu
 
   useEffect(() => {
     // Probeer iets met de gamepad
-    const gamepad = rightController?.inputSource.gamepad;
+    // const gamepad = rightController?.inputSource.gamepad;
 
     const startingPosition = new THREE.Vector3(
       players[id].x,
@@ -70,9 +100,14 @@ export const XRTeleport: React.FC<Props> = (props) => {
 
       if (guidingController.current) {
         // Controller start position
+        rotationMatrix.current.extractRotation(
+          guidingController.current.matrixWorld
+        );
+
         const p = guidingController.current.getWorldPosition(
           tempVectorP.current
         );
+
         // Set Vector V to the direction of the controller, at 1m/s
         const v = guidingController.current.getWorldDirection(
           tempVectorV.current
@@ -102,12 +137,30 @@ export const XRTeleport: React.FC<Props> = (props) => {
           true;
 
         positionAtT(
-          highLightPosition.current.mesh.position,
+          highLightMesh.current.mesh.position,
           t * 0.98,
           p,
           v,
           gravity
         );
+
+        raycaster.current.ray.origin.set(p.x, p.y, p.z);
+        raycaster.current.ray.direction
+          .set(vertex.x, vertex.y, vertex.z)
+          .normalize()
+          .applyMatrix4(rotationMatrix.current);
+
+        const intersects = raycaster.current.intersectObject(navMesh.current);
+
+        if (intersects.length) {
+          (
+            highLightMesh.current.mesh.material as THREE.RawShaderMaterial
+          ).uniforms.u_color.value = green;
+        } else {
+          (
+            highLightMesh.current.mesh.material as THREE.RawShaderMaterial
+          ).uniforms.u_color.value = red;
+        }
       }
     }
   });
@@ -124,6 +177,7 @@ export const XRTeleport: React.FC<Props> = (props) => {
     inVec.copy(p);
     inVec.addScaledVector(v, t);
     inVec.addScaledVector(g, 0.5 * t ** 2);
+
     return inVec;
   }
 
@@ -138,7 +192,7 @@ export const XRTeleport: React.FC<Props> = (props) => {
     guidingController.current = controller.controller;
 
     controller.controller.add(lineRef.current.guideline as any as THREE.Line);
-    scene.add(highLightPosition.current.mesh);
+    scene.add(highLightMesh.current.mesh);
   }
 
   function onSelectEnd(e: XREvent) {
@@ -164,7 +218,7 @@ export const XRTeleport: React.FC<Props> = (props) => {
       // Calculate t, this is the above equation written as JS
       const cursorPos = positionAtT(tempVector1.current, t, p, v, gravity);
 
-      // Offset
+      // Offset (New position)
       const offset = cursorPos.addScaledVector(feetPos, -1);
 
       // Do the locomotion
@@ -186,7 +240,7 @@ export const XRTeleport: React.FC<Props> = (props) => {
       // Clean up
       guidingController.current = null;
       controller.controller.remove(lineRef.current.guideline);
-      scene.remove(highLightPosition.current.mesh);
+      scene.remove(highLightMesh.current.mesh);
     }
   }
 

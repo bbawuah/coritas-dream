@@ -6,7 +6,9 @@ export interface ComponentProps {
   baseColor?: THREE.ColorRepresentation;
 }
 
-export interface EnvironmentProps {}
+export interface EnvironmentProps {
+  nodes: GLTFNodes;
+}
 
 export type GLTFResult = GLTF & {
   nodes: GLTFNodes;
@@ -39,4 +41,5 @@ export type GLTFNodes = {
   ['love-painting003']: THREE.Mesh;
   ['love-painting004']: THREE.Mesh;
   navmesh: THREE.Mesh;
+  ['pathfinding-navmesh']: THREE.Mesh;
 };

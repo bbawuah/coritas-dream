@@ -1,0 +1,26 @@
+.icon {
+  :global(svg) {
+    pointer-events: none;
+    width: 100%;
+    height: 100%;
+    stroke: #fff;
+    fill: #000;
+    transform: scale(0.7);
+    stroke-width: 0.5;
+    transition: 0.325s ease-in-out;
+  }
+}
+
+.hovered {
+  :global(svg) {
+    stroke: #000;
+    fill: #fff;
+    stroke-width: 0.5;
+  }
+}
+
+.small {
+  :global(svg) {
+    transform: scale(0.7);
+  }
+}
