@@ -3,11 +3,11 @@ import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import styles from '../styles/Home.module.scss';
 import { useColyseus } from '../hooks/useColyseus';
-import { useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import type { Navigator } from 'webxr';
 import { useDeviceCheck } from '../hooks/useDeviceCheck';
 
-const Canvas = dynamic(() => import('../components/webgl/canvas/canvas'), {
+const Canvas = dynamic(() => import('../components/experience/canvas/canvas'), {
   ssr: false,
 });
 
@@ -44,12 +44,14 @@ const Home: NextPage = () => {
     }
 
     return (
-      <Canvas
-        isWebXrSupported={webXRIsSupported ?? false}
-        client={client}
-        id={id}
-        room={room}
-      />
+      <Suspense fallback={null}>
+        <Canvas
+          isWebXrSupported={webXRIsSupported ?? false}
+          client={client}
+          id={id}
+          room={room}
+        />
+      </Suspense>
     );
   }
 };

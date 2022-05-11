@@ -37,8 +37,8 @@ export const useLines = (props: Props) => {
         const curve = new THREE.CatmullRomCurve3(points).getPoints(1000);
 
         return {
-          width: Math.max(0.1, (0.2 * index) / 10),
-          speed: Math.max(0.001, 0.004 * Math.random()),
+          width: Math.max(0.1, (0.5 * index) / 10),
+          speed: Math.max(0.0008, 0.001 * Math.random()),
           curve,
           color: colors[parseInt((colors.length * Math.random()) as any)],
         };
