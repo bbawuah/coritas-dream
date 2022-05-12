@@ -1,9 +1,9 @@
 export interface IPApiResponse {
   status: string;
   country: string;
-  countryCode: string;
+  country_code: string;
   region: string;
-  regionName: string;
+  region_name: string;
   city: string;
   zip: string;
   lat: number;

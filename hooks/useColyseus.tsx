@@ -30,9 +30,11 @@ export const useColyseus = () => {
 
   async function getLocation() {
     try {
-      const data = await fetch('http://ip-api.com/json');
+      const data = await fetch(
+        `https://api.ipdata.co?api-key=${process.env.NEXT_PUBLIC_API_KEY}`
+      );
       const json: IPApiResponse = await data.json();
-      const location = `${json.city}, ${json.countryCode}`;
+      const location = `${json.city}, ${json.country_code}`;
 
       return location;
     } catch (e) {
