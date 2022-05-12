@@ -29,12 +29,13 @@ exports.Player = void 0;
 const schema_1 = require("@colyseus/schema");
 const THREE = __importStar(require("three"));
 class Player extends schema_1.Schema {
-    constructor(id, physics) {
+    constructor(id, physics, geoLocation) {
         super();
         this.x = 0;
         this.y = 0;
         this.z = 0;
         this.id = '';
+        this.userLocation = 'Location unknown';
         this.timestamp = 0;
         this.playerSpeed = 10;
         this.direction = new THREE.Vector3();
@@ -52,6 +53,7 @@ class Player extends schema_1.Schema {
         this.y = 1;
         this.z = Math.floor(Math.random() * 6) + 1;
         this.id = id;
+        this.userLocation = geoLocation;
         this.physicalBody = physics.createPlayerPhysics(this); // Create phyisical represenatation of player
         physics.physicsWorld.addBody(this.physicalBody);
     }
@@ -82,6 +84,9 @@ __decorate([
 __decorate([
     (0, schema_1.type)('string')
 ], Player.prototype, "id", void 0);
+__decorate([
+    (0, schema_1.type)('string')
+], Player.prototype, "userLocation", void 0);
 __decorate([
     (0, schema_1.type)('number')
 ], Player.prototype, "timestamp", void 0);

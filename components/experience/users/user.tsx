@@ -76,6 +76,7 @@ export const User: React.FC<Props> = (props) => {
         [id]: {
           id: players[id].id,
           timestamp: players[id].timestamp,
+          userLocation: players[id].userLocation,
           x: players[id].x,
           y: players[id].y,
           z: players[id].z,
@@ -217,6 +218,7 @@ export const User: React.FC<Props> = (props) => {
         [player.id]: {
           id: players[id].id,
           timestamp: player.timestamp,
+          userLocation: players[id].userLocation,
           x: player.x,
           y: player.y,
           z: player.z,

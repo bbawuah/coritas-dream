@@ -54,7 +54,9 @@ class Gallery extends colyseus_1.Room {
     // Called every time a client joins
     onJoin(client, options) {
         console.log('user joined');
-        this.state.players.set(client.sessionId, new player_1.Player(client.sessionId, this.physics)); //Store instance of user in state
+        const { location } = options;
+        this.state.players.set(client.sessionId, new player_1.Player(client.sessionId, this.physics, location)); //Store instance of user in state
+        // Should do something here
         client.send('id', { id: client.sessionId });
         const players = this.state.players; // get player from store
         this.onMessage('test', (client, data) => {

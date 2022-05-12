@@ -83,6 +83,7 @@ export const XRTeleport: React.FC<Props> = (props) => {
       [id]: {
         id: players[id].id,
         timestamp: players[id].timestamp,
+        userLocation: players[id].userLocation,
         x: players[id].x,
         y: player.position.y,
         z: players[id].z,
