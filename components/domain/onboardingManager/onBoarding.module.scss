@@ -1,0 +1,7 @@
+.container > div {
+  position: absolute;
+  left: 50%;
+  top: 50px;
+  transform: translate(-50%, 0);
+  z-index: 2;
+}

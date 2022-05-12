@@ -9,6 +9,7 @@ export class Player extends Schema {
   @type('number') y: number = 0;
   @type('number') z: number = 0;
   @type('string') id: string = '';
+  @type('string') userLocation: string = 'Location unknown';
   @type('number') timestamp: number = 0;
 
   public playerSpeed: number = 10;
@@ -27,12 +28,13 @@ export class Player extends Schema {
     idle: false,
   };
 
-  constructor(id: string, physics: Physics) {
+  constructor(id: string, physics: Physics, geoLocation: string) {
     super();
     this.x = Math.floor(Math.random() * 6) + 1;
     this.y = 1;
     this.z = Math.floor(Math.random() * 6) + 1;
     this.id = id;
+    this.userLocation = geoLocation;
 
     this.physicalBody = physics.createPlayerPhysics<Player>(this); // Create phyisical represenatation of player
 

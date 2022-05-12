@@ -17,14 +17,12 @@ interface Props {
 export const Onboarding: React.FC<Props> = (props) => {
   const { title, message, icon, isFirst, isLast, onNext, onBack } = props;
   return (
-    <div className={styles.container}>
-      <div className={styles.content}>
-        <div className={styles.leftContainer}>{renderIcon()}</div>
-        <div className={styles.rightContainer}>
-          <p className={styles.onboardingTitle}>{title}</p>
-          <p className={styles.message}>{message}</p>
-          {renderButtons()}
-        </div>
+    <div className={styles.content}>
+      <div className={styles.leftContainer}>{renderIcon()}</div>
+      <div className={styles.rightContainer}>
+        <p className={styles.onboardingTitle}>{title}</p>
+        <p className={styles.message}>{message}</p>
+        {renderButtons()}
       </div>
     </div>
   );

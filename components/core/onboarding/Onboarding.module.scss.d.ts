@@ -1,4 +1,3 @@
-export const container: string;
 export const content: string;
 export const onboardingTitle: string;
 export const message: string;

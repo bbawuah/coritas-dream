@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Client, Room } from 'colyseus.js';
 import { getState, useStore } from '../store/store';
 import { OnMoveProps } from '../components/experience/users/types';
+import { IPApiResponse } from './types';
 const dev: boolean = process.env.NODE_ENV !== 'production';
 const developmentPort: string = dev ? '8080' : '3000';
 const port: number = parseInt(process.env.PORT || developmentPort, 10);
@@ -27,10 +28,23 @@ export const useColyseus = () => {
 
   return { client, id, room };
 
+  async function getLocation() {
+    try {
+      const data = await fetch('http://ip-api.com/json');
+      const json: IPApiResponse = await data.json();
+      const location = `${json.city}, ${json.countryCode}`;
+
+      return location;
+    } catch (e) {
+      throw new Error(`Promise failed. ${e}`);
+    }
+  }
+
   async function getRoom() {
     if (client) {
       try {
-        const room = await client.joinOrCreate('gallery');
+        const location = await getLocation();
+        const room = await client.joinOrCreate('gallery', { location });
 
         getPlayerId(room);
         setRoom(room);

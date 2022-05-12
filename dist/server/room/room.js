@@ -8,7 +8,7 @@ const state_1 = require("../state/state");
 class Gallery extends colyseus_1.Room {
     constructor() {
         super();
-        this.maxClients = 30;
+        this.maxClients = 30; //Might need to change this amount.
         this.patchRate = 100;
         this.physics = new physics_1.Physics();
     }

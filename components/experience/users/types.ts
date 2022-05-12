@@ -5,5 +5,6 @@ export interface OnMoveProps {
     z: number;
     id: string;
     timestamp: number;
+    userLocation: string;
   };
 }

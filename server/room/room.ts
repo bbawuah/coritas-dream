@@ -78,10 +78,13 @@ export class Gallery extends Room<State> {
   // Called every time a client joins
   public onJoin(client: Client, options: any) {
     console.log('user joined');
+    const { location } = options;
     this.state.players.set(
       client.sessionId,
-      new Player(client.sessionId, this.physics)
+      new Player(client.sessionId, this.physics, location)
     ); //Store instance of user in state
+
+    // Should do something here
 
     client.send('id', { id: client.sessionId });
 

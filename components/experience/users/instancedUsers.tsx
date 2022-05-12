@@ -142,7 +142,7 @@ export const InstancedUsers: React.FC<Props> = (props) => {
             letterSpacing={0.03}
             lineHeight={1}
           >
-            {id}
+            {players[id].userLocation}
           </Text>
         );
       });
