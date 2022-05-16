@@ -44,9 +44,11 @@ export const useColyseus = () => {
 
   async function getRoom() {
     if (client) {
+      const location = await getLocation(); //Doesn't really matter if this fails
       try {
-        const location = await getLocation();
-        const room = await client.joinOrCreate('gallery', { location });
+        const room = await client.joinOrCreate('gallery', {
+          location: location ?? 'Location unknown',
+        });
 
         getPlayerId(room);
         setRoom(room);

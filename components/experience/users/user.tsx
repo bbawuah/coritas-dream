@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { OrbitControls, useHelper } from '@react-three/drei';
-import { useFrame } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
+import { useFrame, useThree } from '@react-three/fiber';
 import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';

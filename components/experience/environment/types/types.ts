@@ -1,4 +1,5 @@
 import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
+import { Physics } from '../../../../shared/physics/physics';
 
 export interface ComponentProps {
   nodes: GLTFNodes;
@@ -8,6 +9,7 @@ export interface ComponentProps {
 
 export interface EnvironmentProps {
   nodes: GLTFNodes;
+  physics: Physics;
 }
 
 export type GLTFResult = GLTF & {

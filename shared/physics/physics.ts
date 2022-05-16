@@ -30,7 +30,7 @@ export class Physics {
     this.physicsWorld.addBody(this.planeBody);
   }
 
-  public createPhysics<T extends IPositionType>(
+  public createPhysics<T extends THREE.Mesh>(
     geometry: BufferGeometry,
     object: T,
     hasMass: boolean
@@ -40,11 +40,13 @@ export class Physics {
     const body = new CANNON.Body({
       mass: hasMass ? 1 : 0,
       shape: shape,
+      collisionFilterGroup: this.GROUP2,
+      collisionFilterMask: this.GROUP1,
     });
 
-    body.position.x = object.x;
-    body.position.y = object.y;
-    body.position.z = object.z;
+    body.position.x = object.position.x;
+    body.position.y = object.position.y;
+    body.position.z = object.position.z;
 
     return body;
   }

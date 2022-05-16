@@ -33,10 +33,11 @@ interface Props {
 }
 
 const CanvasComponent: React.FC<Props> = (props) => {
-  const { hovered } = useStore(({ hovered }) => ({ hovered })); //Maybe refactor this later
-  const test = new Pathfinding();
+  const { hovered } = useStore(({ hovered }) => ({ hovered })); //Maybe refactor this late
   const { isWebXrSupported, room, id } = props;
-  const { nodes } = useGLTF('/environment-transformed.glb') as GLTFResult;
+  const { nodes } = useGLTF(
+    '/environment-transformed.glb'
+  ) as unknown as GLTFResult;
   const { isInVR, isDesktop } = useDeviceCheck();
   const [physics, setPhysics] = useState<Physics | null>(null);
   const classes = classNames([
@@ -80,12 +81,11 @@ const CanvasComponent: React.FC<Props> = (props) => {
             mieDirectionalG={0.029}
             azimuth={91.5}
           />
-          <ambientLight intensity={0.9} />
+          <ambientLight intensity={1.2} />
           <directionalLight color="white" position={[-3, 3, -2]} />
           <User id={id} room={room} physics={physics} />
           <InstancedUsers playerId={id} />
-          {/* <Perf /> */}
-          <Environment nodes={nodes} />
+          <Environment nodes={nodes} physics={physics} />
           <EffectComposer>
             <Noise
               opacity={0.3}
