@@ -96,12 +96,15 @@
     width: 100%;
     border: none;
     padding: 0.75rem 2rem;
+    border-radius: 25px;
     font-family: 'Dark Paradise';
     font-style: normal;
     font-weight: 700;
     font-size: 1.75vmax;
     background-color: #212121;
     color: #fff;
+    cursor: pointer;
+    text-align: center;
   }
 }
 

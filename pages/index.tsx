@@ -3,16 +3,23 @@ import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import Image from 'next/image';
 import { Suspense, useEffect, useState } from 'react';
-import styles from '../styles/Home.module.scss';
+import styles from '../styles/home/Home.module.scss';
+import { Provider, Session } from '@supabase/supabase-js';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { supabase } from '../utils/supabase';
 
 const Canvas = dynamic(() => import('../components/landingPageCanvas/canvas'), {
   ssr: false,
 });
 
 const Home: NextPage = () => {
-  const [isSsr, setIsSsr] = useState<boolean>(true);
+  const [isSsr, setIsSsr] = useState<boolean>(true); // andere manier fixen
+  const [session, setSession] = useState<Session | null>();
 
   useEffect(() => {
+    const currentSession = supabase.auth.session();
+    setSession(currentSession);
     setIsSsr(false);
   }, []);
 
@@ -48,7 +55,9 @@ const Home: NextPage = () => {
           </p>
         </section>
         <section className={styles.buttonContainer}>
-          <button className={styles.button}>Enter experience</button>
+          <Link href={!session ? '/signin' : '/dream'}>
+            <a className={styles.button}>Start Experience</a>
+          </Link>
         </section>
       </main>
       <footer className={styles.footer}>

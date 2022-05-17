@@ -1,11 +1,11 @@
+import { useRouter } from 'next/router';
 import React from 'react';
+import { supabase } from '../../../../utils/supabase';
 import styles from './Menu.module.scss';
 
-const Modal: React.FC = (props) => {
-  return <div className={styles.modal}>{props.children}</div>;
-};
-
 export const Menu: React.FC = () => {
+  const router = useRouter();
+
   return (
     <div className={styles.modal}>
       <div className={styles.menu}>
@@ -16,7 +16,17 @@ export const Menu: React.FC = () => {
           <p className={styles.menuItem}>Video</p>
           <button className={styles.button}>play video</button>
         </div>
+
+        <button onClick={handleLogout} className={styles.logOutButton}>
+          Log out
+        </button>
       </div>
     </div>
   );
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+
+    router.replace('/');
+  }
 };

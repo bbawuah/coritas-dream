@@ -15,6 +15,8 @@
     "@react-three/fiber": "^7.0.26",
     "@react-three/postprocessing": "^2.3.2",
     "@react-three/xr": "^3.4.0",
+    "@supabase/supabase-auth-helpers": "^1.4.1",
+    "@supabase/supabase-js": "^1.35.3",
     "cannon-es": "^0.19.0",
     "classnames": "^2.3.1",
     "colyseus": "^0.14.23",
