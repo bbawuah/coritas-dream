@@ -55,7 +55,7 @@ export class Physics {
     const body = new CANNON.Body({
       mass: 1,
       position: new CANNON.Vec3(object.x, object.y, object.z),
-      shape: new CANNON.Sphere(0.45),
+      shape: new CANNON.Sphere(0.5),
       collisionFilterGroup: this.GROUP1,
       collisionFilterMask: this.GROUP2,
     });

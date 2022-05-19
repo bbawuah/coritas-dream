@@ -24,7 +24,6 @@ interface Props {
 
 export const useKeyboardEvents = (props: Props) => {
   const userDirection = useRef<IUserDirection>('idle');
-  const { set } = useStore(({ set }) => ({ set }));
 
   useEffect(() => {
     document.addEventListener('keydown', onKeyDown, { passive: true });
@@ -39,6 +38,7 @@ export const useKeyboardEvents = (props: Props) => {
 
   function onKeyDown(ev: KeyboardEvent) {
     const objectKeys = Object.keys(keys);
+
     if (objectKeys.includes(ev.key)) {
       userDirection.current = keys[ev.key];
       props.keyDownEvent(keys[ev.key]);

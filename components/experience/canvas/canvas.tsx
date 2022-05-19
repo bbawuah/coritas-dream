@@ -24,6 +24,7 @@ import { GLTFResult } from '../environment/types/types';
 import { Pathfinding } from 'three-pathfinding';
 import { SettingsMenu } from '../../core/headers/settingsMenu/settingsMenu';
 import { OnboardingManager } from '../../domain/onboardingManager/onBoardingManager';
+import { supabase } from '../../../utils/supabase';
 
 interface Props {
   client: Client;
@@ -40,6 +41,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
   ) as unknown as GLTFResult;
   const { isInVR, isDesktop } = useDeviceCheck();
   const [physics, setPhysics] = useState<Physics | null>(null);
+  const user = supabase.auth.user();
   const classes = classNames([
     styles.container,
     {
@@ -47,9 +49,12 @@ const CanvasComponent: React.FC<Props> = (props) => {
       [styles.pointer]: hovered,
     },
   ]);
+  const [userAvatar, setUserAvatar] = useState<string>();
 
   useEffect(() => {
+    getUserModel();
     setPhysics(new Physics());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <div className={classes}>{renderCanvas()}</div>;
@@ -81,9 +86,10 @@ const CanvasComponent: React.FC<Props> = (props) => {
             mieDirectionalG={0.029}
             azimuth={91.5}
           />
+          <Perf />
           <ambientLight intensity={1.2} />
           <directionalLight color="white" position={[-3, 3, -2]} />
-          <User id={id} room={room} physics={physics} />
+          {renderUser()}
           <InstancedUsers playerId={id} />
           <Environment nodes={nodes} physics={physics} />
           <EffectComposer>
@@ -98,6 +104,24 @@ const CanvasComponent: React.FC<Props> = (props) => {
         </Canvas>
       </>
     );
+  }
+
+  function renderUser() {
+    if (userAvatar && physics) {
+      return <User id={id} room={room} physics={physics} glbUrl={userAvatar} />;
+    }
+  }
+
+  async function getUserModel() {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('avatar')
+      .eq('id', user?.id);
+
+    if (profile?.length) {
+      const { avatar } = profile[0];
+      setUserAvatar(avatar as string);
+    }
   }
 };
 

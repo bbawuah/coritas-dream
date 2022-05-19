@@ -1,0 +1,30 @@
+.footer {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  padding: 0 2rem;
+  max-height: 100px;
+  justify-items: center;
+  // flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  // position: relative;
+
+  .stedelijkLogo {
+    justify-self: flex-start;
+  }
+
+  .copyright {
+    justify-self: end;
+    align-self: flex-end;
+    font-family: 'Dark Paradise';
+    font-size: 1.25vmax;
+  }
+}
+
+.footer a {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-grow: 1;
+}
