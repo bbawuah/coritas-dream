@@ -7,10 +7,11 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import type { Navigator } from 'webxr';
 import { useDeviceCheck } from '../hooks/useDeviceCheck';
 import { Loader } from '../components/experience/loader/loader';
-import { supabase } from '../utils/supabase';
-import { Session } from '@supabase/supabase-js';
+import { client as supabaseClient } from '../utils/supabase';
+import { Session, User } from '@supabase/supabase-js';
 import { useRouter } from 'next/router';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
+import { useAuth } from '../hooks/useAuth';
 
 const Canvas = dynamic(() => import('../components/experience/canvas/canvas'), {
   ssr: false,
@@ -21,14 +22,13 @@ const Dream: NextPage = () => {
   const { client, id, room } = useColyseus();
   const [webXRIsSupported, setWebXRIsSupported] = useState<boolean>();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [session, setSession] = useState<Session | null>(null);
   const router = useRouter();
   const subdomain: string = 'demo';
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [charachterIsCreated, setCharachterIsCreated] =
     useState<boolean>(false);
   const [hasProfile, setHasProfile] = useState<boolean>(false);
-  const user = supabase.auth.user();
+  const { session } = useAuth();
 
   useEffect(() => {
     const webXRNavigator: Navigator = navigator as any as Navigator;
@@ -41,15 +41,13 @@ const Dream: NextPage = () => {
   }, [isInVR]);
 
   useEffect(() => {
-    const currentSession = supabase.auth.session();
-
-    setSession(currentSession);
-    supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
+    if (room) {
+      console.log('room is available');
+    }
 
     getUserProfile();
     window.addEventListener('message', subscribe);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -149,22 +147,27 @@ const Dream: NextPage = () => {
   }
 
   async function getUserProfile() {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('id', user?.id);
+    const user = supabaseClient.auth.user();
+    if (user) {
+      const { data: profile } = await supabaseClient
+        .from('profiles')
+        .select('id')
+        .eq('id', user.id);
 
-    if (profile?.length === 0) {
-      setHasProfile(false);
-    } else {
-      setHasProfile(true);
-      setCharachterIsCreated(true);
+      if (!profile || profile?.length === 0) {
+        setHasProfile(false);
+      } else {
+        setHasProfile(true);
+        setCharachterIsCreated(true);
+      }
     }
   }
 
   async function updateUserAvatar(url: string) {
+    const user = supabaseClient.auth.user();
+
     if (!hasProfile) {
-      const { data, error } = await supabase
+      const { data, error } = await supabaseClient
         .from('profiles')
         .insert([{ id: user?.id, updated_at: new Date(), avatar: url }]);
 

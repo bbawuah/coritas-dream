@@ -1,16 +1,15 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
-import { Canvas, extend, ReactThreeFiber } from '@react-three/fiber';
+import { Canvas, extend } from '@react-three/fiber';
 import { User } from '../users/user';
-import { InstancedUsers } from '../users/instancedUsers';
 import { Client, Room } from 'colyseus.js';
 import { Physics } from '../../../shared/physics/physics';
 import { XRCanvas } from './xrCanvas';
 import { Sky, useGLTF } from '@react-three/drei';
 import { VRCanvas } from '@react-three/xr';
 import { Perf } from 'r3f-perf';
-import { useStore } from '../../../store/store';
+import { getState, useStore } from '../../../store/store';
 import { useDeviceCheck } from '../../../hooks/useDeviceCheck';
 import { Environment } from '../environment/Environment';
 import { BlendFunction } from 'postprocessing';
@@ -24,13 +23,23 @@ import { GLTFResult } from '../environment/types/types';
 import { Pathfinding } from 'three-pathfinding';
 import { SettingsMenu } from '../../core/headers/settingsMenu/settingsMenu';
 import { OnboardingManager } from '../../domain/onboardingManager/onBoardingManager';
-import { supabase } from '../../../utils/supabase';
+import { client } from '../../../utils/supabase';
+import { InstancedUsers } from '../users/instancedUsers';
+import { useRealtime } from 'react-supabase';
+import { NonPlayableCharacters } from '../users/npcs/npcs';
 
 interface Props {
   client: Client;
   room: Room;
   id: string;
   isWebXrSupported: boolean;
+}
+
+interface ProfileData {
+  avatar: string;
+  updated_at: string;
+  id: string;
+  username: string | null;
 }
 
 const CanvasComponent: React.FC<Props> = (props) => {
@@ -41,7 +50,6 @@ const CanvasComponent: React.FC<Props> = (props) => {
   ) as unknown as GLTFResult;
   const { isInVR, isDesktop } = useDeviceCheck();
   const [physics, setPhysics] = useState<Physics | null>(null);
-  const user = supabase.auth.user();
   const classes = classNames([
     styles.container,
     {
@@ -49,7 +57,12 @@ const CanvasComponent: React.FC<Props> = (props) => {
       [styles.pointer]: hovered,
     },
   ]);
+  const [{ data, error, fetching }, reexecute] = useRealtime('profiles');
   const [userAvatar, setUserAvatar] = useState<string>();
+
+  // useEffect(() => {
+  //   console.log(data);
+  // }, [data]);
 
   useEffect(() => {
     getUserModel();
@@ -68,6 +81,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
       return (
         <VRCanvas>
           <XRCanvas id={id} room={room} physics={physics} nodes={nodes} />
+          {renderNpcs()}
           <Perf />
         </VRCanvas>
       );
@@ -86,11 +100,11 @@ const CanvasComponent: React.FC<Props> = (props) => {
             mieDirectionalG={0.029}
             azimuth={91.5}
           />
-          <Perf />
+          {/* <Perf /> */}
           <ambientLight intensity={1.2} />
           <directionalLight color="white" position={[-3, 3, -2]} />
           {renderUser()}
-          <InstancedUsers playerId={id} />
+          {renderNpcs()}
           <Environment nodes={nodes} physics={physics} />
           <EffectComposer>
             <Noise
@@ -113,14 +127,48 @@ const CanvasComponent: React.FC<Props> = (props) => {
   }
 
   async function getUserModel() {
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('avatar')
-      .eq('id', user?.id);
+    const user = client.auth.user();
+    const data = await reexecute();
 
-    if (profile?.length) {
-      const { avatar } = profile[0];
-      setUserAvatar(avatar as string);
+    if (data && data.data && user) {
+      const profile = data.data.filter(
+        (data: ProfileData) => data.id === user.id
+      );
+
+      if (profile?.length) {
+        const { avatar } = profile[0];
+        setUserAvatar(avatar as string);
+      }
+    }
+  }
+
+  function renderNpcs() {
+    const user = client.auth.user();
+    const players = getState().players;
+    const ids = Object.keys(players);
+    const values = Object.values(players);
+
+    if (data && user) {
+      const jsx = ids
+        .filter((data) => data !== id)
+        .map((id) => {
+          const player = players[id];
+          const playerObject = data.find(
+            (val) => val.id === player.uuid
+          ) as ProfileData;
+
+          if (playerObject) {
+            return (
+              <NonPlayableCharacters
+                key={playerObject.id}
+                id={player.id}
+                glbUrl={playerObject.avatar}
+              />
+            );
+          }
+        });
+
+      return jsx;
     }
   }
 };

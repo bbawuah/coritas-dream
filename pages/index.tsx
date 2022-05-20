@@ -4,12 +4,13 @@ import Head from 'next/head';
 import Image from 'next/image';
 import { Suspense, useEffect, useState } from 'react';
 import styles from '../styles/home/Home.module.scss';
-import { Provider, Session } from '@supabase/supabase-js';
+import { Session } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { supabase } from '../utils/supabase';
+import { client } from '../utils/supabase';
 import { Footer } from '../components/core/footer/footer';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
+import { useAuth } from '../hooks/useAuth';
 
 const Canvas = dynamic(() => import('../components/landingPageCanvas/canvas'), {
   ssr: false,
@@ -17,12 +18,11 @@ const Canvas = dynamic(() => import('../components/landingPageCanvas/canvas'), {
 
 const Home: NextPage = () => {
   const [isSsr, setIsSsr] = useState<boolean>(true); // andere manier fixen
-  const [session, setSession] = useState<Session | null>();
+  const { session, user } = useAuth();
 
   useEffect(() => {
-    const currentSession = supabase.auth.session();
-    setSession(currentSession);
     setIsSsr(false);
+    console.log(session);
   }, []);
 
   return (

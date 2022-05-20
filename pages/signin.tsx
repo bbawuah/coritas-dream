@@ -6,7 +6,7 @@ import { Suspense, useEffect, useState } from 'react';
 import styles from '../styles/signin/SignIn.module.scss';
 import { Provider } from '@supabase/supabase-js';
 import classNames from 'classnames';
-import { supabase } from '../utils/supabase';
+import { client } from '../utils/supabase';
 import Link from 'next/link';
 import { Footer } from '../components/core/footer/footer';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
@@ -17,7 +17,7 @@ const Canvas = dynamic(() => import('../components/landingPageCanvas/canvas'), {
 
 const SignIn: NextPage = () => {
   const [isSsr, setIsSsr] = useState<boolean>(true); // andere manier fixen
-  const user = supabase.auth.user();
+  const user = client.auth.user();
 
   useEffect(() => {
     setIsSsr(false);
@@ -61,7 +61,7 @@ const SignIn: NextPage = () => {
   );
 
   async function signInWithOAuth(provider: Provider) {
-    const { error } = await supabase.auth.signIn(
+    const { error } = await client.auth.signIn(
       {
         provider,
       },

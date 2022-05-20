@@ -2,6 +2,7 @@ import { Schema, type } from '@colyseus/schema';
 import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
 import { Physics } from '../../shared/physics/physics';
+import { ActionNames } from '../../store/store';
 import { IDirection } from './types';
 
 export class Player extends Schema {
@@ -12,7 +13,8 @@ export class Player extends Schema {
   @type('number') ry: number = 0;
   @type('number') rz: number = 0;
   @type('string') id: string = '';
-  @type('string') userLocation: string = 'Location unknown'; // Need to remove
+  @type('string') uuid: string = '';
+  @type('string') animationState: ActionNames = 'idle';
   @type('number') timestamp: number = 0;
 
   public playerSpeed: number = 10;
@@ -32,13 +34,13 @@ export class Player extends Schema {
     idle: false,
   };
 
-  constructor(id: string, physics: Physics, geoLocation: string) {
+  constructor(id: string, uuid: string, physics: Physics) {
     super();
     this.x = Math.floor(Math.random() * 6) + 1;
     this.y = 0.5;
     this.z = Math.floor(Math.random() * 6) + 1;
     this.id = id;
-    this.userLocation = geoLocation;
+    this.uuid = uuid;
 
     this.physicalBody = physics.createPlayerPhysics<Player>(this); // Create phyisical represenatation of player
 

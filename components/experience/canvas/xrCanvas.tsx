@@ -37,7 +37,6 @@ export const XRCanvas: React.FC<Props> = (props) => {
       <color attach="background" args={['#ffffff']} />
       <ambientLight intensity={0.5} />
       <directionalLight color="white" position={[0, 3, 0]} />
-      <InstancedUsers playerId={id} />
       <Environment physics={physics} nodes={nodes} />
     </>
   );

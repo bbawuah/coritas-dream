@@ -1,11 +1,17 @@
 import '../styles/globals.scss';
 import type { AppProps } from 'next/app';
-import { UserProvider } from '@auth0/nextjs-auth0';
-import { supabaseClient } from '@supabase/supabase-auth-helpers/nextjs';
-import { MyUserContextProvider } from '../utils/useUser';
+import { Provider } from 'react-supabase';
+import { client } from '../utils/supabase';
+import { AuthProvider } from '../context/authContext';
 
 function MyApp({ Component, pageProps }: AppProps) {
-  return <Component {...pageProps} />;
+  return (
+    <Provider value={client}>
+      <AuthProvider>
+        <Component {...pageProps} />
+      </AuthProvider>
+    </Provider>
+  );
 }
 
 export default MyApp;

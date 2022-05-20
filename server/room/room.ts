@@ -5,6 +5,7 @@ import {
   IHandlePhysicsProps,
   IUserDirection,
 } from '../../shared/physics/types';
+import { ActionNames } from '../../store/store';
 import { Player } from '../player/player';
 import { State } from '../state/state';
 
@@ -24,7 +25,7 @@ export class Gallery extends Room<State> {
     this.setSimulationInterval((deltaTime) => this.update(deltaTime));
 
     // Called every time this room receives a "move" message
-    this.onMessage('move', (client, data) => {
+    this.onMessage('move', (client, data: IHandlePhysicsProps) => {
       const player = this.state.players.get(client.sessionId);
       this.handleMovement(player, data);
 
@@ -73,15 +74,32 @@ export class Gallery extends Room<State> {
         }
       );
     });
+
+    this.onMessage('animationState', (client, data: ActionNames) => {
+      const player = this.state.players.get(client.sessionId);
+
+      if (player) {
+        player.animationState = data;
+      }
+
+      this.broadcast(
+        'animationState',
+        { player },
+        {
+          afterNextPatch: true,
+        }
+      );
+    });
   }
 
   // Called every time a client joins
-  public onJoin(client: Client, options: any) {
+  public onJoin(client: Client, options: { id: string }) {
     console.log('user joined');
-    const { location } = options;
+    const { id } = options;
+
     this.state.players.set(
       client.sessionId,
-      new Player(client.sessionId, this.physics, location)
+      new Player(client.sessionId, id, this.physics)
     ); //Store instance of user in state
 
     // Should do something here

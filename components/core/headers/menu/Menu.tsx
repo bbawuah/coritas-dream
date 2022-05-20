@@ -1,6 +1,6 @@
 import { useRouter } from 'next/router';
 import React from 'react';
-import { supabase } from '../../../../utils/supabase';
+import { client } from '../../../../utils/supabase';
 import styles from './Menu.module.scss';
 
 export const Menu: React.FC = () => {
@@ -25,7 +25,7 @@ export const Menu: React.FC = () => {
   );
 
   async function handleLogout() {
-    await supabase.auth.signOut();
+    await client.auth.signOut();
 
     router.replace('/');
   }

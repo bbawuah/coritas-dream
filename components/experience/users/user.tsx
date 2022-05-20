@@ -1,16 +1,15 @@
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { OrbitControls } from '@react-three/drei';
-import { ObjectMap, useFrame, useLoader, useThree } from '@react-three/fiber';
+import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import {
   getState,
-  IPlayerCoordinations,
+  IPlayerNetworkData,
   IPlayerType,
+  useStore,
 } from '../../../store/store';
-import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Room } from 'colyseus.js';
 import {
   IHandlePhysicsProps,
@@ -20,10 +19,8 @@ import { useKeyboardEvents } from '../../../hooks/useKeys';
 import { IDirection } from '../../../server/player/types';
 import { Physics } from '../../../shared/physics/physics';
 import { OnMoveProps } from './types';
-import { supabase } from '../../../utils/supabase';
-import { useGLTF } from '@react-three/drei';
-import { GLTFResult } from '../environment/types/types';
 import CannonDebugRenderer from '../../../shared/physics/cannonDebugger';
+import { UserModel } from './userModel';
 
 interface Props {
   room: Room;
@@ -32,66 +29,17 @@ interface Props {
   glbUrl: string;
 }
 
-interface UserModelProps {
-  gltf: GLTF & ObjectMap;
-  scene: THREE.Scene;
-}
+export type Animations = 'idle' | 'walking';
 
-type Animations = 'idle' | 'walking';
-class UserModel {
-  public controlObject: THREE.Group;
-  private animationLoader: GLTFLoader;
-  private dracoLoader: DRACOLoader;
-  public mixers: { [key: string]: THREE.AnimationMixer } = {};
-
-  constructor(props: UserModelProps) {
-    const { gltf, scene } = props;
-    this.animationLoader = new GLTFLoader();
-    this.dracoLoader = new DRACOLoader();
-    this.dracoLoader.setDecoderPath('draco/');
-    this.animationLoader.setDRACOLoader(this.dracoLoader);
-
-    this.controlObject = gltf.scene;
-
-    this.controlObject.traverse((o: any) => {
-      if (o.isMesh) {
-        o.castShadow = true;
-        o.receiveShadow = true;
-      }
-    });
-
-    this.animationLoader.load('/animations/idle.glb', (animationGltf) => {
-      const m = new THREE.AnimationMixer(this.controlObject);
-      this.mixers = { ...this.mixers, idle: m };
-
-      const idle = m.clipAction(animationGltf.animations[0]);
-      idle.play();
-    });
-
-    // this.animationLoader.load('/animations/walking.glb', (animationGltf) => {
-    //   const m = new THREE.AnimationMixer(this.controlObject);
-    //   this.mixers = { ...this.mixers, idle: m };
-
-    //   const walking = m.clipAction(animationGltf.animations[0]);
-    //   walking.play();
-    // });
-
-    // this.animationLoader.load('/animations/fist.glb', (animationGltf) => {
-    //   const m = new THREE.AnimationMixer(this.controlObject);
-    //   this.mixers = { ...this.mixers, idle: m };
-
-    //   const walking = m.clipAction(animationGltf.animations[0]);
-    //   walking.play();
-    // });
-
-    scene.add(gltf.scene);
-  }
-}
+type BaseActions = Record<Animations, { weight: number }>;
 
 export const User: React.FC<Props> = (props) => {
   const { id, room, physics, glbUrl } = props;
   const players = getState().players;
-  const { scene, camera } = useThree();
+  const { scene } = useThree();
+  const { animationName } = useStore(({ animationName }) => ({
+    animationName,
+  })); //Maybe refactor this late
   const controlsRef = useRef<any>();
   const processedAction = useRef<IPlayerType | null>(null);
   const currentAction = useRef<IHandlePhysicsProps | null>(null);
@@ -112,16 +60,13 @@ export const User: React.FC<Props> = (props) => {
   const counter = useRef<number>(0);
   const playerSpeed = 10;
   const frameTime = useRef<number>(0.0);
-  const user = supabase.auth.user();
-
   const gltf = useLoader(GLTFLoader, glbUrl);
   const userRef = useRef<UserModel>();
-  const quaternion = useRef<THREE.Quaternion>(new THREE.Quaternion());
   const userLookAt = useRef<THREE.Vector3>(new THREE.Vector3());
 
-  const cannonDebugRenderer = useRef(
-    new CannonDebugRenderer(scene, physics.physicsWorld)
-  );
+  // const cannonDebugRenderer = useRef(
+  //   new CannonDebugRenderer(scene, physics.physicsWorld)
+  // );
 
   const [getDirection] = useKeyboardEvents({
     keyDownEvent,
@@ -136,7 +81,7 @@ export const User: React.FC<Props> = (props) => {
 
     if (userRef.current) {
       // Create physics
-      physicalBody.current = physics.createPlayerPhysics<IPlayerCoordinations>(
+      physicalBody.current = physics.createPlayerPhysics<IPlayerNetworkData>(
         players[id]
       ); // Create phyisical represenatation of player
       physics.physicsWorld.addBody(physicalBody.current); //Add to physics world
@@ -153,10 +98,14 @@ export const User: React.FC<Props> = (props) => {
         [id]: {
           id: players[id].id,
           timestamp: players[id].timestamp,
-          userLocation: players[id].userLocation,
+          animationState: players[id].animationState,
+          uuid: players[id].uuid,
           x: players[id].x,
           y: players[id].y,
           z: players[id].z,
+          rx: players[id].rx,
+          ry: players[id].ry,
+          rz: players[id].rz,
         },
       };
 
@@ -165,6 +114,14 @@ export const User: React.FC<Props> = (props) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controlsRef]);
+
+  useEffect(() => {
+    if (userRef.current && userRef.current.actions) {
+      userRef.current.fadeToAction(animationName.animationName, 0.25);
+      room.send('animationState', animationName.animationName);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [animationName.animationName]);
 
   useFrame((state, dt) => {
     frameTime.current += state.clock.getElapsedTime();
@@ -175,8 +132,8 @@ export const User: React.FC<Props> = (props) => {
         handleSendPosition(userDirection);
       }
 
-      if (userRef.current.mixers.idle) {
-        userRef.current.mixers.idle.update(dt);
+      if (userRef.current.mixer) {
+        userRef.current.mixer.update(dt);
       }
 
       if (currentAction.current) {
@@ -307,10 +264,14 @@ export const User: React.FC<Props> = (props) => {
         [player.id]: {
           id: players[id].id,
           timestamp: player.timestamp,
-          userLocation: players[id].userLocation,
+          animationState: players[id].animationState,
+          uuid: players[id].uuid,
           x: player.x,
           y: player.y,
           z: player.z,
+          rx: players[id].rx,
+          ry: players[id].ry,
+          rz: players[id].rz,
         },
       };
     }

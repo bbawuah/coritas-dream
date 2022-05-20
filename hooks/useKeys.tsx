@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { IUserDirection } from '../shared/physics/types';
 import { useStore } from '../store/store';
 
+type AnimationEmotions = 'fist' | 'praying';
 interface Keys {
   [x: string]: IUserDirection;
 }
@@ -24,6 +25,9 @@ interface Props {
 
 export const useKeyboardEvents = (props: Props) => {
   const userDirection = useRef<IUserDirection>('idle');
+  const { set } = useStore(({ set }) => ({
+    set,
+  }));
 
   useEffect(() => {
     document.addEventListener('keydown', onKeyDown, { passive: true });
@@ -39,9 +43,15 @@ export const useKeyboardEvents = (props: Props) => {
   function onKeyDown(ev: KeyboardEvent) {
     const objectKeys = Object.keys(keys);
 
+    animationEmotionManager(ev.key);
+
     if (objectKeys.includes(ev.key)) {
       userDirection.current = keys[ev.key];
       props.keyDownEvent(keys[ev.key]);
+      set((state) => ({
+        ...state,
+        animationName: { animationName: 'walking' },
+      }));
     }
   }
 
@@ -50,11 +60,29 @@ export const useKeyboardEvents = (props: Props) => {
     if (objectKeys.includes(ev.key)) {
       userDirection.current = 'idle';
       props.keyUpEvent(keys[ev.key]);
+      set((state) => ({ ...state, animationName: { animationName: 'idle' } }));
     }
   }
 
   function getDirection(): IUserDirection {
     return userDirection.current;
+  }
+
+  function animationEmotionManager(key: string) {
+    switch (key) {
+      case '1':
+        set((state) => ({
+          ...state,
+          animationName: { animationName: 'praying' },
+        }));
+        break;
+      case '2':
+        set((state) => ({
+          ...state,
+          animationName: { animationName: 'fist' },
+        }));
+        break;
+    }
   }
 
   return [getDirection];
