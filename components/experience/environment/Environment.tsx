@@ -84,7 +84,7 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
   });
 
   return (
-    <group ref={group} dispose={null} position={new THREE.Vector3(0, -0.5, 0)}>
+    <group ref={group} dispose={null} position={new THREE.Vector3(0, 0.5, 0)}>
       <mesh
         geometry={nodes.screen001.geometry}
         material={nodes.screen001.material}

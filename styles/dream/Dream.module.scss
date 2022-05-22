@@ -1,0 +1,23 @@
+.container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+
+  .iframeWrapper {
+    background-color: #ffffff;
+    width: 100%;
+    height: 100%;
+    padding: 0.5rem 3rem;
+    .iframe {
+      width: 100%;
+      height: 100%;
+      border-radius: 25px;
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
+        Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+      font-size: 14px;
+      border: none;
+      box-shadow: rgba(149, 157, 165, 0.8) 0px 8px 24px;
+    }
+  }
+}

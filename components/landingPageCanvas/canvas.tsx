@@ -16,12 +16,17 @@ const CaptionText: React.FC<CaptionProps> = (props) => {
     <Text
       position={position}
       lineHeight={0.8}
-      font="/fonts/DarkParadiseItalic.ttf"
+      font="/fonts/NeutralFace.ttf"
       fontSize={width / 8}
-      color={new THREE.Color(0xff0000)}
+      color={new THREE.Color(0x000000)}
       material-toneMapped={false}
       anchorX="left"
       anchorY="middle"
+      outlineOffsetX={'10%'}
+      outlineOffsetY={'10%'}
+      outlineBlur={'25%'}
+      outlineOpacity={0.15}
+      outlineColor="#000000"
     >
       {text}
     </Text>

@@ -16,10 +16,13 @@ export const InstancedUsers: React.FC<Props> = (props) => {
   const { camera } = useThree();
   const instancedMeshRef = useRef<THREE.InstancedMesh>();
   const labelsRef = useRef<ILabelsType>({});
-  const { playersCount, set } = useStore(({ playersCount, set }) => ({
-    playersCount,
-    set,
-  }));
+  const { playersCount, set, players } = useStore(
+    ({ playersCount, set, players }) => ({
+      playersCount,
+      set,
+      players,
+    })
+  );
 
   const dummy = new THREE.Object3D();
   const tempMatrix = new THREE.Matrix4();
@@ -46,6 +49,10 @@ export const InstancedUsers: React.FC<Props> = (props) => {
       instancedMeshRef.current.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     }
   }, []);
+
+  useEffect(() => {
+    console.log(players);
+  }, [players]);
 
   // Listen directly to websocket in renderloop
   useFrame(() => {
@@ -142,7 +149,7 @@ export const InstancedUsers: React.FC<Props> = (props) => {
             letterSpacing={0.03}
             lineHeight={1}
           >
-            {players[id].userLocation}
+            {players[id].id}
           </Text>
         );
       });

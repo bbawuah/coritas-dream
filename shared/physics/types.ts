@@ -1,5 +1,3 @@
-import { Player } from '../../server/player/player';
-
 export interface IPositionType {
   x: number;
   y: number;

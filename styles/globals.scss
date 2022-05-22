@@ -1,18 +1,18 @@
 @font-face {
-  font-family: 'Dark Paradise';
-  src: url('../assets/fonts/DarkParadiseItalic.woff2') format('woff2'),
-    url('../assets/fonts/DarkParadiseItalic.woff') format('woff'),
-    url('../assets/fonts/DarkParadiseItalic.ttf') format('truetype');
+  font-family: 'Neutral Face';
+  src: url('../assets/fonts/NeutralFace.woff') format('woff'),
+    url('../assets/fonts/NeutralFace.otf') format('opentype'),
+    url('../assets/fonts/NeutralFace.ttf') format('truetype');
   font-weight: normal;
-  font-style: italic;
+  font-style: normal;
   font-display: swap;
 }
 
 @font-face {
-  font-family: 'Dark Paradise';
-  src: url('../assets/fonts/DarkParadiseBold.woff2') format('woff2'),
-    url('../assets/fonts/DarkParadiseBold.woff') format('woff'),
-    url('../assets/fonts/DarkParadiseBold.ttf') format('truetype');
+  font-family: 'Neutral Face';
+  src: url('../assets/fonts/NeutralFace-Bold.woff') format('woff'),
+    url('../assets/fonts/NeutralFace-Bold.otf') format('opentype'),
+    url('../assets/fonts/NeutralFace-Bold.ttf') format('truetype');
   font-weight: bold;
   font-style: normal;
   font-display: swap;

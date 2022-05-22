@@ -5,6 +5,7 @@ import {
   IHandlePhysicsProps,
   IUserDirection,
 } from '../../shared/physics/types';
+import { ActionNames } from '../../store/store';
 import { Player } from '../player/player';
 import { State } from '../state/state';
 
@@ -24,7 +25,7 @@ export class Gallery extends Room<State> {
     this.setSimulationInterval((deltaTime) => this.update(deltaTime));
 
     // Called every time this room receives a "move" message
-    this.onMessage('move', (client, data) => {
+    this.onMessage('move', (client, data: IHandlePhysicsProps) => {
       const player = this.state.players.get(client.sessionId);
       this.handleMovement(player, data);
 
@@ -73,29 +74,45 @@ export class Gallery extends Room<State> {
         }
       );
     });
+
+    this.onMessage('animationState', (client, data: ActionNames) => {
+      const player = this.state.players.get(client.sessionId);
+
+      if (player) {
+        player.animationState = data;
+      }
+
+      this.broadcast(
+        'animationState',
+        { player },
+        {
+          afterNextPatch: true,
+        }
+      );
+    });
   }
 
   // Called every time a client joins
-  public onJoin(client: Client, options: any) {
+  public onJoin(client: Client, options: { id: string }) {
     console.log('user joined');
-    const { location } = options;
-    this.state.players.set(
-      client.sessionId,
-      new Player(client.sessionId, this.physics, location)
-    ); //Store instance of user in state
+    const { id } = options;
+
+    const player = new Player(client.sessionId, id, this.physics);
+
+    this.state.players.set(client.sessionId, player); //Store instance of user in state
 
     // Should do something here
 
     client.send('id', { id: client.sessionId });
 
-    const players = (this.state as State).players; // get player from store
-
     this.onMessage('test', (client, data: string) => {
       console.log(`${client.sessionId} has sent this message ${data}`);
     });
 
-    if (players) {
-      this.broadcast('spawnPlayer', { players }); //Optimize this to only sending the new player
+    if ((this.state as State).players.get(client.sessionId)) {
+      this.broadcast('spawnPlayer', {
+        player: (this.state as State).players.get(client.sessionId),
+      }); //Optimize this to only sending the new player
     }
   }
 

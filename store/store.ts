@@ -10,15 +10,19 @@ const controls = {
   right: false,
 };
 
-export type IPlayerType = Record<string, IPlayerCoordinations>;
+export type IPlayerType = Record<string, IPlayerNetworkData>;
 
-export interface IPlayerCoordinations {
+export interface IPlayerNetworkData {
   id: string;
   timestamp: number;
-  userLocation: string;
+  animationState: ActionNames;
   x: number;
+  uuid: string;
   y: number;
   z: number;
+  rx: number;
+  ry: number;
+  rz: number;
 }
 
 const clients = {};
@@ -29,9 +33,16 @@ const playersCount: number = 0;
 
 const hovered: boolean = false;
 
+const animationName: ActionState = { animationName: 'idle' };
+
 export type Controls = typeof controls;
 
-const actionNames = ['idle', 'walking'] as const;
+interface ActionState {
+  animationName: ActionNames;
+  cb?: () => void;
+}
+
+const actionNames = ['idle', 'walking', 'praying', 'fist'] as const;
 export type ActionNames = typeof actionNames[number];
 
 const cursorState: CursorStates = 'grab';
@@ -42,6 +53,7 @@ export interface IState {
   controls: Controls;
   players: IPlayerType;
   playersCount: number;
+  animationName: ActionState;
   cursorState: CursorStates;
   hovered: boolean;
   get: Getter;
@@ -59,6 +71,7 @@ const useStoreImplementation = create(
         clients,
         players,
         playersCount,
+        animationName,
         hovered,
         cursorState,
         get,

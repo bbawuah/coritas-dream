@@ -1,16 +1,15 @@
 import React, { Suspense, useEffect, useState } from 'react';
 import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
-import { Canvas, extend, ReactThreeFiber } from '@react-three/fiber';
+import { Canvas, extend } from '@react-three/fiber';
 import { User } from '../users/user';
-import { InstancedUsers } from '../users/instancedUsers';
 import { Client, Room } from 'colyseus.js';
 import { Physics } from '../../../shared/physics/physics';
 import { XRCanvas } from './xrCanvas';
 import { Sky, useGLTF } from '@react-three/drei';
 import { VRCanvas } from '@react-three/xr';
 import { Perf } from 'r3f-perf';
-import { useStore } from '../../../store/store';
+import { getState, useStore } from '../../../store/store';
 import { useDeviceCheck } from '../../../hooks/useDeviceCheck';
 import { Environment } from '../environment/Environment';
 import { BlendFunction } from 'postprocessing';
@@ -24,6 +23,10 @@ import { GLTFResult } from '../environment/types/types';
 import { Pathfinding } from 'three-pathfinding';
 import { SettingsMenu } from '../../core/headers/settingsMenu/settingsMenu';
 import { OnboardingManager } from '../../domain/onboardingManager/onBoardingManager';
+import { client } from '../../../utils/supabase';
+import { InstancedUsers } from '../users/instancedUsers';
+import { useRealtime } from 'react-supabase';
+import { NonPlayableCharacters } from '../users/npcs/npcs';
 
 interface Props {
   client: Client;
@@ -32,8 +35,18 @@ interface Props {
   isWebXrSupported: boolean;
 }
 
+interface ProfileData {
+  avatar: string;
+  updated_at: string;
+  id: string;
+  username: string | null;
+}
+
 const CanvasComponent: React.FC<Props> = (props) => {
-  const { hovered } = useStore(({ hovered }) => ({ hovered })); //Maybe refactor this late
+  const { hovered, playersCount } = useStore(({ hovered, playersCount }) => ({
+    hovered,
+    playersCount,
+  })); //Maybe refactor this late
   const { isWebXrSupported, room, id } = props;
   const { nodes } = useGLTF(
     '/environment-transformed.glb'
@@ -47,9 +60,13 @@ const CanvasComponent: React.FC<Props> = (props) => {
       [styles.pointer]: hovered,
     },
   ]);
+  const [{ data, error, fetching }, reexecute] = useRealtime('profiles');
+  const [userAvatar, setUserAvatar] = useState<string>();
 
   useEffect(() => {
+    getUserModel();
     setPhysics(new Physics());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return <div className={classes}>{renderCanvas()}</div>;
@@ -63,6 +80,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
       return (
         <VRCanvas>
           <XRCanvas id={id} room={room} physics={physics} nodes={nodes} />
+          {renderNpcs(playersCount)}
           <Perf />
         </VRCanvas>
       );
@@ -70,7 +88,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
 
     return (
       <>
-        <SettingsMenu />
+        <SettingsMenu room={room} />
         <OnboardingManager />
         <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
           <Sky
@@ -81,10 +99,11 @@ const CanvasComponent: React.FC<Props> = (props) => {
             mieDirectionalG={0.029}
             azimuth={91.5}
           />
+          {/* <Perf /> */}
           <ambientLight intensity={1.2} />
           <directionalLight color="white" position={[-3, 3, -2]} />
-          <User id={id} room={room} physics={physics} />
-          <InstancedUsers playerId={id} />
+          {renderUser()}
+          {renderNpcs(playersCount)}
           <Environment nodes={nodes} physics={physics} />
           <EffectComposer>
             <Noise
@@ -98,6 +117,58 @@ const CanvasComponent: React.FC<Props> = (props) => {
         </Canvas>
       </>
     );
+  }
+
+  function renderUser() {
+    if (userAvatar && physics) {
+      return <User id={id} room={room} physics={physics} glbUrl={userAvatar} />;
+    }
+  }
+
+  async function getUserModel() {
+    const user = client.auth.user();
+    const data = await reexecute();
+
+    if (data && data.data && user) {
+      const profile = data.data.filter(
+        (data: ProfileData) => data.id === user.id
+      );
+
+      if (profile?.length) {
+        const { avatar } = profile[0];
+        setUserAvatar(avatar as string);
+      }
+    }
+  }
+
+  function renderNpcs(count: number) {
+    const user = client.auth.user();
+    const players = getState().players;
+    const ids = Object.keys(players);
+
+    if (data && user) {
+      const jsx = ids
+        .filter((data) => data !== id)
+        .map((id) => {
+          const player = players[id];
+          const playerObject = data.find(
+            (val) => val.id === player.uuid
+          ) as ProfileData;
+
+          if (playerObject) {
+            return (
+              <NonPlayableCharacters
+                key={playerObject.id}
+                id={player.id}
+                glbUrl={playerObject.avatar}
+                room={room}
+              />
+            );
+          }
+        });
+
+      return jsx;
+    }
   }
 };
 

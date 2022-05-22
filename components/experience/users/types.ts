@@ -1,10 +1,5 @@
+import { IPlayerNetworkData } from '../../../store/store';
+
 export interface OnMoveProps {
-  player: {
-    x: number;
-    y: number;
-    z: number;
-    id: string;
-    timestamp: number;
-    userLocation: string;
-  };
+  player: IPlayerNetworkData;
 }
