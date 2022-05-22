@@ -21,7 +21,7 @@ const ImageMesh: React.FC<CaptionProps> = (props) => {
   const mouseRef = useRef<THREE.Vector3>(new THREE.Vector3());
   const offset = useRef<THREE.Vector3>(new THREE.Vector3());
   const imagePlane = useRef<THREE.Mesh>();
-  const [isMouseOver, setIsMouseOver] = useState<boolean>(true);
+  const [isMouseOver, setIsMouseOver] = useState<boolean>(false);
 
   const uniforms = useRef<{
     [uniform: string]: THREE.IUniform<any>;

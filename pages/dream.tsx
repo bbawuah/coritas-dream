@@ -47,6 +47,7 @@ const Dream: NextPage = () => {
 
     getUserProfile();
     window.addEventListener('message', subscribe);
+    document.addEventListener('message', subscribe);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -103,7 +104,7 @@ const Dream: NextPage = () => {
     );
   }
 
-  function subscribe(event: MessageEvent) {
+  function subscribe(event: any) {
     const json = parse(event);
 
     if (json?.source !== 'readyplayerme') {
@@ -129,6 +130,11 @@ const Dream: NextPage = () => {
     // Get avatar GLB URL
     if (json.eventName === 'v1.avatar.exported') {
       console.log(`Avatar URL: ${json.data.url}`);
+
+      if (iframeRef.current) {
+        iframeRef.current.hidden = true;
+      }
+
       updateUserAvatar(json.data.url);
     }
 
