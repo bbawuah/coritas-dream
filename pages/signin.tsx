@@ -13,6 +13,8 @@ const Canvas = dynamic(() => import('../components/landingPageCanvas/canvas'), {
   ssr: false,
 });
 
+const dev: boolean = process.env.NODE_ENV !== 'production';
+
 const SignIn: NextPage = () => {
   const [isSsr, setIsSsr] = useState<boolean>(true); // andere manier fixen
   const user = client.auth.user();
@@ -64,7 +66,9 @@ const SignIn: NextPage = () => {
         provider,
       },
       {
-        redirectTo: '/dream',
+        redirectTo: dev
+          ? 'http://localhost:3000/dream'
+          : 'https://coritas-dream.herokuapp.com/dream',
       }
     );
 
