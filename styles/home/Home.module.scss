@@ -3,7 +3,7 @@
   height: 100%;
   display: grid;
   grid-template-columns: 1fr auto;
-  // overflow-x: hidden;
+  overflow-y: hidden;
 
   .gridWrapper {
     display: flex;
@@ -48,6 +48,10 @@
     width: 6vmax;
     position: relative;
     display: flex;
+    white-space: nowrap;
+    will-change: transform;
+
+    animation: marquee 20s linear infinite;
 
     .animationText {
       transform: rotate(-90deg);
@@ -82,6 +86,15 @@
       .justice {
         color: #46a125;
       }
+    }
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateY(-100%);
+    }
+    to {
+      transform: translateY(125%);
     }
   }
 

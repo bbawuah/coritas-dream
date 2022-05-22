@@ -5,6 +5,7 @@ import { OnMoveProps } from '../components/experience/users/types';
 import { IPApiResponse } from './types';
 import { client as supabaseClient } from '../utils/supabase';
 import { State } from '../server/state/state';
+import { useRealtime } from 'react-supabase';
 
 const dev: boolean = process.env.NODE_ENV !== 'production';
 const developmentPort: string = dev ? '8080' : '3000';

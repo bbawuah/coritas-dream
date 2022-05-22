@@ -142,6 +142,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
   }
 
   function renderNpcs(count: number) {
+    console.log(count);
     const user = client.auth.user();
     const players = getState().players;
     const ids = Object.keys(players);

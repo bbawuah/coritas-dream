@@ -26,6 +26,7 @@ export const OnboardingManager: React.FC<Props> = (props) => {
 
   useEffect(() => {
     transRef.start();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
   const data: ((
