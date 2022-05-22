@@ -26,7 +26,7 @@ import { OnboardingManager } from '../../domain/onboardingManager/onBoardingMana
 import { client } from '../../../utils/supabase';
 import { InstancedUsers } from '../users/instancedUsers';
 import { useRealtime } from 'react-supabase';
-import { NonPlayableCharacters } from '../users/npcs/npcs';
+import { NonPlayableCharacters } from '../users/NonPlayableCharacters/NonPlayableCharacters';
 
 interface Props {
   client: Client;
@@ -60,7 +60,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
       [styles.pointer]: hovered,
     },
   ]);
-  const [{ data, error, fetching }, reexecute] = useRealtime('profiles');
+  const [_, reexecute] = useRealtime('profiles');
   const [userAvatar, setUserAvatar] = useState<string>();
 
   useEffect(() => {
@@ -80,7 +80,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
       return (
         <VRCanvas>
           <XRCanvas id={id} room={room} physics={physics} nodes={nodes} />
-          {renderNpcs(playersCount)}
+          {renderNpcs()}
           <Perf />
         </VRCanvas>
       );
@@ -99,11 +99,12 @@ const CanvasComponent: React.FC<Props> = (props) => {
             mieDirectionalG={0.029}
             azimuth={91.5}
           />
-          {/* <Perf /> */}
+          <Perf />
           <ambientLight intensity={1.2} />
           <directionalLight color="white" position={[-3, 3, -2]} />
           {renderUser()}
-          {renderNpcs(playersCount)}
+          {renderNpcs()}
+          <InstancedUsers playerId={id} />
           <Environment nodes={nodes} physics={physics} />
           <EffectComposer>
             <Noise
@@ -141,35 +142,23 @@ const CanvasComponent: React.FC<Props> = (props) => {
     }
   }
 
-  function renderNpcs(count: number) {
-    console.log(count);
-    const user = client.auth.user();
+  function renderNpcs() {
     const players = getState().players;
     const ids = Object.keys(players);
 
-    if (data && user) {
-      const jsx = ids
-        .filter((data) => data !== id)
-        .map((id) => {
-          const player = players[id];
-          const playerObject = data.find(
-            (val) => val.id === player.uuid
-          ) as ProfileData;
+    const jsx = ids
+      .filter((data) => data !== id)
+      .map((id, index) => {
+        const player = players[id];
 
-          if (playerObject) {
-            return (
-              <NonPlayableCharacters
-                key={playerObject.id}
-                id={player.id}
-                glbUrl={playerObject.avatar}
-                room={room}
-              />
-            );
-          }
-        });
+        return (
+          <Suspense key={index} fallback={null}>
+            <NonPlayableCharacters playerData={player} room={room} />
+          </Suspense>
+        );
+      });
 
-      return jsx;
-    }
+    return jsx;
   }
 };
 

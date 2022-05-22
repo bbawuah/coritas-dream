@@ -2,10 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Client, Room } from 'colyseus.js';
 import { getState, useStore } from '../store/store';
 import { OnMoveProps } from '../components/experience/users/types';
-import { IPApiResponse } from './types';
 import { client as supabaseClient } from '../utils/supabase';
 import { State } from '../server/state/state';
-import { useRealtime } from 'react-supabase';
 
 const dev: boolean = process.env.NODE_ENV !== 'production';
 const developmentPort: string = dev ? '8080' : '3000';
@@ -16,7 +14,7 @@ const endpoint = dev ? `ws://localhost:${port}` : undefined;
 export const useColyseus = () => {
   const { set } = useStore(({ set }) => ({ set }));
   const [client, setClient] = useState<Client>();
-  const [room, setRoom] = useState<Room<State>>();
+  const [room, setRoom] = useState<Room>();
   const [id, setId] = useState<string>();
 
   useEffect(() => {
@@ -32,24 +30,10 @@ export const useColyseus = () => {
 
   return { client, id, room };
 
-  async function getLocation() {
-    try {
-      const data = await fetch(
-        `https://api.ipdata.co?api-key=${process.env.NEXT_PUBLIC_API_KEY}`
-      );
-      const json: IPApiResponse = await data.json();
-      const location = `${json.city}, ${json.country_code}`;
-
-      return location;
-    } catch (e) {
-      throw new Error(`Promise failed. ${e}`);
-    }
-  }
-
   async function getRoom() {
     const user = supabaseClient.auth.user();
+
     if (client && user) {
-      // const location = await getLocation(); //Doesn't really matter if this fails
       try {
         const room = (await client.joinOrCreate('gallery', {
           id: user.id,
@@ -57,9 +41,9 @@ export const useColyseus = () => {
 
         getPlayerId(room);
         setRoom(room);
+        onAnimation(room);
         onSpawnPlayer(room);
         onRemovePlayer(room);
-        onAnimation(room);
         onMove(room);
       } catch (e) {
         console.log(e);
@@ -67,26 +51,26 @@ export const useColyseus = () => {
     }
   }
 
-  function getPlayerId(room: Room<State>) {
+  function getPlayerId(room: Room) {
     room.onMessage('id', (data) => {
       setId(data.id);
     });
   }
 
-  function onSpawnPlayer(room: Room<State>) {
+  function onSpawnPlayer(room: Room) {
     room.onMessage('spawnPlayer', (data) => {
-      const { player } = data;
+      const { players } = data;
       console.log('new player joined');
 
       set((state) => ({
         ...state,
-        players: { ...state.players, [player.id]: player },
-        playersCount: Object.keys(state.players).length,
+        players,
+        playersCount: Object.keys(players).length,
       }));
     });
   }
 
-  function onMove(room: Room<State>) {
+  function onMove(room: Room) {
     room.onMessage('move', (data: OnMoveProps) => {
       const { player } = data;
       const players = getState().players;
@@ -114,7 +98,7 @@ export const useColyseus = () => {
     });
   }
 
-  function onRemovePlayer(room: Room<State>) {
+  function onRemovePlayer(room: Room) {
     room.onMessage('removePlayer', (data) => {
       const { players } = data;
 

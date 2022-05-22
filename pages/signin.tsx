@@ -9,15 +9,11 @@ import { client } from '../utils/supabase';
 import { Footer } from '../components/core/footer/footer';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
 
-const Canvas = dynamic(() => import('../components/landingPageCanvas/canvas'), {
-  ssr: false,
-});
-
 const dev: boolean = process.env.NODE_ENV !== 'production';
+console.log(dev);
 
 const SignIn: NextPage = () => {
   const [isSsr, setIsSsr] = useState<boolean>(true); // andere manier fixen
-  const user = client.auth.user();
 
   useEffect(() => {
     setIsSsr(false);

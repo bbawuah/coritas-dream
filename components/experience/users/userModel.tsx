@@ -5,7 +5,7 @@ import { ObjectMap } from '@react-three/fiber';
 import { ActionNames, getState, setState } from '../../../store/store';
 
 interface UserModelProps {
-  gltf: GLTF & ObjectMap;
+  gltf: GLTF | (GLTF & ObjectMap);
   scene: THREE.Scene;
 }
 

@@ -17,6 +17,7 @@ export const AuthProvider: React.FC = ({ children }) => {
   useEffect(() => {
     const session = client.auth.session();
     setState({ session, user: session?.user ?? null });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

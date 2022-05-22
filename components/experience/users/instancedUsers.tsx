@@ -50,10 +50,6 @@ export const InstancedUsers: React.FC<Props> = (props) => {
     }
   }, []);
 
-  useEffect(() => {
-    console.log(players);
-  }, [players]);
-
   // Listen directly to websocket in renderloop
   useFrame(() => {
     if (instancedMeshRef.current) {
