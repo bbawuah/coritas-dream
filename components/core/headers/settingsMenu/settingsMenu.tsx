@@ -1,8 +1,13 @@
+import { Room } from 'colyseus.js';
 import React, { useState } from 'react';
 import { Menu } from '../menu/Menu';
 import { SettingsButton } from '../settingsButton/SettingsButton';
+interface Props {
+  room: Room;
+}
 
-export const SettingsMenu: React.FC = () => {
+export const SettingsMenu: React.FC<Props> = (props) => {
+  const { room } = props;
   const [hovered, setHovered] = useState<boolean>(false);
   const [clicked, setClicked] = useState<boolean>(false);
 
@@ -24,6 +29,6 @@ export const SettingsMenu: React.FC = () => {
       return null;
     }
 
-    return <Menu />;
+    return <Menu room={room} />;
   }
 };

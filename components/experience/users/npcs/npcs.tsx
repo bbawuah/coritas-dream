@@ -4,13 +4,15 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { getState, useStore } from '../../../../store/store';
 import { UserModel } from '../userModel';
 import * as THREE from 'three';
+import { Room } from 'colyseus.js';
 
 interface Props {
   id: string;
+  room: Room;
   glbUrl: string;
 }
 export const NonPlayableCharacters: React.FC<Props> = (props) => {
-  const { glbUrl, id } = props;
+  const { glbUrl, id, room } = props;
   const gltf = useLoader(GLTFLoader, glbUrl);
   const { players } = useStore(({ players }) => ({ players }));
   const { scene } = useThree();
@@ -19,14 +21,12 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
   const newPosition = useRef<THREE.Vector3>(new THREE.Vector3());
 
   useEffect(() => {
-    const player = players[id];
+    room.onMessage('removePlayer', () => {
+      userRef?.current?.controlObject.traverse((child) => scene.remove(child));
+    });
 
-    if (userRef.current && !player) {
-      console.log('should be removed');
-      userRef.current.controlObject.traverse((child) => scene.remove(child));
-    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [players, id]);
+  }, []);
 
   useEffect(() => {
     const player = players[id];

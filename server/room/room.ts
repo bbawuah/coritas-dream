@@ -97,23 +97,22 @@ export class Gallery extends Room<State> {
     console.log('user joined');
     const { id } = options;
 
-    this.state.players.set(
-      client.sessionId,
-      new Player(client.sessionId, id, this.physics)
-    ); //Store instance of user in state
+    const player = new Player(client.sessionId, id, this.physics);
+
+    this.state.players.set(client.sessionId, player); //Store instance of user in state
 
     // Should do something here
 
     client.send('id', { id: client.sessionId });
 
-    const players = (this.state as State).players; // get player from store
-
     this.onMessage('test', (client, data: string) => {
       console.log(`${client.sessionId} has sent this message ${data}`);
     });
 
-    if (players) {
-      this.broadcast('spawnPlayer', { players }); //Optimize this to only sending the new player
+    if ((this.state as State).players.get(client.sessionId)) {
+      this.broadcast('spawnPlayer', {
+        player: (this.state as State).players.get(client.sessionId),
+      }); //Optimize this to only sending the new player
     }
   }
 

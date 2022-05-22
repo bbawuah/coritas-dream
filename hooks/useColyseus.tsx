@@ -74,13 +74,13 @@ export const useColyseus = () => {
 
   function onSpawnPlayer(room: Room<State>) {
     room.onMessage('spawnPlayer', (data) => {
-      const { players } = data;
+      const { player } = data;
       console.log('new player joined');
 
       set((state) => ({
         ...state,
-        players,
-        playersCount: Object.keys(players).length,
+        players: { ...state.players, [player.id]: player },
+        playersCount: Object.keys(state.players).length,
       }));
     });
   }

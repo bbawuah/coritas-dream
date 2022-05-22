@@ -1,13 +1,11 @@
 import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-import Image from 'next/image';
-import { Suspense, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from '../styles/signin/SignIn.module.scss';
 import { Provider } from '@supabase/supabase-js';
 import classNames from 'classnames';
 import { client } from '../utils/supabase';
-import Link from 'next/link';
 import { Footer } from '../components/core/footer/footer';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
 

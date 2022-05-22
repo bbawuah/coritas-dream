@@ -16,7 +16,7 @@ const CaptionText: React.FC<CaptionProps> = (props) => {
     <Text
       position={position}
       lineHeight={0.8}
-      font="/fonts/DarkParadiseItalic.ttf"
+      font="/fonts/NeutralFace.ttf"
       fontSize={width / 8}
       color={new THREE.Color(0x000000)}
       material-toneMapped={false}

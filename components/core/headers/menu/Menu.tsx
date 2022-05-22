@@ -1,9 +1,15 @@
+import { Room } from 'colyseus.js';
 import { useRouter } from 'next/router';
 import React from 'react';
 import { client } from '../../../../utils/supabase';
 import styles from './Menu.module.scss';
 
-export const Menu: React.FC = () => {
+interface Props {
+  room: Room;
+}
+
+export const Menu: React.FC<Props> = (props) => {
+  const { room } = props;
   const router = useRouter();
 
   return (
@@ -26,7 +32,7 @@ export const Menu: React.FC = () => {
 
   async function handleLogout() {
     await client.auth.signOut();
-
+    room.leave();
     router.replace('/');
   }
 };

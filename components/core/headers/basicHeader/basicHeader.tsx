@@ -21,7 +21,7 @@ export const Header: React.FC<Props> = (props) => {
 
     return (
       <p className={styles.headerText}>
-        A prototype for the Stedelijk museum Amsterdam
+        A thesis prototype for the Stedelijk museum Amsterdam
       </p>
     );
   }

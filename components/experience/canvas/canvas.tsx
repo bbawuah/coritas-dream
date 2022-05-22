@@ -43,7 +43,10 @@ interface ProfileData {
 }
 
 const CanvasComponent: React.FC<Props> = (props) => {
-  const { hovered } = useStore(({ hovered }) => ({ hovered })); //Maybe refactor this late
+  const { hovered, playersCount } = useStore(({ hovered, playersCount }) => ({
+    hovered,
+    playersCount,
+  })); //Maybe refactor this late
   const { isWebXrSupported, room, id } = props;
   const { nodes } = useGLTF(
     '/environment-transformed.glb'
@@ -59,10 +62,6 @@ const CanvasComponent: React.FC<Props> = (props) => {
   ]);
   const [{ data, error, fetching }, reexecute] = useRealtime('profiles');
   const [userAvatar, setUserAvatar] = useState<string>();
-
-  // useEffect(() => {
-  //   console.log(data);
-  // }, [data]);
 
   useEffect(() => {
     getUserModel();
@@ -81,7 +80,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
       return (
         <VRCanvas>
           <XRCanvas id={id} room={room} physics={physics} nodes={nodes} />
-          {renderNpcs()}
+          {renderNpcs(playersCount)}
           <Perf />
         </VRCanvas>
       );
@@ -89,7 +88,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
 
     return (
       <>
-        <SettingsMenu />
+        <SettingsMenu room={room} />
         <OnboardingManager />
         <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
           <Sky
@@ -104,7 +103,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
           <ambientLight intensity={1.2} />
           <directionalLight color="white" position={[-3, 3, -2]} />
           {renderUser()}
-          {renderNpcs()}
+          {renderNpcs(playersCount)}
           <Environment nodes={nodes} physics={physics} />
           <EffectComposer>
             <Noise
@@ -142,11 +141,10 @@ const CanvasComponent: React.FC<Props> = (props) => {
     }
   }
 
-  function renderNpcs() {
+  function renderNpcs(count: number) {
     const user = client.auth.user();
     const players = getState().players;
     const ids = Object.keys(players);
-    const values = Object.values(players);
 
     if (data && user) {
       const jsx = ids
@@ -163,6 +161,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
                 key={playerObject.id}
                 id={player.id}
                 glbUrl={playerObject.avatar}
+                room={room}
               />
             );
           }
