@@ -50,20 +50,31 @@ class Gallery extends colyseus_1.Room {
                 afterNextPatch: true,
             });
         });
+        this.onMessage('animationState', (client, data) => {
+            const player = this.state.players.get(client.sessionId);
+            if (player) {
+                player.animationState = data;
+            }
+            this.broadcast('animationState', { player }, {
+                afterNextPatch: true,
+            });
+        });
     }
     // Called every time a client joins
     onJoin(client, options) {
         console.log('user joined');
-        const { location } = options;
-        this.state.players.set(client.sessionId, new player_1.Player(client.sessionId, this.physics, location)); //Store instance of user in state
+        const { id } = options;
+        const player = new player_1.Player(client.sessionId, id, this.physics);
+        this.state.players.set(client.sessionId, player); //Store instance of user in state
         // Should do something here
         client.send('id', { id: client.sessionId });
-        const players = this.state.players; // get player from store
         this.onMessage('test', (client, data) => {
             console.log(`${client.sessionId} has sent this message ${data}`);
         });
-        if (players) {
-            this.broadcast('spawnPlayer', { players }); //Optimize this to only sending the new player
+        if (this.state.players.get(client.sessionId)) {
+            this.broadcast('spawnPlayer', {
+                player: this.state.players.get(client.sessionId),
+            }); //Optimize this to only sending the new player
         }
     }
     update(deltaTime) {

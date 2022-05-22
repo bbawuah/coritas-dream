@@ -44,17 +44,19 @@ class Physics {
         const body = new CANNON.Body({
             mass: hasMass ? 1 : 0,
             shape: shape,
+            collisionFilterGroup: this.GROUP2,
+            collisionFilterMask: this.GROUP1,
         });
-        body.position.x = object.x;
-        body.position.y = object.y;
-        body.position.z = object.z;
+        body.position.x = object.position.x;
+        body.position.y = object.position.y;
+        body.position.z = object.position.z;
         return body;
     }
     createPlayerPhysics(object) {
         const body = new CANNON.Body({
             mass: 1,
             position: new CANNON.Vec3(object.x, object.y, object.z),
-            shape: new CANNON.Sphere(0.45),
+            shape: new CANNON.Sphere(0.5),
             collisionFilterGroup: this.GROUP1,
             collisionFilterMask: this.GROUP2,
         });

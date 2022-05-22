@@ -29,19 +29,24 @@ exports.Player = void 0;
 const schema_1 = require("@colyseus/schema");
 const THREE = __importStar(require("three"));
 class Player extends schema_1.Schema {
-    constructor(id, physics, geoLocation) {
+    constructor(id, uuid, physics) {
         super();
         this.x = 0;
         this.y = 0;
         this.z = 0;
+        this.rx = 0;
+        this.ry = 0;
+        this.rz = 0;
         this.id = '';
-        this.userLocation = 'Location unknown';
+        this.uuid = '';
+        this.animationState = 'idle';
         this.timestamp = 0;
         this.playerSpeed = 10;
         this.direction = new THREE.Vector3();
         this.frontVector = new THREE.Vector3();
         this.sideVector = new THREE.Vector3();
         this.upVector = new THREE.Vector3(0, 1, 0);
+        this.userLookAt = new THREE.Vector3();
         this.movement = {
             forward: false,
             backward: false,
@@ -50,10 +55,10 @@ class Player extends schema_1.Schema {
             idle: false,
         };
         this.x = Math.floor(Math.random() * 6) + 1;
-        this.y = 1;
+        this.y = 0.5;
         this.z = Math.floor(Math.random() * 6) + 1;
         this.id = id;
-        this.userLocation = geoLocation;
+        this.uuid = uuid;
         this.physicalBody = physics.createPlayerPhysics(this); // Create phyisical represenatation of player
         physics.physicsWorld.addBody(this.physicalBody);
     }
@@ -65,8 +70,19 @@ class Player extends schema_1.Schema {
             .normalize()
             .multiplyScalar(this.playerSpeed)
             .applyAxisAngle(this.upVector, angle);
+        //Store lookAt
+        if (this.movement.backward ||
+            this.movement.forward ||
+            this.movement.left ||
+            this.movement.right) {
+            this.userLookAt.copy(this.direction);
+            this.userLookAt.multiplyScalar(100);
+        }
         this.physicalBody.velocity.set(this.direction.x, this.physicalBody.velocity.y, this.direction.z);
         // Misschien position in een array pushen?
+        this.rx = this.userLookAt.x;
+        this.ry = this.userLookAt.y;
+        this.rz = this.userLookAt.z;
         this.x = this.physicalBody.position.x;
         this.y = this.physicalBody.position.y;
         this.z = this.physicalBody.position.z;
@@ -82,11 +98,23 @@ __decorate([
     (0, schema_1.type)('number')
 ], Player.prototype, "z", void 0);
 __decorate([
+    (0, schema_1.type)('number')
+], Player.prototype, "rx", void 0);
+__decorate([
+    (0, schema_1.type)('number')
+], Player.prototype, "ry", void 0);
+__decorate([
+    (0, schema_1.type)('number')
+], Player.prototype, "rz", void 0);
+__decorate([
     (0, schema_1.type)('string')
 ], Player.prototype, "id", void 0);
 __decorate([
     (0, schema_1.type)('string')
-], Player.prototype, "userLocation", void 0);
+], Player.prototype, "uuid", void 0);
+__decorate([
+    (0, schema_1.type)('string')
+], Player.prototype, "animationState", void 0);
 __decorate([
     (0, schema_1.type)('number')
 ], Player.prototype, "timestamp", void 0);

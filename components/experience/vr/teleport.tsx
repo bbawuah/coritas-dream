@@ -34,7 +34,6 @@ export const XRTeleport: React.FC<Props> = (props) => {
   const highLightMesh = useRef<HighlightMesh>(new HighlightMesh());
 
   const counter = useRef<number>(0);
-  const processedAction = useRef<IPlayerType | null>(null);
   const worldDirection = new THREE.Vector3();
   const green = new THREE.Color(0x00ff00);
   const red = new THREE.Color(0xff0000);
@@ -77,18 +76,6 @@ export const XRTeleport: React.FC<Props> = (props) => {
       player.position.y,
       players[id].z
     );
-
-    // Update processed position
-    processedAction.current = {
-      [id]: {
-        id: players[id].id,
-        timestamp: players[id].timestamp,
-        userLocation: players[id].userLocation,
-        x: players[id].x,
-        y: player.position.y,
-        z: players[id].z,
-      },
-    };
 
     player.position.add(startingPosition);
 
