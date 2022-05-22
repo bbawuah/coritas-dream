@@ -64,7 +64,7 @@ const SignIn: NextPage = () => {
         provider,
       },
       {
-        redirectTo: 'http://localhost:3000/dream',
+        redirectTo: '/dream',
       }
     );
 
