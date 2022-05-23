@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { Suspense, useEffect, useRef } from 'react';
 import { OrbitControls } from '@react-three/drei';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import * as CANNON from 'cannon-es';
@@ -61,7 +61,11 @@ export const User: React.FC<Props> = (props) => {
   const playerSpeed = 10;
   const frameTime = useRef<number>(0.0);
   const gltf = useLoader(GLTFLoader, glbUrl);
-  const userRef = useRef<UserModel>();
+  const userRef = useRef<UserModel>(
+    new UserModel({
+      gltf,
+    })
+  );
   const userLookAt = useRef<THREE.Vector3>(new THREE.Vector3());
 
   // const cannonDebugRenderer = useRef(
@@ -74,11 +78,6 @@ export const User: React.FC<Props> = (props) => {
   }); //Use keyboard events
 
   useEffect(() => {
-    userRef.current = new UserModel({
-      gltf,
-      scene,
-    });
-
     if (userRef.current) {
       // Create physics
       physicalBody.current = physics.createPlayerPhysics<IPlayerNetworkData>(
@@ -154,14 +153,15 @@ export const User: React.FC<Props> = (props) => {
   });
 
   return (
-    <>
+    <Suspense fallback={null}>
+      <primitive object={userRef.current?.controlObject} />
       <OrbitControls
         ref={controlsRef}
         enablePan={false}
         enableZoom={false}
         maxPolarAngle={Math.PI / 2}
       />
-    </>
+    </Suspense>
   );
 
   function keyDownEvent(direction: IUserDirection) {

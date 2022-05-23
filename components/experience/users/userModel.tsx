@@ -6,7 +6,6 @@ import { ActionNames, getState, setState } from '../../../store/store';
 
 interface UserModelProps {
   gltf: GLTF | (GLTF & ObjectMap);
-  scene: THREE.Scene;
 }
 
 const animations: Array<ActionNames> = ['fist', 'idle', 'praying', 'walking'];
@@ -21,7 +20,7 @@ export class UserModel {
   public actions!: Record<ActionNames, THREE.AnimationAction>;
 
   constructor(props: UserModelProps) {
-    const { gltf, scene } = props;
+    const { gltf } = props;
     this.animationLoader = new GLTFLoader();
     this.dracoLoader = new DRACOLoader();
     this.dracoLoader.setDecoderPath('draco/');
@@ -49,8 +48,6 @@ export class UserModel {
         }
       );
     });
-
-    scene.add(this.controlObject);
   }
 
   fadeToAction(name: ActionNames, duration: number) {

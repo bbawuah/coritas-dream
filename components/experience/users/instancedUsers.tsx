@@ -16,13 +16,10 @@ export const InstancedUsers: React.FC<Props> = (props) => {
   const { camera } = useThree();
   const instancedMeshRef = useRef<THREE.InstancedMesh>();
   const labelsRef = useRef<ILabelsType>({});
-  const { playersCount, set, players } = useStore(
-    ({ playersCount, set, players }) => ({
-      playersCount,
-      set,
-      players,
-    })
-  );
+  const { playersCount, set } = useStore(({ playersCount, set }) => ({
+    playersCount,
+    set,
+  }));
 
   const dummy = new THREE.Object3D();
   const tempMatrix = new THREE.Matrix4();

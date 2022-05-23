@@ -99,12 +99,11 @@ const CanvasComponent: React.FC<Props> = (props) => {
             mieDirectionalG={0.029}
             azimuth={91.5}
           />
-          <Perf />
+          {/* <Perf /> */}
           <ambientLight intensity={1.2} />
           <directionalLight color="white" position={[-3, 3, -2]} />
           {renderUser()}
           {renderNpcs()}
-          <InstancedUsers playerId={id} />
           <Environment nodes={nodes} physics={physics} />
           <EffectComposer>
             <Noise
@@ -152,9 +151,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
         const player = players[id];
 
         return (
-          <Suspense key={index} fallback={null}>
-            <NonPlayableCharacters playerData={player} room={room} />
-          </Suspense>
+          <NonPlayableCharacters key={index} playerData={player} room={room} />
         );
       });
 

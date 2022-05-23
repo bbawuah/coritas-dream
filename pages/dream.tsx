@@ -161,6 +161,7 @@ const Dream: NextPage = () => {
         .eq('id', user.id);
 
       if (!profile || profile?.length === 0) {
+        console.log(profile);
         setHasProfile(false);
       } else {
         setHasProfile(true);
@@ -172,13 +173,14 @@ const Dream: NextPage = () => {
   async function updateUserAvatar(url: string) {
     const user = supabaseClient.auth.user();
 
-    if (!hasProfile) {
+    if (!hasProfile && user) {
       const { data, error } = await supabaseClient
         .from('profiles')
         .insert([{ id: user?.id, updated_at: new Date(), avatar: url }]);
 
       if (error) {
         console.log(error.message);
+        setCharachterIsCreated(true);
       }
 
       if (data) {

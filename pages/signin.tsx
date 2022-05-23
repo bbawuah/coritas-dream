@@ -44,7 +44,7 @@ const SignIn: NextPage = () => {
               Facebook
             </button>
             <button
-              onClick={() => console.log('clicked')}
+              onClick={() => signInWithOAuth('github')}
               className={classNames(styles.button, styles.github)}
             >
               Github

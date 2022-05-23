@@ -1,5 +1,5 @@
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import {
@@ -24,6 +24,8 @@ interface ProfileData {
   username: string | null;
 }
 
+// Hier moet je eigenlijk async call hebben naar 3D model
+
 export const NonPlayableCharacters: React.FC<Props> = (props) => {
   const { playerData, room } = props;
   const { scene } = useThree();
@@ -39,13 +41,8 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
   const newPosition = useRef<THREE.Vector3>(new THREE.Vector3());
 
   const { players } = useStore(({ players }) => ({ players }));
-  const ids = Object.keys(players);
 
   useEffect(() => {
-    room.onMessage('removePlayer', () => {
-      userRef?.current?.controlObject.traverse((child) => scene.remove(child));
-    });
-
     setIsSsr(false);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -71,12 +68,6 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
     if (userRef.current) {
       const player = getState().players[playerData.id];
 
-      if (!player) {
-        userRef?.current?.controlObject.traverse((child) =>
-          scene.remove(child)
-        );
-      }
-
       if (player) {
         lookAt.current.set(player.rx, player.ry, player.rz);
         newPosition.current.set(player.x, player.y, player.z);
@@ -90,7 +81,13 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
     }
   });
 
-  return null;
+  return (
+    <Suspense fallback={null}>
+      {userRef.current?.controlObject && (
+        <primitive object={userRef.current?.controlObject} />
+      )}
+    </Suspense>
+  );
 
   async function getPlayer() {
     try {
@@ -108,10 +105,8 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
         })[0];
 
         gltfLoader.current.load(playerObject.avatar, (gltf) => {
-          console.log('test');
           userRef.current = new UserModel({
             gltf,
-            scene,
           });
         });
       }
