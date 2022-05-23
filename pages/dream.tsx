@@ -9,9 +9,9 @@ import { useDeviceCheck } from '../hooks/useDeviceCheck';
 import { Loader } from '../components/experience/loader/loader';
 import { client as supabaseClient } from '../utils/supabase';
 import { Session, User } from '@supabase/supabase-js';
-import { useRouter } from 'next/router';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
 import { useAuth } from '../hooks/useAuth';
+import Router from 'next/router';
 
 const Canvas = dynamic(() => import('../components/experience/canvas/canvas'), {
   ssr: false,
@@ -22,13 +22,12 @@ const Dream: NextPage = () => {
   const { client, id, room } = useColyseus();
   const [webXRIsSupported, setWebXRIsSupported] = useState<boolean>();
   const videoRef = useRef<HTMLVideoElement>(null);
-  const router = useRouter();
   const subdomain: string = 'demo';
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [charachterIsCreated, setCharachterIsCreated] =
     useState<boolean>(false);
   const [hasProfile, setHasProfile] = useState<boolean>(false);
-  const { session } = useAuth();
+  const [session, setSession] = useState<Session | null>();
 
   useEffect(() => {
     const webXRNavigator: Navigator = navigator as any as Navigator;
@@ -41,6 +40,14 @@ const Dream: NextPage = () => {
   }, [isInVR]);
 
   useEffect(() => {
+    const currentSession = supabaseClient.auth.session();
+
+    setSession(currentSession);
+
+    if (!currentSession) {
+      Router.push('/');
+    }
+
     if (room) {
       console.log('room is available');
     }
@@ -173,17 +180,20 @@ const Dream: NextPage = () => {
   async function updateUserAvatar(url: string) {
     const user = supabaseClient.auth.user();
 
-    if (!hasProfile && user) {
-      const { data, error } = await supabaseClient
-        .from('profiles')
-        .insert([{ id: user?.id, updated_at: new Date(), avatar: url }]);
+    if (user) {
+      if (!hasProfile) {
+        const { data, error } = await supabaseClient
+          .from('profiles')
+          .insert([{ id: user?.id, updated_at: new Date(), avatar: url }]);
 
-      if (error) {
-        console.log(error.message);
-        setCharachterIsCreated(true);
-      }
+        if (error) {
+          console.log(error.message);
+        }
 
-      if (data) {
+        if (data) {
+          setCharachterIsCreated(true);
+        }
+      } else {
         setCharachterIsCreated(true);
       }
     }
