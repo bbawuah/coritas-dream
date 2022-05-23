@@ -166,14 +166,14 @@ const Dream: NextPage = () => {
 
   async function updateUserAvatar(url: string) {
     const user = supabaseClient.auth.user();
-    console.log(user);
     if (user) {
       if (!hasProfile) {
-        const { data, error } = await supabaseClient.from('profiles').insert([
+        const { data, error } = await supabaseClient.from('profiles').upsert([
           {
-            id: supabaseClient.auth.user(),
+            id: user.id,
             avatar: url,
           },
+          { onConflict: 'id' },
         ]);
 
         if (error) {
