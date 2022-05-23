@@ -4,6 +4,7 @@ import { getState, useStore } from '../store/store';
 import { OnMoveProps } from '../components/experience/users/types';
 import { client as supabaseClient } from '../utils/supabase';
 import { State } from '../server/state/state';
+import { useAuth } from './useAuth';
 
 const dev: boolean = process.env.NODE_ENV !== 'production';
 const developmentPort: string = dev ? '8080' : '3000';
@@ -16,6 +17,7 @@ export const useColyseus = () => {
   const [client, setClient] = useState<Client>();
   const [room, setRoom] = useState<Room>();
   const [id, setId] = useState<string>();
+  const { user } = useAuth();
 
   useEffect(() => {
     setClient(new Client(endpoint));
@@ -31,8 +33,6 @@ export const useColyseus = () => {
   return { client, id, room };
 
   async function getRoom() {
-    const user = supabaseClient.auth.user();
-
     if (client && user) {
       try {
         const room = (await client.joinOrCreate('gallery', {

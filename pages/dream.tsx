@@ -27,9 +27,7 @@ const Dream: NextPage = () => {
   const [charachterIsCreated, setCharachterIsCreated] =
     useState<boolean>(false);
   const [hasProfile, setHasProfile] = useState<boolean>(false);
-  const { session } = useAuth();
-
-  console.log(session);
+  const { session, user } = useAuth();
 
   useEffect(() => {
     const webXRNavigator: Navigator = navigator as any as Navigator;
@@ -154,7 +152,6 @@ const Dream: NextPage = () => {
   }
 
   async function getUserProfile() {
-    const user = supabaseClient.auth.user();
     if (user) {
       const { data: profile } = await supabaseClient
         .from('profiles')
