@@ -27,7 +27,9 @@ const Dream: NextPage = () => {
   const [charachterIsCreated, setCharachterIsCreated] =
     useState<boolean>(false);
   const [hasProfile, setHasProfile] = useState<boolean>(false);
-  const [session, setSession] = useState<Session | null>();
+  const [session, setSession] = useState<Session | null>(
+    supabaseClient.auth.session()
+  );
 
   useEffect(() => {
     const webXRNavigator: Navigator = navigator as any as Navigator;
@@ -44,8 +46,10 @@ const Dream: NextPage = () => {
 
     setSession(currentSession);
 
+    console.log(currentSession);
+
     if (!currentSession) {
-      Router.push('/');
+      // Router.push('/');
     }
 
     if (room) {
