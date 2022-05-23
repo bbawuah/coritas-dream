@@ -166,11 +166,15 @@ const Dream: NextPage = () => {
 
   async function updateUserAvatar(url: string) {
     const user = supabaseClient.auth.user();
+    console.log(user);
     if (user) {
       if (!hasProfile) {
-        const { data, error } = await supabaseClient
-          .from('profiles')
-          .insert([{ id: user.id, updated_at: new Date(), avatar: url }]);
+        const { data, error } = await supabaseClient.from('profiles').upsert([
+          {
+            id: user.id,
+            avatar: url,
+          },
+        ]);
 
         if (error) {
           console.log(error.message);
@@ -179,8 +183,6 @@ const Dream: NextPage = () => {
         if (data) {
           setCharachterIsCreated(true);
         }
-      } else {
-        setCharachterIsCreated(true);
       }
     }
   }
