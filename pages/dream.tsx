@@ -168,12 +168,11 @@ const Dream: NextPage = () => {
     const user = supabaseClient.auth.user();
     if (user) {
       if (!hasProfile) {
-        const { data, error } = await supabaseClient.from('profiles').upsert([
+        const { data, error } = await supabaseClient.from('profiles').insert([
           {
             id: user.id,
             avatar: url,
           },
-          { onConflict: 'id' },
         ]);
 
         if (error) {
