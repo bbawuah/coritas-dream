@@ -9,6 +9,7 @@ import Link from 'next/link';
 import { Footer } from '../components/core/footer/footer';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
 import { useAuth } from '../hooks/useAuth';
+import { useSignOut } from 'react-supabase';
 
 const Canvas = dynamic(() => import('../components/landingPageCanvas/canvas'), {
   ssr: false,
@@ -18,10 +19,17 @@ const Home: NextPage = () => {
   const [isSsr, setIsSsr] = useState<boolean>(true); // andere manier fixen
   const { session, user } = useAuth();
   const [titleElement, setTitleElement] = useState<HTMLHeadingElement>();
+  const [{ error, fetching }, signOut] = useSignOut(); //Render logout error
 
-  console.log(session, user);
   useEffect(() => {
+    if (session) {
+      (async () => {
+        await signOut();
+      })();
+    }
+
     setIsSsr(false);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

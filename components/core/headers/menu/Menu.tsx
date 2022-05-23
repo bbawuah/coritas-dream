@@ -1,18 +1,17 @@
 import { Room } from 'colyseus.js';
 import { useRouter } from 'next/router';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSignOut } from 'react-supabase';
 import { client } from '../../../../utils/supabase';
 import styles from './Menu.module.scss';
 
 interface Props {
   room: Room;
+  onLogout: () => void;
 }
 
 export const Menu: React.FC<Props> = (props) => {
-  const [{ error, fetching }, signOut] = useSignOut(); //Render logout error
-  const { room } = props;
-  const router = useRouter();
+  const { room, onLogout } = props;
 
   return (
     <div className={styles.modal}>
@@ -25,16 +24,10 @@ export const Menu: React.FC<Props> = (props) => {
           <button className={styles.button}>play video</button>
         </div>
 
-        <button onClick={handleLogout} className={styles.logOutButton}>
+        <button onClick={() => onLogout()} className={styles.logOutButton}>
           Log out
         </button>
       </div>
     </div>
   );
-
-  async function handleLogout() {
-    await signOut();
-    room.leave();
-    router.replace('/');
-  }
 };

@@ -29,8 +29,6 @@ const Dream: NextPage = () => {
   const [hasProfile, setHasProfile] = useState<boolean>(false);
   const { session, user } = useAuth();
 
-  console.log(session);
-
   useEffect(() => {
     const webXRNavigator: Navigator = navigator as any as Navigator;
 
@@ -50,7 +48,7 @@ const Dream: NextPage = () => {
     window.addEventListener('message', subscribe);
     document.addEventListener('message', subscribe);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [session]);
 
   return (
     <div className={styles.container}>
@@ -64,7 +62,6 @@ const Dream: NextPage = () => {
   );
 
   function renderContent() {
-    console.log(session);
     if (!charachterIsCreated) {
       return (
         <>
@@ -102,7 +99,7 @@ const Dream: NextPage = () => {
     );
   }
 
-  function subscribe(event: any) {
+  async function subscribe(event: any) {
     const json = parse(event);
 
     if (json?.source !== 'readyplayerme') {
@@ -133,7 +130,7 @@ const Dream: NextPage = () => {
         iframeRef.current.hidden = true;
       }
 
-      updateUserAvatar(json.data.url);
+      await updateUserAvatar(json.data.url);
     }
 
     // Get user id
@@ -169,12 +166,11 @@ const Dream: NextPage = () => {
 
   async function updateUserAvatar(url: string) {
     const user = supabaseClient.auth.user();
-
     if (user) {
       if (!hasProfile) {
         const { data, error } = await supabaseClient
           .from('profiles')
-          .insert([{ id: user?.id, updated_at: new Date(), avatar: url }]);
+          .insert([{ id: user.id, updated_at: new Date(), avatar: url }]);
 
         if (error) {
           console.log(error.message);
