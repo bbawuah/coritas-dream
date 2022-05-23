@@ -165,23 +165,25 @@ const Dream: NextPage = () => {
   }
 
   async function updateUserAvatar(url: string) {
-    console.log(user);
-    console.log(supabaseClient.auth.user());
-    if (!hasProfile) {
-      const { data, error } = await supabaseClient.from('profiles').upsert([
-        {
-          id: supabaseClient.auth.user(),
-          avatar: url,
-        },
-      ]);
+    const user = supabaseClient.auth.user();
+console.log(user)
+    if (user) {
+      if (!hasProfile) {
+        const { data, error } = await supabaseClient.from('profiles').upsert([
+          {
+            id: supabaseClient.auth.user(),
+            avatar: url,
+          },
+          { onConflict: 'id' },
+        ]);
 
-      if (error) {
-        console.log(error.message);
-      }
+        if (error) {
+          console.log(error.message);
+        }
 
-      if (data) {
-        console.log(data);
-        setCharachterIsCreated(true);
+        if (data) {
+          setCharachterIsCreated(true);
+        }
       }
     }
   }
