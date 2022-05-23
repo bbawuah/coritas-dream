@@ -24,8 +24,7 @@ const Dream: NextPage = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const subdomain: string = 'demo';
   const iframeRef = useRef<HTMLIFrameElement>(null);
-  const [charachterIsCreated, setCharachterIsCreated] =
-    useState<boolean>(false);
+  const [characterIsCreated, setCharacterIsCreated] = useState<boolean>(false);
   const [hasProfile, setHasProfile] = useState<boolean>(false);
   const { session, user } = useAuth();
 
@@ -62,7 +61,7 @@ const Dream: NextPage = () => {
   );
 
   function renderContent() {
-    if (!charachterIsCreated) {
+    if (!characterIsCreated) {
       return (
         <>
           <Header showLogo={true} />
@@ -155,11 +154,10 @@ const Dream: NextPage = () => {
         .eq('id', user.id);
 
       if (!profile || profile?.length === 0) {
-        console.log(profile);
         setHasProfile(false);
       } else {
         setHasProfile(true);
-        setCharachterIsCreated(true);
+        setCharacterIsCreated(true);
       }
     }
   }
@@ -175,13 +173,12 @@ const Dream: NextPage = () => {
           },
         ]);
 
-        if (error) {
-          console.log(error.message);
+        if (data) {
+          console.log('character is created');
+          setCharacterIsCreated(true);
         }
 
-        if (data) {
-          setCharachterIsCreated(true);
-        }
+        return;
       }
     }
   }
