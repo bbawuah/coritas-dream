@@ -45,7 +45,6 @@ const Dream: NextPage = () => {
 
     getUserProfile();
     window.addEventListener('message', subscribe);
-    document.addEventListener('message', subscribe);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
@@ -172,6 +171,11 @@ const Dream: NextPage = () => {
             avatar: url,
           },
         ]);
+
+        if (error) {
+          console.log(error);
+          return;
+        }
 
         if (data) {
           console.log('character is created');
