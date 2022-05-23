@@ -27,9 +27,9 @@ const Dream: NextPage = () => {
   const [charachterIsCreated, setCharachterIsCreated] =
     useState<boolean>(false);
   const [hasProfile, setHasProfile] = useState<boolean>(false);
-  const [session, setSession] = useState<Session | null>(
-    supabaseClient.auth.session()
-  );
+  const { session } = useAuth();
+
+  console.log(session);
 
   useEffect(() => {
     const webXRNavigator: Navigator = navigator as any as Navigator;
@@ -42,16 +42,6 @@ const Dream: NextPage = () => {
   }, [isInVR]);
 
   useEffect(() => {
-    const currentSession = supabaseClient.auth.session();
-
-    setSession(currentSession);
-
-    console.log(currentSession);
-
-    if (!currentSession) {
-      // Router.push('/');
-    }
-
     if (room) {
       console.log('room is available');
     }

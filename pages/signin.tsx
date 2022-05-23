@@ -8,11 +8,13 @@ import classNames from 'classnames';
 import { client } from '../utils/supabase';
 import { Footer } from '../components/core/footer/footer';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
+import { useSignIn } from 'react-supabase';
 
 const dev: boolean = process.env.NODE_ENV !== 'production';
 console.log(dev);
 
 const SignIn: NextPage = () => {
+  const [{ error, fetching, session, user }, signIn] = useSignIn();
   const [isSsr, setIsSsr] = useState<boolean>(true); // andere manier fixen
 
   useEffect(() => {
@@ -32,19 +34,52 @@ const SignIn: NextPage = () => {
           <p className={styles.description}>Log in to continue</p>
           <section className={styles.buttonContainer}>
             <button
-              onClick={() => signInWithOAuth('google')}
+              onClick={() =>
+                signIn(
+                  {
+                    provider: 'google',
+                  },
+                  {
+                    redirectTo: dev
+                      ? 'http://localhost:3000/dream'
+                      : 'https://coritas-dream.herokuapp.com/dream',
+                  }
+                )
+              }
               className={classNames(styles.button, styles.google)}
             >
               Google
             </button>
             <button
-              onClick={() => signInWithOAuth('facebook')}
+              onClick={() =>
+                signIn(
+                  {
+                    provider: 'facebook',
+                  },
+                  {
+                    redirectTo: dev
+                      ? 'http://localhost:3000/dream'
+                      : 'https://coritas-dream.herokuapp.com/dream',
+                  }
+                )
+              }
               className={classNames(styles.button, styles.facebook)}
             >
               Facebook
             </button>
             <button
-              onClick={() => signInWithOAuth('github')}
+              onClick={() =>
+                signIn(
+                  {
+                    provider: 'github',
+                  },
+                  {
+                    redirectTo: dev
+                      ? 'http://localhost:3000/dream'
+                      : 'https://coritas-dream.herokuapp.com/dream',
+                  }
+                )
+              }
               className={classNames(styles.button, styles.github)}
             >
               Github
@@ -55,23 +90,6 @@ const SignIn: NextPage = () => {
       <Footer />
     </div>
   );
-
-  async function signInWithOAuth(provider: Provider) {
-    const { error } = await client.auth.signIn(
-      {
-        provider,
-      },
-      {
-        redirectTo: dev
-          ? 'http://localhost:3000/dream'
-          : 'https://coritas-dream.herokuapp.com/dream',
-      }
-    );
-
-    if (error) {
-      throw new Error(error.message);
-    }
-  }
 };
 
 export default SignIn;

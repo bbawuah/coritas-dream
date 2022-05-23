@@ -1,6 +1,7 @@
 import { Room } from 'colyseus.js';
 import { useRouter } from 'next/router';
 import React from 'react';
+import { useSignOut } from 'react-supabase';
 import { client } from '../../../../utils/supabase';
 import styles from './Menu.module.scss';
 
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export const Menu: React.FC<Props> = (props) => {
+  const [{ error, fetching }, signOut] = useSignOut(); //Render logout error
   const { room } = props;
   const router = useRouter();
 
@@ -31,7 +33,7 @@ export const Menu: React.FC<Props> = (props) => {
   );
 
   async function handleLogout() {
-    await client.auth.signOut();
+    await signOut();
     room.leave();
     router.replace('/');
   }

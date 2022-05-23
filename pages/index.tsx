@@ -22,6 +22,7 @@ const Home: NextPage = () => {
   const { session, user } = useAuth();
   const [titleElement, setTitleElement] = useState<HTMLHeadingElement>();
 
+  console.log(session, user);
   useEffect(() => {
     setIsSsr(false);
   }, []);

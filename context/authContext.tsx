@@ -22,6 +22,7 @@ export const AuthProvider: React.FC = ({ children }) => {
   }, []);
 
   useAuthStateChange((event, session) => {
+    console.log(`${event} from context`);
     setState({ session, user: session?.user ?? null });
   });
 
