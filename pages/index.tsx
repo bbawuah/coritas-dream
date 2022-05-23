@@ -2,13 +2,10 @@
 import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 import Head from 'next/head';
-import Image from 'next/image';
-import { Suspense, useEffect, useRef, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import styles from '../styles/home/Home.module.scss';
 import { Session } from '@supabase/supabase-js';
 import Link from 'next/link';
-import Router from 'next/router';
-import { client } from '../utils/supabase';
 import { Footer } from '../components/core/footer/footer';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
 import { useAuth } from '../hooks/useAuth';
