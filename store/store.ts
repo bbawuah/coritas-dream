@@ -2,6 +2,7 @@ import create from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 import shallow from 'zustand/shallow';
 import type { GetState, SetState, StateSelector } from 'zustand';
+import Peer from 'simple-peer';
 
 const controls = {
   backward: false,
@@ -25,9 +26,16 @@ export interface IPlayerNetworkData {
   rz: number;
 }
 
+interface CallRequests {
+  id: string;
+  signal: Peer.SignalData;
+}
+
 const clients = {};
 
 const players: IPlayerType = {};
+
+const callRequests: CallRequests[] = [];
 
 const playersCount: number = 0;
 
@@ -54,6 +62,7 @@ export interface IState {
   players: IPlayerType;
   playersCount: number;
   animationName: ActionState;
+  callRequests: CallRequests[];
   cursorState: CursorStates;
   hovered: boolean;
   get: Getter;
@@ -71,6 +80,7 @@ const useStoreImplementation = create(
         clients,
         players,
         playersCount,
+        callRequests,
         animationName,
         hovered,
         cursorState,

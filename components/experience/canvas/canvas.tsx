@@ -1,4 +1,4 @@
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
 import { Canvas, extend } from '@react-three/fiber';
@@ -9,7 +9,7 @@ import { XRCanvas } from './xrCanvas';
 import { Sky, useGLTF } from '@react-three/drei';
 import { VRCanvas } from '@react-three/xr';
 import { Perf } from 'r3f-perf';
-import { getState, useStore } from '../../../store/store';
+import { getState, IPlayerNetworkData, useStore } from '../../../store/store';
 import { useDeviceCheck } from '../../../hooks/useDeviceCheck';
 import { Environment } from '../environment/Environment';
 import { BlendFunction } from 'postprocessing';
@@ -27,6 +27,8 @@ import { client } from '../../../utils/supabase';
 import { InstancedUsers } from '../users/instancedUsers';
 import { useRealtime } from 'react-supabase';
 import { NonPlayableCharacters } from '../users/NonPlayableCharacters/NonPlayableCharacters';
+import { Notifications } from '../../core/notifications/Notifications';
+import Peer from 'simple-peer';
 
 interface Props {
   client: Client;
@@ -43,16 +45,28 @@ interface ProfileData {
 }
 
 const CanvasComponent: React.FC<Props> = (props) => {
-  const { hovered, playersCount } = useStore(({ hovered, playersCount }) => ({
-    hovered,
-    playersCount,
-  })); //Maybe refactor this late
+  const [stream, setStream] = useState<MediaStream>();
   const { isWebXrSupported, room, id } = props;
   const { nodes } = useGLTF(
     '/environment-transformed.glb'
   ) as unknown as GLTFResult;
   const { isInVR, isDesktop } = useDeviceCheck();
   const [physics, setPhysics] = useState<Physics | null>(null);
+  const [_, reexecute] = useRealtime('profiles');
+  const [userAvatar, setUserAvatar] = useState<string>();
+  const [notifications, setNotifications] = useState<{ id: string }[]>([]);
+  const [waitingForResponse, setWaitingForResponse] = useState<boolean>(false);
+  const connectionRef = useRef<Peer.Instance>();
+  const userAudio = useRef<HTMLAudioElement | null>(null);
+  const [callRequestClose, setRequestClose] = useState<boolean>(false);
+  const [callClose, setCallClose] = useState<boolean>(false);
+  const { hovered, set, callRequests } = useStore(
+    ({ hovered, set, callRequests }) => ({
+      hovered,
+      set,
+      callRequests,
+    })
+  ); //Maybe refactor this late
   const classes = classNames([
     styles.container,
     {
@@ -60,12 +74,29 @@ const CanvasComponent: React.FC<Props> = (props) => {
       [styles.pointer]: hovered,
     },
   ]);
-  const [_, reexecute] = useRealtime('profiles');
-  const [userAvatar, setUserAvatar] = useState<string>();
+
+  const createNotification = (id: string) =>
+    setNotifications((value) => [{ id }]);
+
+  const deleteNotification = (id: string) =>
+    setNotifications((value) => value.filter((v) => v.id !== id));
+
+  const deleteCallRequestNotification = (id: string) =>
+    set((state) => ({
+      ...state,
+      callRequests: callRequests.filter((v) => v.id !== id),
+    }));
 
   useEffect(() => {
     getUserModel();
     setPhysics(new Physics());
+
+    navigator.mediaDevices
+      .getUserMedia({ video: false, audio: true })
+      .then((stream) => {
+        setStream(stream);
+      });
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -115,6 +146,9 @@ const CanvasComponent: React.FC<Props> = (props) => {
             <Bloom />
           </EffectComposer>
         </Canvas>
+        {renderCallNotification()}
+        {renderRequestNotifications()}
+        <audio className={styles.audio} playsInline ref={userAudio} autoPlay />:
       </>
     );
   }
@@ -147,15 +181,151 @@ const CanvasComponent: React.FC<Props> = (props) => {
 
     const jsx = ids
       .filter((data) => data !== id)
-      .map((id, index) => {
-        const player = players[id];
+      .map((playerId, index) => {
+        const player = players[playerId];
 
         return (
-          <NonPlayableCharacters key={index} playerData={player} room={room} />
+          <NonPlayableCharacters
+            key={index}
+            playerData={player}
+            room={room}
+            onClick={() => createNotification(player.id)}
+          />
         );
       });
 
     return jsx;
+  }
+
+  function renderCallNotification() {
+    return notifications.map((value, index) => (
+      <Notifications
+        isClosing={callClose}
+        key={index}
+        types={'info'}
+        onDelete={() => deleteCallRequestNotification(id)}
+      >
+        <div className={styles.notificationContainer}>
+          <p className={styles.notificationTitle}>
+            {!waitingForResponse
+              ? `Call player ${value.id}`
+              : `Calling ${value.id}..`}{' '}
+          </p>
+
+          {!waitingForResponse && (
+            <div className={styles.buttonContainer}>
+              <button
+                onClick={() => handleClickedNonPlayableCharacter(value.id, id)}
+                className={styles.notificationButton}
+              >
+                Call
+              </button>
+              <button
+                className={classNames(
+                  styles.notificationButton,
+                  styles.cancelNotificationButton
+                )}
+                onClick={() => deleteNotification(value.id)}
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      </Notifications>
+    ));
+  }
+
+  function renderRequestNotifications() {
+    return callRequests?.map(({ id, signal }) => (
+      <Notifications
+        isClosing={callRequestClose}
+        key={id}
+        types={'info'}
+        onDelete={() => deleteNotification(id)}
+      >
+        <div className={styles.notificationContainer}>
+          <p className={styles.notificationTitle}>
+            {id} Wants to start a voice call
+          </p>
+          <div className={styles.buttonContainer}>
+            <button
+              onClick={() => answerCall(id, signal)}
+              className={styles.notificationButton}
+            >
+              Accept
+            </button>
+            <button
+              className={classNames(
+                styles.notificationButton,
+                styles.cancelNotificationButton
+              )}
+              onClick={() => deleteNotification(id)}
+            >
+              Decline
+            </button>
+          </div>
+        </div>
+      </Notifications>
+    ));
+  }
+
+  function handleClickedNonPlayableCharacter(
+    clickedPlayer: string,
+    id: string
+  ) {
+    const peer = new Peer({
+      initiator: true,
+      trickle: false,
+      stream: stream,
+    });
+
+    peer.on('signal', (data) => {
+      room.send('sending private message', {
+        to: clickedPlayer,
+        signal: data,
+      });
+    });
+
+    peer.on('stream', (stream) => {
+      if (userAudio.current) userAudio.current.srcObject = stream;
+    });
+
+    setWaitingForResponse(true);
+
+    room.onMessage('callAccepted', (data) => {
+      const { signal } = data;
+      peer.signal(signal);
+    });
+
+    connectionRef.current = peer;
+  }
+
+  function answerCall(callerId: string, callerSignal: Peer.SignalData) {
+    setRequestClose(true);
+    setNotifications((value) => value.filter((v) => v.id !== callerId));
+    console.log(notifications.length);
+    const peer = new Peer({
+      initiator: false,
+      trickle: false,
+      stream: stream,
+    });
+
+    peer.on('signal', (data) => {
+      room.send('answerCall', { signal: data, to: callerId });
+    });
+
+    peer.on('stream', (stream) => {
+      if (userAudio.current) userAudio.current.srcObject = stream;
+    });
+
+    peer.signal(callerSignal);
+
+    connectionRef.current = peer;
+  }
+
+  function leaveCall() {
+    if (connectionRef.current) connectionRef.current.destroy();
   }
 };
 

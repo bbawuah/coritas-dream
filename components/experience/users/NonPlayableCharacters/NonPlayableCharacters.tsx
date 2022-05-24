@@ -11,10 +11,12 @@ import { UserModel } from '../userModel';
 import * as THREE from 'three';
 import { Room } from 'colyseus.js';
 import { client } from '../../../../utils/supabase';
+import { Text } from '@react-three/drei';
 
 interface Props {
   playerData: IPlayerNetworkData;
   room: Room;
+  onClick: () => void;
 }
 
 interface ProfileData {
@@ -27,15 +29,20 @@ interface ProfileData {
 // Hier moet je eigenlijk async call hebben naar 3D model
 
 export const NonPlayableCharacters: React.FC<Props> = (props) => {
-  const { playerData, room } = props;
+  const { playerData, room, onClick } = props;
   const { scene } = useThree();
   const userRef = useRef<UserModel>();
+  const { set } = useStore(({ set }) => ({ set }));
   const [isSsr, setIsSsr] = useState<boolean>(true);
   // const [isModelLoaded, setIsModelLoaded] = useState<boolean>(false);
   const gltfLoader = useRef<GLTFLoader>(new GLTFLoader());
   const dracoLoader = useRef<DRACOLoader>(new DRACOLoader());
   dracoLoader.current.setDecoderPath('draco/');
   gltfLoader.current.setDRACOLoader(dracoLoader.current);
+  const labelsRef = useRef<any>();
+  const newPositionLabel = useRef<THREE.Vector3>(new THREE.Vector3());
+  const lerpAlpha = 0.1;
+  const { camera } = useThree();
 
   const lookAt = useRef<THREE.Vector3>(new THREE.Vector3());
   const newPosition = useRef<THREE.Vector3>(new THREE.Vector3());
@@ -73,6 +80,14 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
         newPosition.current.set(player.x, player.y, player.z);
         userRef.current.controlObject.lookAt(lookAt.current);
         userRef.current.controlObject.position.lerp(newPosition.current, 0.1);
+
+        newPositionLabel.current.set(player.x, player.y + 2, player.z);
+
+        if (labelsRef.current) {
+          labelsRef.current.position.lerp(newPositionLabel.current, lerpAlpha);
+          newPositionLabel.current.set(0, 0, 0);
+          labelsRef.current.quaternion.copy(camera.quaternion);
+        }
       }
 
       if (userRef.current.mixer) {
@@ -84,8 +99,26 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
   return (
     <Suspense fallback={null}>
       {userRef.current?.controlObject && (
-        <primitive object={userRef.current?.controlObject} />
+        <>
+          <primitive
+            object={userRef.current?.controlObject}
+            onClick={() => onClick()}
+            onPointerOver={() => set((state) => ({ ...state, hovered: true }))}
+            onPointerLeave={() =>
+              set((state) => ({ ...state, hovered: false }))
+            }
+          />
+        </>
       )}
+      <Text
+        ref={labelsRef}
+        color={'#000'}
+        fontSize={0.25}
+        letterSpacing={0.03}
+        lineHeight={1}
+      >
+        {playerData.id}
+      </Text>
     </Suspense>
   );
 

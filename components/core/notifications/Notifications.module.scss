@@ -1,0 +1,84 @@
+.notification {
+  max-width: 430px;
+  max-height: 200px;
+  overflow: hidden;
+  padding: 1.5vmax;
+  z-index: 99;
+  position: relative;
+  border-radius: 0.8rem;
+  background: rgba(47, 47, 47, 0.7);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  transition: transform 0.3s ease-out;
+}
+
+.notification:not(:last-child) {
+  margin-bottom: 8px;
+}
+
+.notification.info {
+  background-color: #2196f3;
+}
+
+.notification.success {
+  background-color: #4caf50;
+}
+
+.notification.warning {
+  background-color: #ff9800;
+}
+
+.notification.error {
+  background-color: #f44336;
+}
+
+.notification.slideIn {
+  animation-name: slideIn;
+  animation-duration: 0.3s;
+  animation-timing-function: ease-in-out;
+}
+
+.notification.slideOut {
+  transform: translateX(150%);
+  flex: 0;
+}
+
+.container {
+  overflow: hidden;
+  max-height: 200px;
+  transition: max-height 0.3s ease-out;
+}
+
+.container:not(:last-child) {
+  margin-bottom: 8px;
+}
+
+.container.shrink {
+  max-height: 0;
+}
+
+.notification .closeButton {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  padding: 0;
+  border: none;
+  cursor: pointer;
+}
+
+.notification,
+.notification .closeButton {
+  font-size: 0.9rem;
+  color: #d4d3d3;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+  }
+
+  to {
+    transform: translateX(0%);
+  }
+}
