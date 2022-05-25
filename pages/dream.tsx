@@ -7,14 +7,23 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import type { Navigator } from 'webxr';
 import { useDeviceCheck } from '../hooks/useDeviceCheck';
 import { Loader } from '../components/experience/loader/loader';
-import { client as supabaseClient } from '../utils/supabase';
+import { client, client as supabaseClient } from '../utils/supabase';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
 import { useAuth } from '../hooks/useAuth';
-import Peer from 'simple-peer';
 
 const Canvas = dynamic(() => import('../components/experience/canvas/canvas'), {
   ssr: false,
 });
+
+export async function getServerSideProps({ req }: any) {
+  const { user } = await client.auth.api.getUserByCookie(req);
+
+  if (!user) {
+    return { props: {}, redirect: { destination: '/signin' } };
+  }
+
+  return { props: {} };
+}
 
 const Dream: NextPage = () => {
   const { isInVR } = useDeviceCheck();
@@ -34,7 +43,6 @@ const Dream: NextPage = () => {
         setWebXRIsSupported(supported);
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInVR]);
 
   useEffect(() => {
@@ -46,10 +54,6 @@ const Dream: NextPage = () => {
     window.addEventListener('message', subscribe);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
-
-  if (!session) {
-    return <p>No session found</p>;
-  }
 
   return (
     <div className={styles.container}>
