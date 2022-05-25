@@ -47,21 +47,6 @@ export const useColyseus = () => {
           id: user.id,
         })) as Room<State>;
 
-        room.onMessage(
-          'sending private message',
-          (data: { signal: Peer.SignalData; senderId: string }) => {
-            const { signal, senderId } = data;
-
-            set((state) => ({
-              ...state,
-              callRequests: [
-                ...state.callRequests,
-                { id: senderId, signal: signal },
-              ],
-            }));
-          }
-        );
-
         getPlayerId(room);
         setRoom(room);
         onAnimation(room);

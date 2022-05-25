@@ -10,7 +10,7 @@ export const copyright: string;
 export const description: string;
 export const title: string;
 export const buttonContainer: string;
-export const button: string;
+export const signInbutton: string;
 export const google: string;
 export const facebook: string;
 export const github: string;

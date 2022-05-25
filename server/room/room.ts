@@ -115,7 +115,7 @@ export class Gallery extends Room<State> {
         const receiver = this.clients.find((v) => v.sessionId === to);
 
         if (receiver) {
-          receiver.send('callAccepted', { signal });
+          receiver.send('callAccepted', { signal, id: client.sessionId });
         }
       }
     );

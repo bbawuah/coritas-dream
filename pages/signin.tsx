@@ -9,6 +9,7 @@ import { client } from '../utils/supabase';
 import { Footer } from '../components/core/footer/footer';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
 import { useSignIn } from 'react-supabase';
+import { Button } from '../components/core/button/Button';
 
 const dev: boolean = process.env.NODE_ENV !== 'production';
 console.log(dev);
@@ -33,7 +34,7 @@ const SignIn: NextPage = () => {
         <section className={styles.contentContainer}>
           <p className={styles.description}>Log in to continue</p>
           <section className={styles.buttonContainer}>
-            <button
+            <Button
               onClick={() =>
                 signIn(
                   {
@@ -46,11 +47,10 @@ const SignIn: NextPage = () => {
                   }
                 )
               }
-              className={classNames(styles.button, styles.google)}
-            >
-              Google
-            </button>
-            <button
+              className={classNames(styles.signInbutton, styles.google)}
+              text={'Google'}
+            />
+            <Button
               onClick={() =>
                 signIn(
                   {
@@ -63,11 +63,11 @@ const SignIn: NextPage = () => {
                   }
                 )
               }
-              className={classNames(styles.button, styles.facebook)}
-            >
-              Facebook
-            </button>
-            <button
+              className={classNames(styles.signInbutton, styles.facebook)}
+              text={'Facebook'}
+            />
+
+            <Button
               onClick={() =>
                 signIn(
                   {
@@ -80,10 +80,9 @@ const SignIn: NextPage = () => {
                   }
                 )
               }
-              className={classNames(styles.button, styles.github)}
-            >
-              Github
-            </button>
+              className={classNames(styles.signInbutton, styles.github)}
+              text={'Github'}
+            />
           </section>
         </section>
       </main>

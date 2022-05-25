@@ -1,5 +1,5 @@
 import React from 'react';
-import className from 'classnames';
+import classNames from 'classnames';
 import styles from './Button.module.scss';
 
 interface Props
@@ -8,14 +8,15 @@ interface Props
     HTMLButtonElement
   > {
   text: string;
+  className?: string;
 }
 
 export const Button: React.FC<Props> = (props) => {
-  const { text, ...rest } = props;
-  const classes = className(styles.button);
+  const { text, className, ...rest } = props;
+  const classes = classNames(styles.button, className);
 
   return (
-    <button className={styles.button} {...rest}>
+    <button className={classes} {...rest}>
       {text}
     </button>
   );

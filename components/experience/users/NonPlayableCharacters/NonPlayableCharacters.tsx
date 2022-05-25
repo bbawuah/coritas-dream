@@ -16,7 +16,7 @@ import { Text } from '@react-three/drei';
 interface Props {
   playerData: IPlayerNetworkData;
   room: Room;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 interface ProfileData {
@@ -102,11 +102,11 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
         <>
           <primitive
             object={userRef.current?.controlObject}
-            onClick={() => onClick()}
-            onPointerOver={() => set((state) => ({ ...state, hovered: true }))}
-            onPointerLeave={() =>
-              set((state) => ({ ...state, hovered: false }))
-            }
+            onClick={() => onClick?.()}
+            // onPointerOver={() => set((state) => ({ ...state, hovered: true }))}
+            // onPointerLeave={() =>
+            //   set((state) => ({ ...state, hovered: false }))
+            // }
           />
         </>
       )}

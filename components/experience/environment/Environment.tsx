@@ -60,7 +60,7 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
   normalTexture.minFilter = THREE.LinearFilter;
   metalnessMap.minFilter = THREE.LinearFilter;
 
-  const color = 0x93887d;
+  const color = 0x8b7967;
   const material = new THREE.MeshPhongMaterial({
     color,
     normalMap: normalTexture,
