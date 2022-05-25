@@ -5,7 +5,11 @@ import { useSignOut } from 'react-supabase';
 import { Menu } from '../menu/Menu';
 import { SettingsButton } from '../settingsButton/SettingsButton';
 
-export const SettingsMenu: React.FC = (props) => {
+interface Props {
+  room: Room;
+}
+export const SettingsMenu: React.FC<Props> = (props) => {
+  const { room } = props;
   const [hovered, setHovered] = useState<boolean>(false);
   const [clicked, setClicked] = useState<boolean>(false);
   const router = useRouter();
@@ -28,10 +32,11 @@ export const SettingsMenu: React.FC = (props) => {
       return null;
     }
 
-    return <Menu onLogout={handleLogout} />;
+    return <Menu onLogout={() => handleLogout()} />;
   }
 
-  function handleLogout() {
+  async function handleLogout() {
     router.push('/');
+    await room.leave();
   }
 };

@@ -33,6 +33,8 @@ interface CallRequests {
 
 const clients = {};
 
+const playerIds: string[] = [];
+
 const players: IPlayerType = {};
 
 const callRequests: CallRequests[] = [];
@@ -60,6 +62,7 @@ type CursorStates = 'grab' | 'pointer';
 export interface IState {
   controls: Controls;
   players: IPlayerType;
+  playerIds: string[];
   playersCount: number;
   animationName: ActionState;
   callRequests: CallRequests[];
@@ -79,6 +82,7 @@ const useStoreImplementation = create(
         controls,
         clients,
         players,
+        playerIds,
         playersCount,
         callRequests,
         animationName,

@@ -9,7 +9,12 @@ import { XRCanvas } from './xrCanvas';
 import { Sky, useGLTF } from '@react-three/drei';
 import { VRCanvas } from '@react-three/xr';
 import { Perf } from 'r3f-perf';
-import { getState, IPlayerNetworkData, useStore } from '../../../store/store';
+import {
+  getState,
+  IPlayerNetworkData,
+  IPlayerType,
+  useStore,
+} from '../../../store/store';
 import { useDeviceCheck } from '../../../hooks/useDeviceCheck';
 import { Environment } from '../environment/Environment';
 import { BlendFunction } from 'postprocessing';
@@ -24,13 +29,8 @@ import { Pathfinding } from 'three-pathfinding';
 import { SettingsMenu } from '../../core/headers/settingsMenu/settingsMenu';
 import { OnboardingManager } from '../../domain/onboardingManager/onBoardingManager';
 import { client } from '../../../utils/supabase';
-import { InstancedUsers } from '../users/instancedUsers';
 import { useRealtime } from 'react-supabase';
 import { NonPlayableCharacters } from '../users/NonPlayableCharacters/NonPlayableCharacters';
-import { Notifications } from '../../core/notifications/Notifications';
-import Peer from 'simple-peer';
-import { Button } from '../../core/button/Button';
-import { CallDashboard } from '../../core/callDashboard/callDashboard';
 import { VoiceCallManager } from '../../domain/voiceCallManager/voiceCallManager';
 
 interface Props {
@@ -53,6 +53,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
     '/environment-transformed.glb'
   ) as unknown as GLTFResult;
   const { isInVR, isDesktop } = useDeviceCheck();
+  const [players, setPlayers] = useState<IPlayerType>();
   const [physics, setPhysics] = useState<Physics | null>(null);
   const [_, reexecute] = useRealtime('profiles');
   const [userAvatar, setUserAvatar] = useState<string>();
@@ -60,10 +61,13 @@ const CanvasComponent: React.FC<Props> = (props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [clickedPlayers, setClickedPlayers] = useState<{ id: string }[]>([]);
   const classes = classNames([styles.container]);
+  const { playerIds } = useStore(({ playerIds }) => ({ playerIds }));
 
   useEffect(() => {
     getUserModel();
     setPhysics(new Physics());
+    onSpawnPlayer(room);
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -90,7 +94,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
 
     return (
       <>
-        <SettingsMenu />
+        <SettingsMenu room={room} />
         <OnboardingManager />
         <VoiceCallManager room={room} clickedPlayers={clickedPlayers} id={id} />
         <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
@@ -145,11 +149,19 @@ const CanvasComponent: React.FC<Props> = (props) => {
     }
   }
 
+  function onSpawnPlayer(room: Room) {
+    room.onMessage('spawnPlayer', (data) => {
+      const { players } = data;
+      console.log('new player joined from canvas');
+
+      setPlayers(players);
+    });
+  }
+
   function renderNpcs() {
     const players = getState().players;
-    const ids = Object.keys(players);
 
-    const jsx = ids
+    const jsx = playerIds
       .filter((data) => data !== id)
       .map((playerId, index) => {
         const player = players[playerId];
@@ -167,6 +179,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
               if (containerRef?.current)
                 containerRef.current.style.cursor = 'grab';
             }}
+            room={room}
           />
         );
       });

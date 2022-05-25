@@ -26,6 +26,7 @@ export const useColyseus = () => {
   const { user } = useAuth();
   const peersRef = useRef<{ peerID: string; peer: Peer.Instance }[]>([]);
   const [peers, setPeers] = useState<Peer.Instance[]>();
+  const [players, setPlayers] = useState<IPlayerType>();
 
   useEffect(() => {
     setClient(new Client(endpoint));
@@ -53,8 +54,6 @@ export const useColyseus = () => {
         onSpawnPlayer(room);
         onRemovePlayer(room);
         onMove(room);
-
-        // if (id) await handleAudioCall(room, id);
       } catch (e) {
         console.log(e);
       }
@@ -70,12 +69,12 @@ export const useColyseus = () => {
   function onSpawnPlayer(room: Room) {
     room.onMessage('spawnPlayer', (data) => {
       const { players } = data;
-      console.log(players);
       console.log('new player joined');
 
       set((state) => ({
         ...state,
         players,
+        playerIds: Object.keys(players),
         playersCount: Object.keys(players).length,
       }));
     });
@@ -121,99 +120,5 @@ export const useColyseus = () => {
         playersCount: Object.keys(players).length,
       }));
     });
-  }
-
-  async function handleAudioCall(room: Room, id: string) {
-    const stream = await navigator.mediaDevices.getUserMedia({
-      video: {
-        height: window.innerHeight / 2,
-        width: window.innerWidth / 2,
-      },
-      audio: true,
-    });
-
-    room.onMessage('spawnPlayer', (data: { players: IPlayerType }) => {
-      if (stream) {
-        console.log('test');
-
-        const { players } = data;
-        console.log(players);
-        const ids = Object.keys(players).filter((playerId) => playerId !== id);
-        const peers: any[] = [];
-
-        ids.forEach((userId) => {
-          console.log(userId);
-          const peer = createPeer(userId, id, stream, room);
-
-          peersRef.current.push({
-            peerID: userId,
-            peer,
-          });
-
-          peers.push(peer);
-        });
-        setPeers(peers);
-      }
-    });
-
-    room.onMessage('user joined call', (payload: any) => {
-      if (stream) {
-        const peer = addPeer(payload.signal, payload.callerId, stream, room);
-
-        peersRef.current.push({
-          peerID: payload.callerID,
-          peer,
-        });
-
-        setPeers((users) => (users ? [...users, peer] : [peer]));
-      }
-    });
-
-    room.onMessage('receiving returned signal', (payload) => {
-      const item = peersRef.current.find((p) => p.peerID === payload.id);
-
-      item?.peer.signal(payload.signal);
-    });
-  }
-
-  function createPeer(
-    userToSignalId: string,
-    callerId: string,
-    stream: MediaStream,
-    room: Room
-  ) {
-    const peer = new Peer({
-      initiator: true,
-      trickle: false,
-      stream: stream,
-    });
-
-    peer.on('signal', (signal) => {
-      console.log(signal);
-      room.send('sending signal', { userToSignalId, callerId, signal });
-    });
-
-    return peer;
-  }
-
-  function addPeer(
-    incomingSignal: string | Peer.SignalData,
-    callerId: string,
-    stream: MediaStream,
-    room: Room
-  ) {
-    const peer = new Peer({
-      initiator: false,
-      trickle: false,
-      stream,
-    });
-
-    peer.on('signal', (signal) => {
-      room.send('returning signal', { signal, callerId });
-    });
-
-    peer.signal(incomingSignal);
-
-    return peer;
   }
 };
