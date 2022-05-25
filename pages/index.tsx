@@ -4,7 +4,6 @@ import dynamic from 'next/dynamic';
 import Head from 'next/head';
 import { Suspense, useEffect, useState } from 'react';
 import styles from '../styles/home/Home.module.scss';
-import { Session } from '@supabase/supabase-js';
 import Link from 'next/link';
 import { Footer } from '../components/core/footer/footer';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';

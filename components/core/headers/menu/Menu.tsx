@@ -16,10 +16,6 @@ export const Menu: React.FC<Props> = (props) => {
         <div className={styles.menuContainer}>
           <p className={styles.menuTitle}>Menu</p>
         </div>
-        <div className={styles.menuContainer}>
-          <p className={styles.menuItem}>Video</p>
-          <Button className={styles.button} text={'play video'} />
-        </div>
 
         <Button
           onClick={() => onLogout()}

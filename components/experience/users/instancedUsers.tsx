@@ -52,42 +52,45 @@ export const InstancedUsers: React.FC<Props> = (props) => {
     if (instancedMeshRef.current) {
       // Only move players in here
       const players = getState().players;
-      const ids = Object.keys(players);
-      ids
-        .filter((id) => id !== playerId)
-        .forEach((player, index) => {
-          instancedMeshRef.current?.getMatrixAt(index, tempMatrix);
-          oldPosition.current.setFromMatrixPosition(tempMatrix);
 
-          newPosition.current.set(
-            players[player].x,
-            players[player].y,
-            players[player].z
-          );
+      if (players) {
+        const ids = Object.keys(players);
+        ids
+          .filter((id) => id !== playerId)
+          .forEach((player, index) => {
+            instancedMeshRef.current?.getMatrixAt(index, tempMatrix);
+            oldPosition.current.setFromMatrixPosition(tempMatrix);
 
-          dummy.position.lerpVectors(
-            oldPosition.current,
-            newPosition.current,
-            lerpAlpha
-          );
-
-          dummy.updateMatrix();
-          instancedMeshRef.current?.setMatrixAt(index, dummy.matrix);
-
-          if (labelsRef.current[player]) {
-            newPositionLabel.current.set(
+            newPosition.current.set(
               players[player].x,
-              players[player].y + 1.5,
+              players[player].y,
               players[player].z
             );
-            labelsRef.current[player].position.lerp(
-              newPositionLabel.current,
+
+            dummy.position.lerpVectors(
+              oldPosition.current,
+              newPosition.current,
               lerpAlpha
             );
-            newPositionLabel.current.set(0, 0, 0);
-            labelsRef.current[player].quaternion.copy(camera.quaternion);
-          }
-        });
+
+            dummy.updateMatrix();
+            instancedMeshRef.current?.setMatrixAt(index, dummy.matrix);
+
+            if (labelsRef.current[player]) {
+              newPositionLabel.current.set(
+                players[player].x,
+                players[player].y + 1.5,
+                players[player].z
+              );
+              labelsRef.current[player].position.lerp(
+                newPositionLabel.current,
+                lerpAlpha
+              );
+              newPositionLabel.current.set(0, 0, 0);
+              labelsRef.current[player].quaternion.copy(camera.quaternion);
+            }
+          });
+      }
 
       instancedMeshRef.current.instanceMatrix.needsUpdate = true;
       instancedMeshRef.current.instanceMatrix.updateRange.count =
@@ -126,34 +129,40 @@ export const InstancedUsers: React.FC<Props> = (props) => {
 
   function renderPlayerLabels() {
     const players = getState().players;
-    const ids = Object.keys(players);
 
-    const jsx = ids
-      .filter((id) => id !== playerId)
-      .map((id) => {
-        return (
-          <Text
-            key={id}
-            ref={(element) => {
-              return (labelsRef.current[id] = element);
-            }}
-            color={'#000'}
-            fontSize={0.25}
-            letterSpacing={0.03}
-            lineHeight={1}
-          >
-            {players[id].id}
-          </Text>
-        );
-      });
+    if (players) {
+      const ids = Object.keys(players);
 
-    return jsx;
+      const jsx = ids
+        .filter((id) => id !== playerId)
+        .map((id) => {
+          return (
+            <Text
+              key={id}
+              ref={(element) => {
+                return (labelsRef.current[id] = element);
+              }}
+              color={'#000'}
+              fontSize={0.25}
+              letterSpacing={0.03}
+              lineHeight={1}
+            >
+              {players[id].id}
+            </Text>
+          );
+        });
+
+      return jsx;
+    }
   }
 
   function handleClickedPlayer(index?: number) {
     const players = getState().players;
-    const ids = Object.keys(players).filter((id) => id !== playerId);
 
-    console.log(`Clicked on player ${index ? ids[index] : ids[0]}`);
+    if (players) {
+      const ids = Object.keys(players).filter((id) => id !== playerId);
+
+      console.log(`Clicked on player ${index ? ids[index] : ids[0]}`);
+    }
   }
 };

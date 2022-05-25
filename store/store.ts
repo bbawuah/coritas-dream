@@ -31,8 +31,6 @@ interface CallRequests {
   signal: Peer.SignalData;
 }
 
-const clients = {};
-
 const playerIds: string[] = [];
 
 const players: IPlayerType = {};
@@ -40,8 +38,6 @@ const players: IPlayerType = {};
 const callRequests: CallRequests[] = [];
 
 const playersCount: number = 0;
-
-const hovered: boolean = false;
 
 const animationName: ActionState = { animationName: 'idle' };
 
@@ -61,13 +57,12 @@ type CursorStates = 'grab' | 'pointer';
 
 export interface IState {
   controls: Controls;
-  players: IPlayerType;
+  players: IPlayerType | undefined;
   playerIds: string[];
   playersCount: number;
   animationName: ActionState;
   callRequests: CallRequests[];
   cursorState: CursorStates;
-  hovered: boolean;
   get: Getter;
   set: Setter;
 }
@@ -80,13 +75,11 @@ const useStoreImplementation = create(
     (set: SetState<IState>, get: GetState<IState>) => {
       return {
         controls,
-        clients,
         players,
         playerIds,
         playersCount,
         callRequests,
         animationName,
-        hovered,
         cursorState,
         get,
         set,

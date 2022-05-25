@@ -1,7 +1,7 @@
-import React, { Suspense, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
-import { Canvas, extend } from '@react-three/fiber';
+import { Canvas } from '@react-three/fiber';
 import { User } from '../users/user';
 import { Client, Room } from 'colyseus.js';
 import { Physics } from '../../../shared/physics/physics';
@@ -9,12 +9,7 @@ import { XRCanvas } from './xrCanvas';
 import { Sky, useGLTF } from '@react-three/drei';
 import { VRCanvas } from '@react-three/xr';
 import { Perf } from 'r3f-perf';
-import {
-  getState,
-  IPlayerNetworkData,
-  IPlayerType,
-  useStore,
-} from '../../../store/store';
+import { getState, IPlayerType, useStore } from '../../../store/store';
 import { useDeviceCheck } from '../../../hooks/useDeviceCheck';
 import { Environment } from '../environment/Environment';
 import { BlendFunction } from 'postprocessing';
@@ -25,7 +20,6 @@ import {
   BrightnessContrast,
 } from '@react-three/postprocessing';
 import { GLTFResult } from '../environment/types/types';
-import { Pathfinding } from 'three-pathfinding';
 import { SettingsMenu } from '../../core/headers/settingsMenu/settingsMenu';
 import { OnboardingManager } from '../../domain/onboardingManager/onBoardingManager';
 import { client } from '../../../utils/supabase';
@@ -161,30 +155,32 @@ const CanvasComponent: React.FC<Props> = (props) => {
   function renderNpcs() {
     const players = getState().players;
 
-    const jsx = playerIds
-      .filter((data) => data !== id)
-      .map((playerId, index) => {
-        const player = players[playerId];
+    if (players) {
+      const jsx = playerIds
+        .filter((data) => data !== id)
+        .map((playerId, index) => {
+          const player = players[playerId];
 
-        return (
-          <NonPlayableCharacters
-            key={index}
-            playerData={player}
-            onClick={() => setClickedPlayers((v) => [{ id: player.id }])}
-            onPointerOver={() => {
-              if (containerRef?.current)
-                containerRef.current.style.cursor = 'pointer';
-            }}
-            onPointerLeave={() => {
-              if (containerRef?.current)
-                containerRef.current.style.cursor = 'grab';
-            }}
-            room={room}
-          />
-        );
-      });
+          return (
+            <NonPlayableCharacters
+              key={index}
+              playerData={player}
+              onClick={() => setClickedPlayers((v) => [{ id: player.id }])}
+              onPointerOver={() => {
+                if (containerRef?.current)
+                  containerRef.current.style.cursor = 'pointer';
+              }}
+              onPointerLeave={() => {
+                if (containerRef?.current)
+                  containerRef.current.style.cursor = 'grab';
+              }}
+              room={room}
+            />
+          );
+        });
 
-    return jsx;
+      return jsx;
+    }
   }
 };
 

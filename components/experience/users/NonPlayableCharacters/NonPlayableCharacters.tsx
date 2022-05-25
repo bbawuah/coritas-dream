@@ -52,13 +52,13 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
   const { players } = useStore(({ players }) => ({ players }));
 
   useEffect(() => {
-    if (players && playerData) {
-      const state = getState().players[playerData.id];
-
+    const state = getState().players;
+    if (players && playerData && state) {
+      const playersList = state[playerData.id];
       if (state) {
         setAnimationState((v) => {
-          if (v !== state.animationState) {
-            return state.animationState;
+          if (v !== playersList.animationState) {
+            return playersList.animationState;
           }
 
           return v;
@@ -75,8 +75,10 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
   }, [isSsr]);
 
   useEffect(() => {
-    if (playerData && animationState) {
-      const player = getState().players[playerData.id];
+    const state = getState().players;
+
+    if (playerData && animationState && state) {
+      const player = state[playerData.id];
 
       if (userRef.current && userRef.current.actions && player) {
         userRef.current.fadeToAction(animationState, 0.25);
@@ -92,8 +94,10 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
   }, [playerData]);
 
   useFrame((state, dt) => {
-    if (userRef.current && playerData) {
-      const player = getState().players[playerData.id];
+    const playersList = getState().players;
+
+    if (userRef.current && playerData && playersList) {
+      const player = playersList[playerData.id];
 
       if (player) {
         lookAt.current.set(player.rx, player.ry, player.rz);
@@ -148,7 +152,6 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
   function getRemovedPlayer() {
     room.onMessage('removePlayer', (data) => {
       const { players } = data;
-      console.log('somoene left');
       const newIds = Object.keys(players);
       const didPlayerLeave = newIds.filter((v) => v === playerData?.id);
 

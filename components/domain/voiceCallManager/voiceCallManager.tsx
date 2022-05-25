@@ -14,7 +14,7 @@ interface Props {
 }
 
 export const VoiceCallManager: React.FC<Props> = (props) => {
-  const { room, id, clickedPlayers } = props;
+  const { room, clickedPlayers } = props;
   const [callRequests, setCallRequests] = useState<
     { signal: Peer.SignalData; id: string }[]
   >([]);
@@ -22,6 +22,7 @@ export const VoiceCallManager: React.FC<Props> = (props) => {
   const [notifications, setNotifications] = useState<{ id: string }[]>();
   const [isWaitingForResponse, setIsWaitingForResponse] =
     useState<boolean>(false);
+  const [muted, setMuted] = useState<boolean>();
   const [isCalling, setIsCalling] = useState<{ id: string }>();
   const [closeRequest, setCloseRequest] = useState<boolean>(false);
   const userAudio = useRef<HTMLAudioElement | null>(null);
@@ -60,7 +61,7 @@ export const VoiceCallManager: React.FC<Props> = (props) => {
       {isCalling && (
         <CallDashboard
           id={isCalling.id}
-          onMute={() => console.log('should mute')}
+          onMute={() => muteMic()}
           onEnd={() => leaveCall(isCalling.id)}
         />
       )}
@@ -223,5 +224,13 @@ export const VoiceCallManager: React.FC<Props> = (props) => {
     if (connectionRef.current) connectionRef.current.destroy();
 
     connectionRef.current = undefined;
+  }
+
+  function muteMic() {
+    if (stream)
+      stream
+        .getAudioTracks()
+        .forEach((track) => (track.enabled = !track.enabled));
+    setMuted(true);
   }
 };

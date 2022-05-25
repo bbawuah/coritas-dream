@@ -8,43 +8,17 @@ import type { Navigator } from 'webxr';
 import { useDeviceCheck } from '../hooks/useDeviceCheck';
 import { Loader } from '../components/experience/loader/loader';
 import { client as supabaseClient } from '../utils/supabase';
-import { Session, User } from '@supabase/supabase-js';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
 import { useAuth } from '../hooks/useAuth';
-import Router from 'next/router';
 import Peer from 'simple-peer';
-import { Room } from 'colyseus.js';
-import { IPlayerType, useStore } from '../store/store';
-import { Notifications } from '../components/core/notifications/Notifications';
-import classNames from 'classnames';
 
 const Canvas = dynamic(() => import('../components/experience/canvas/canvas'), {
   ssr: false,
 });
 
-interface VideoComponentProps {
-  peer: Peer.Instance;
-}
-const VideoComponent: React.FC<VideoComponentProps> = (props) => {
-  const { peer } = props;
-  const ref = useRef<HTMLVideoElement>(null);
-
-  useEffect(() => {
-    peer.on('stream', (stream) => {
-      if (ref.current) {
-        ref.current.srcObject = stream;
-      }
-    });
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  return <video ref={ref} playsInline autoPlay />;
-};
-
 const Dream: NextPage = () => {
   const { isInVR } = useDeviceCheck();
-  const { client, id, room, peers } = useColyseus();
+  const { client, id, room } = useColyseus();
   const [webXRIsSupported, setWebXRIsSupported] = useState<boolean>();
   const subdomain: string = 'demo';
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -60,6 +34,7 @@ const Dream: NextPage = () => {
         setWebXRIsSupported(supported);
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isInVR]);
 
   useEffect(() => {
@@ -80,7 +55,7 @@ const Dream: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {session && <>{renderContent()}</>}
+      {renderContent()}
     </div>
   );
 
@@ -112,12 +87,14 @@ const Dream: NextPage = () => {
 
     return (
       <Suspense fallback={<Loader />}>
-        <Canvas
-          isWebXrSupported={webXRIsSupported ?? false}
-          client={client}
-          id={id}
-          room={room}
-        />
+        {session && (
+          <Canvas
+            isWebXrSupported={webXRIsSupported ?? false}
+            client={client}
+            id={id}
+            room={room}
+          />
+        )}
       </Suspense>
     );
   }
