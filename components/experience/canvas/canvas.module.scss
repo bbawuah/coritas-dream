@@ -2,20 +2,12 @@
   position: absolute;
   width: 100vw;
   height: 100vh;
-}
-
-.grab {
   cursor: grab;
   cursor: -moz-grab;
   cursor: -webkit-grab;
-
   &:active {
     cursor: grabbing;
     cursor: -moz-grabbing;
     cursor: -webkit-grabbing;
   }
-}
-
-.pointer {
-  cursor: pointer;
 }

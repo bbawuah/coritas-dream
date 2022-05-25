@@ -102,7 +102,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
             mieDirectionalG={0.029}
             azimuth={91.5}
           />
-          <Perf />
+          {/* <Perf /> */}
           <ambientLight intensity={1.2} />
           <directionalLight color="white" position={[-3, 3, -2]} />
           {renderUser()}
