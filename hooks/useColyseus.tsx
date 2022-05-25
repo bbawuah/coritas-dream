@@ -27,7 +27,7 @@ export const useColyseus = () => {
       getRoom();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client]);
+  }, [client, user]);
 
   return { client, id, room };
 
