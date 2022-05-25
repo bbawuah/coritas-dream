@@ -80,9 +80,6 @@ const Dream: NextPage = () => {
 
   function renderCanvas() {
     if (!id || !room) {
-      console.log(client);
-      console.log(id);
-      console.log(room);
       return null;
     }
 
