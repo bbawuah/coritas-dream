@@ -71,13 +71,15 @@ export const XRTeleport: React.FC<Props> = (props) => {
     // Probeer iets met de gamepad
     // const gamepad = rightController?.inputSource.gamepad;
 
-    const startingPosition = new THREE.Vector3(
-      players[id].x,
-      player.position.y,
-      players[id].z
-    );
+    if (players) {
+      const startingPosition = new THREE.Vector3(
+        players[id].x,
+        player.position.y,
+        players[id].z
+      );
 
-    player.position.add(startingPosition);
+      player.position.add(startingPosition);
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

@@ -10,6 +10,7 @@ class Gallery extends colyseus_1.Room {
         super();
         this.maxClients = 30; //Might need to change this amount.
         this.patchRate = 100;
+        this.clients = [];
         this.physics = new physics_1.Physics();
     }
     onCreate() {
@@ -59,23 +60,62 @@ class Gallery extends colyseus_1.Room {
                 afterNextPatch: true,
             });
         });
+        this.onMessage('sending private message', (client, data) => {
+            const { to, signal } = data;
+            const receiver = this.clients.find((v) => v.sessionId === to);
+            if (receiver) {
+                receiver.send('sending private message', {
+                    signal,
+                    senderId: client.sessionId,
+                });
+            }
+        });
+        this.onMessage('answerCall', (client, data) => {
+            const { signal, to } = data;
+            const receiver = this.clients.find((v) => v.sessionId === to);
+            if (receiver) {
+                receiver.send('callAccepted', { signal, id: client.sessionId });
+            }
+        });
     }
     // Called every time a client joins
     onJoin(client, options) {
-        console.log('user joined');
         const { id } = options;
-        const player = new player_1.Player(client.sessionId, id, this.physics);
-        this.state.players.set(client.sessionId, player); //Store instance of user in state
-        // Should do something here
-        client.send('id', { id: client.sessionId });
+        console.log('user joined');
+        this.state.players.set(client.sessionId, new player_1.Player(client.sessionId, id, this.physics)); //Store instance of user in state
+        this.clients.push(client);
+        const players = this.state.players; // get player from store
         this.onMessage('test', (client, data) => {
             console.log(`${client.sessionId} has sent this message ${data}`);
         });
-        if (this.state.players.get(client.sessionId)) {
-            this.broadcast('spawnPlayer', {
-                player: this.state.players.get(client.sessionId),
-            }); //Optimize this to only sending the new player
+        if (players) {
+            client.send('id', { id: client.sessionId });
+            this.broadcast('spawnPlayer', { players }); //Optimize this to only sending the new player
         }
+        this.onMessage('sending signal', (payload) => {
+            console.log(`from sending signal, ${payload}`);
+            console.log(payload);
+            const { userToSignalId, callerId, signal } = payload;
+            const client = this.clients.find((user) => user.sessionId === userToSignalId);
+            if (client) {
+                client.send('user joined', {
+                    signal: signal,
+                    callerId: callerId,
+                });
+            }
+        });
+        this.onMessage('returning signal', (payload) => {
+            const { signal, callerId } = payload;
+            const caller = this.clients.find((user) => user.sessionId === callerId);
+            if (caller) {
+                caller.send('receiving returned signal', {
+                    signal: signal,
+                    id: client.sessionId,
+                });
+            }
+            // io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id });
+            console.log('returning signal');
+        });
     }
     update(deltaTime) {
         // implement your physics or world updates here!
@@ -84,6 +124,8 @@ class Gallery extends colyseus_1.Room {
     }
     onLeave(client) {
         this.state.players.delete(client.sessionId);
+        const newClientList = this.clients.filter((user) => user.sessionId !== client.sessionId);
+        this.clients = newClientList;
         const players = this.state.players;
         if (players) {
             //Optimize this to only sending the player that left

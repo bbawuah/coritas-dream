@@ -13,21 +13,21 @@ const controls = {
     left: false,
     right: false,
 };
-const clients = {};
+const playerIds = [];
 const players = {};
+const callRequests = [];
 const playersCount = 0;
-const hovered = false;
 const animationName = { animationName: 'idle' };
 const actionNames = ['idle', 'walking', 'praying', 'fist'];
 const cursorState = 'grab';
 const useStoreImplementation = (0, zustand_1.default)((0, middleware_1.subscribeWithSelector)((set, get) => {
     return {
         controls,
-        clients,
         players,
+        playerIds,
         playersCount,
+        callRequests,
         animationName,
-        hovered,
         cursorState,
         get,
         set,

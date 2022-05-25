@@ -78,7 +78,7 @@ export const User: React.FC<Props> = (props) => {
   }); //Use keyboard events
 
   useEffect(() => {
-    if (userRef.current) {
+    if (userRef.current && players) {
       // Create physics
       physicalBody.current = physics.createPlayerPhysics<IPlayerNetworkData>(
         players[id]
@@ -259,7 +259,7 @@ export const User: React.FC<Props> = (props) => {
   function handleOnMessageMove(data: OnMoveProps) {
     const { player } = data;
 
-    if (player.id === id) {
+    if (players && player.id === id) {
       processedAction.current = {
         [player.id]: {
           id: players[id].id,
