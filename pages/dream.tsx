@@ -4,6 +4,7 @@ import Head from 'next/head';
 import styles from '../styles/dream/Dream.module.scss';
 import { useColyseus } from '../hooks/useColyseus';
 import { Suspense, useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
 import type { Navigator } from 'webxr';
 import { useDeviceCheck } from '../hooks/useDeviceCheck';
 import { Loader } from '../components/experience/loader/loader';
@@ -17,7 +18,7 @@ const Canvas = dynamic(() => import('../components/experience/canvas/canvas'), {
 
 const Dream: NextPage = () => {
   const { isInVR } = useDeviceCheck();
-  const { client, id, room } = useColyseus();
+  const { id, room } = useColyseus();
   const [webXRIsSupported, setWebXRIsSupported] = useState<boolean>();
   const subdomain: string = 'demo';
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -53,7 +54,15 @@ const Dream: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {session && renderContent()}
+      {session ? (
+        renderContent()
+      ) : (
+        <>
+          <Link href={'/signin'}>
+            <a>Log in a mattie :p</a>
+          </Link>
+        </>
+      )}
     </div>
   );
 
