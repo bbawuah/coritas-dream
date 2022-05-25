@@ -47,6 +47,10 @@ const Dream: NextPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [session]);
 
+  if (!session) {
+    return <p>No session found</p>;
+  }
+
   return (
     <div className={styles.container}>
       <Head>
@@ -87,14 +91,12 @@ const Dream: NextPage = () => {
 
     return (
       <Suspense fallback={<Loader />}>
-        {session && (
-          <Canvas
-            isWebXrSupported={webXRIsSupported ?? false}
-            client={client}
-            id={id}
-            room={room}
-          />
-        )}
+        <Canvas
+          isWebXrSupported={webXRIsSupported ?? false}
+          client={client}
+          id={id}
+          room={room}
+        />
       </Suspense>
     );
   }
