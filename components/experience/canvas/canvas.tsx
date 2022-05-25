@@ -57,17 +57,9 @@ const CanvasComponent: React.FC<Props> = (props) => {
   const [_, reexecute] = useRealtime('profiles');
   const [userAvatar, setUserAvatar] = useState<string>();
   const userAudio = useRef<HTMLAudioElement | null>(null);
-  const { hovered } = useStore(({ hovered }) => ({
-    hovered,
-  })); //Maybe refactor this late
+  const containerRef = useRef<HTMLDivElement>(null);
   const [clickedPlayers, setClickedPlayers] = useState<{ id: string }[]>([]);
-  const classes = classNames([
-    styles.container,
-    {
-      [styles.grab]: !hovered,
-      [styles.pointer]: hovered,
-    },
-  ]);
+  const classes = classNames([styles.container]);
 
   useEffect(() => {
     getUserModel();
@@ -75,7 +67,11 @@ const CanvasComponent: React.FC<Props> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return <div className={classes}>{renderCanvas()}</div>;
+  return (
+    <div ref={containerRef} className={classes}>
+      {renderCanvas()}
+    </div>
+  );
 
   function renderCanvas() {
     if (!physics) {
@@ -106,7 +102,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
             mieDirectionalG={0.029}
             azimuth={91.5}
           />
-          {/* <Perf /> */}
+          <Perf />
           <ambientLight intensity={1.2} />
           <directionalLight color="white" position={[-3, 3, -2]} />
           {renderUser()}
@@ -162,8 +158,15 @@ const CanvasComponent: React.FC<Props> = (props) => {
           <NonPlayableCharacters
             key={index}
             playerData={player}
-            room={room}
             onClick={() => setClickedPlayers((v) => [{ id: player.id }])}
+            onPointerOver={() => {
+              if (containerRef?.current)
+                containerRef.current.style.cursor = 'pointer';
+            }}
+            onPointerLeave={() => {
+              if (containerRef?.current)
+                containerRef.current.style.cursor = 'grab';
+            }}
           />
         );
       });

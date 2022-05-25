@@ -1,4 +1,4 @@
-import { useFrame, useLoader, useThree } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
@@ -9,14 +9,14 @@ import {
 } from '../../../../store/store';
 import { UserModel } from '../userModel';
 import * as THREE from 'three';
-import { Room } from 'colyseus.js';
 import { client } from '../../../../utils/supabase';
 import { Text } from '@react-three/drei';
 
 interface Props {
   playerData: IPlayerNetworkData;
-  room: Room;
   onClick?: () => void;
+  onPointerOver: () => void;
+  onPointerLeave: () => void;
 }
 
 interface ProfileData {
@@ -29,10 +29,8 @@ interface ProfileData {
 // Hier moet je eigenlijk async call hebben naar 3D model
 
 export const NonPlayableCharacters: React.FC<Props> = (props) => {
-  const { playerData, room, onClick } = props;
-  const { scene } = useThree();
+  const { playerData, onClick, onPointerOver, onPointerLeave } = props;
   const userRef = useRef<UserModel>();
-  const { set } = useStore(({ set }) => ({ set }));
   const [isSsr, setIsSsr] = useState<boolean>(true);
   // const [isModelLoaded, setIsModelLoaded] = useState<boolean>(false);
   const gltfLoader = useRef<GLTFLoader>(new GLTFLoader());
@@ -103,10 +101,8 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
           <primitive
             object={userRef.current?.controlObject}
             onClick={() => onClick?.()}
-            // onPointerOver={() => set((state) => ({ ...state, hovered: true }))}
-            // onPointerLeave={() =>
-            //   set((state) => ({ ...state, hovered: false }))
-            // }
+            onPointerOver={() => onPointerOver()}
+            onPointerLeave={() => onPointerLeave()}
           />
         </>
       )}

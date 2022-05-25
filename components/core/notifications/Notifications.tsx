@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import classNames from 'classnames';
 import styles from './Notifications.module.scss';
 import createContainer from './createContainer/createContainer';
@@ -17,7 +17,7 @@ type NotificationTypes = 'info' | 'warning' | 'error' | 'success';
 const container = createContainer();
 
 export const Notifications: React.FC<Props> = (props) => {
-  const { children, isClosing, onDelete, types } = props;
+  const { children, isClosing, onDelete } = props;
   const classes = classNames(styles.notification, {
     [styles.slideIn]: !isClosing,
     [styles.slideOut]: isClosing,
