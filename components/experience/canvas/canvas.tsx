@@ -28,7 +28,6 @@ import { NonPlayableCharacters } from '../users/NonPlayableCharacters/NonPlayabl
 import { VoiceCallManager } from '../../domain/voiceCallManager/voiceCallManager';
 
 interface Props {
-  client: Client;
   room: Room;
   id: string;
   isWebXrSupported: boolean;

@@ -7,23 +7,13 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import type { Navigator } from 'webxr';
 import { useDeviceCheck } from '../hooks/useDeviceCheck';
 import { Loader } from '../components/experience/loader/loader';
-import { client, client as supabaseClient } from '../utils/supabase';
+import { client as supabaseClient } from '../utils/supabase';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
 import { useAuth } from '../hooks/useAuth';
 
 const Canvas = dynamic(() => import('../components/experience/canvas/canvas'), {
   ssr: false,
 });
-
-export async function getServerSideProps({ req }: any) {
-  const { user } = await client.auth.api.getUserByCookie(req);
-
-  if (!user) {
-    return { props: {}, redirect: { destination: '/signin' } };
-  }
-
-  return { props: {} };
-}
 
 const Dream: NextPage = () => {
   const { isInVR } = useDeviceCheck();
@@ -53,7 +43,7 @@ const Dream: NextPage = () => {
     getUserProfile();
     window.addEventListener('message', subscribe);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session]);
+  }, [session, id, room]);
 
   return (
     <div className={styles.container}>
@@ -63,7 +53,7 @@ const Dream: NextPage = () => {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      {renderContent()}
+      {session && renderContent()}
     </div>
   );
 
@@ -89,7 +79,10 @@ const Dream: NextPage = () => {
   }
 
   function renderCanvas() {
-    if (!client || !id || !room) {
+    if (!id || !room) {
+      console.log(client);
+      console.log(id);
+      console.log(room);
       return null;
     }
 
@@ -97,7 +90,6 @@ const Dream: NextPage = () => {
       <Suspense fallback={<Loader />}>
         <Canvas
           isWebXrSupported={webXRIsSupported ?? false}
-          client={client}
           id={id}
           room={room}
         />
