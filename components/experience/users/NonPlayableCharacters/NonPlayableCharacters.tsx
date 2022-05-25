@@ -3,6 +3,7 @@ import React, { Suspense, useEffect, useRef, useState } from 'react';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
 import {
+  ActionNames,
   getState,
   IPlayerNetworkData,
   IPlayerType,
@@ -47,8 +48,25 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
 
   const lookAt = useRef<THREE.Vector3>(new THREE.Vector3());
   const newPosition = useRef<THREE.Vector3>(new THREE.Vector3());
-
+  const [animationState, setAnimationState] = useState<ActionNames>();
   const { players } = useStore(({ players }) => ({ players }));
+
+  useEffect(() => {
+    if (players && playerData) {
+      const state = getState().players[playerData.id];
+
+      if (state) {
+        setAnimationState((v) => {
+          if (v !== state.animationState) {
+            return state.animationState;
+          }
+
+          return v;
+        });
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [players]);
 
   useEffect(() => {
     setIsSsr(false);
@@ -57,18 +75,15 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
   }, [isSsr]);
 
   useEffect(() => {
-    if (playerData) {
+    if (playerData && animationState) {
       const player = getState().players[playerData.id];
 
       if (userRef.current && userRef.current.actions && player) {
-        userRef.current.fadeToAction(
-          players[playerData.id].animationState,
-          0.25
-        );
+        userRef.current.fadeToAction(animationState, 0.25);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [playerData]);
+  }, [animationState]);
 
   useEffect(() => {
     getPlayer();
@@ -144,7 +159,6 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
   }
 
   async function getPlayer() {
-    console.log('runnin');
     try {
       const { data, error, status } = await client
         .from('profiles')
