@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 import React, { useEffect, useRef, useState } from 'react';
 import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
@@ -26,6 +27,7 @@ import { client } from '../../../utils/supabase';
 import { useRealtime } from 'react-supabase';
 import { NonPlayableCharacters } from '../users/NonPlayableCharacters/NonPlayableCharacters';
 import { VoiceCallManager } from '../../domain/voiceCallManager/voiceCallManager';
+import { Modal } from '../../core/modal/modal';
 
 interface Props {
   room: Room;
@@ -54,12 +56,14 @@ const CanvasComponent: React.FC<Props> = (props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [clickedPlayers, setClickedPlayers] = useState<{ id: string }[]>([]);
   const classes = classNames([styles.container]);
-  const { playerIds } = useStore(({ playerIds }) => ({ playerIds }));
+  const { playerIds, focusImage } = useStore(({ playerIds, focusImage }) => ({
+    playerIds,
+    focusImage,
+  }));
 
   useEffect(() => {
     getUserModel();
     setPhysics(new Physics());
-    onSpawnPlayer(room);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -90,6 +94,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
         <SettingsMenu room={room} />
         <OnboardingManager />
         <VoiceCallManager room={room} clickedPlayers={clickedPlayers} id={id} />
+        {renderFocusImage()}
         <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
           <Sky
             turbidity={10.2}
@@ -142,15 +147,6 @@ const CanvasComponent: React.FC<Props> = (props) => {
     }
   }
 
-  function onSpawnPlayer(room: Room) {
-    room.onMessage('spawnPlayer', (data) => {
-      const { players } = data;
-      console.log('new player joined from canvas');
-
-      setPlayers(players);
-    });
-  }
-
   function renderNpcs() {
     const players = getState().players;
 
@@ -179,6 +175,26 @@ const CanvasComponent: React.FC<Props> = (props) => {
         });
 
       return jsx;
+    }
+  }
+
+  function renderFocusImage() {
+    if (focusImage) {
+      return (
+        <Modal>
+          <div className={styles.modalContainer}>
+            <img className={styles.image} alt="focus" src={focusImage}></img>
+            <div className={styles.contentContainer}>
+              <div className={styles.headingContainer}>
+                <h3>Some Title</h3>
+              </div>
+              <p className={styles.paragraph}>
+                Some wiedjishcchdhcsdhjcschcskhcshcjscscdk
+              </p>
+            </div>
+          </div>
+        </Modal>
+      );
     }
   }
 };

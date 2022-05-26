@@ -1,11 +1,16 @@
+/* eslint-disable @next/next/no-img-element */
 import { useTexture } from '@react-three/drei';
-import React from 'react';
+import React, { useState } from 'react';
 import * as THREE from 'three';
+import { Modal } from '../../core/modal/modal';
+import Image from 'next/image';
 import { ComponentProps } from './types/types';
+import { useStore } from '../../../store/store';
 
 export const HopePaintings: React.FC<ComponentProps> = (props) => {
   const { nodes } = props;
-  const paintings = useTexture([
+  const { set } = useStore(({ set }) => ({ set }));
+  const paintings = [
     './hope/70-08.jpg',
     './hope/69-77.jpg',
     './hope/72-08.jpg',
@@ -14,17 +19,20 @@ export const HopePaintings: React.FC<ComponentProps> = (props) => {
     './hope/69-85.jpg',
     './hope/69-82.jpg',
     './hope/69-83.jpg',
-  ]);
-  const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+  ];
+  const textures = useTexture(paintings);
 
   return (
     <>
-      {paintings.map((painting, index) => {
+      {textures.map((painting, index) => {
         painting.flipY = false;
 
         if (index === 0) {
           return (
             <mesh
+              onClick={() =>
+                set((state) => ({ ...state, focusImage: paintings[index] }))
+              }
               key={index}
               geometry={nodes['hope-painting'].geometry}
               material={new THREE.MeshBasicMaterial({ map: painting })}
@@ -40,6 +48,9 @@ export const HopePaintings: React.FC<ComponentProps> = (props) => {
                 .geometry
             }
             material={new THREE.MeshBasicMaterial({ map: painting })}
+            onClick={() =>
+              set((state) => ({ ...state, focusImage: paintings[index] }))
+            }
           />
         );
       })}

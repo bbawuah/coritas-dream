@@ -43,6 +43,7 @@ export const useColyseus = () => {
         onAnimation(room);
         onSpawnPlayer(room);
         onRemovePlayer(room);
+        onLeave(room);
         onMove(room);
       } catch (e) {
         console.log(e);
@@ -109,6 +110,14 @@ export const useColyseus = () => {
         players,
         playersCount: Object.keys(players).length,
       }));
+    });
+  }
+
+  function onLeave(room: Room) {
+    room.onMessage('leave', (data) => {
+      const { message } = data;
+
+      console.log(message);
     });
   }
 };

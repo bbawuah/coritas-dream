@@ -11,6 +11,7 @@ import { Loader } from '../components/experience/loader/loader';
 import { client as supabaseClient } from '../utils/supabase';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
 import { useAuth } from '../hooks/useAuth';
+import { useRouter } from 'next/router';
 
 const Canvas = dynamic(() => import('../components/experience/canvas/canvas'), {
   ssr: false,
@@ -25,6 +26,19 @@ const Dream: NextPage = () => {
   const [characterIsCreated, setCharacterIsCreated] = useState<boolean>(false);
   const [hasProfile, setHasProfile] = useState<boolean>(false);
   const { session, user } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    document.addEventListener('visibilitychange', async (event) => {
+      if (document.visibilityState !== 'visible') {
+        router.push('/');
+        if (room) {
+          await room.leave();
+        }
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room]);
 
   useEffect(() => {
     const webXRNavigator: Navigator = navigator as any as Navigator;
@@ -44,7 +58,7 @@ const Dream: NextPage = () => {
     getUserProfile();
     window.addEventListener('message', subscribe);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, id, room]);
+  }, [id, room]);
 
   return (
     <div className={styles.container}>

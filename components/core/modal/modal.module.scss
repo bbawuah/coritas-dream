@@ -1,0 +1,10 @@
+.container {
+  width: 100vw;
+  height: 100vh;
+  background: rgba(74, 74, 74, 0.7);
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}

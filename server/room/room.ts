@@ -194,6 +194,7 @@ export class Gallery extends Room<State> {
 
     if (players) {
       //Optimize this to only sending the player that left
+      client.send('leave', { message: 'you left' });
       this.broadcast('removePlayer', {
         players,
       });

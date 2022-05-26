@@ -39,6 +39,8 @@ const callRequests: CallRequests[] = [];
 
 const playersCount: number = 0;
 
+const focusImage: string =  ''
+
 const animationName: ActionState = { animationName: 'idle' };
 
 export type Controls = typeof controls;
@@ -60,6 +62,7 @@ export interface IState {
   players: IPlayerType | undefined;
   playerIds: string[];
   playersCount: number;
+  focusImage: string
   animationName: ActionState;
   callRequests: CallRequests[];
   cursorState: CursorStates;
@@ -79,6 +82,7 @@ const useStoreImplementation = create(
         playerIds,
         playersCount,
         callRequests,
+        focusImage,
         animationName,
         cursorState,
         get,
