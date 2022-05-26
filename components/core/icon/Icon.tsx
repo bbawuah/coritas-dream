@@ -9,11 +9,12 @@ interface Props {
   size?: 'small' | 'medium' | 'large'; //Should actually do something with this
   hovered?: boolean;
   clicked?: boolean;
+  className?: string;
 }
 
 export const Icon: React.FC<Props> = (props) => {
-  const { icon, size, hovered, clicked } = props;
-  const classes = classNames(styles.icon, {
+  const { icon, size, hovered, clicked, className } = props;
+  const classes = classNames(styles.icon, className, {
     [styles.medium]: size === 'medium',
     [styles.small]: size === 'small',
     [styles.large]: size === 'large',

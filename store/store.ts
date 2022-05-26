@@ -31,6 +31,13 @@ interface CallRequests {
   signal: Peer.SignalData;
 }
 
+export interface PaintingMetaData {
+  src: string;
+  title: string;
+  description: string;
+  isVisibleInMuseum: boolean;
+}
+
 const playerIds: string[] = [];
 
 const players: IPlayerType = {};
@@ -39,7 +46,7 @@ const callRequests: CallRequests[] = [];
 
 const playersCount: number = 0;
 
-const focusImage: string =  ''
+const focusImage: PaintingMetaData | undefined = undefined;
 
 const animationName: ActionState = { animationName: 'idle' };
 
@@ -62,7 +69,7 @@ export interface IState {
   players: IPlayerType | undefined;
   playerIds: string[];
   playersCount: number;
-  focusImage: string
+  focusImage: PaintingMetaData | undefined;
   animationName: ActionState;
   callRequests: CallRequests[];
   cursorState: CursorStates;

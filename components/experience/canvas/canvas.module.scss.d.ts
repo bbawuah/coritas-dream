@@ -12,3 +12,6 @@ export const image: string;
 export const contentContainer: string;
 export const paragraph: string;
 export const headingContainer: string;
+export const iconContainer: string;
+export const icon: string;
+export const paragraphContainer: string;

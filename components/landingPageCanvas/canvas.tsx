@@ -1,9 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { Text, useTexture } from '@react-three/drei';
+import { useTexture } from '@react-three/drei';
 import styles from './canvas.module.scss';
 import * as THREE from 'three';
-import { a, animated, useSpring, useTransition } from '@react-spring/three';
 
 interface CaptionProps {
   titleElement: HTMLHeadingElement;

@@ -28,6 +28,8 @@ import { useRealtime } from 'react-supabase';
 import { NonPlayableCharacters } from '../users/NonPlayableCharacters/NonPlayableCharacters';
 import { VoiceCallManager } from '../../domain/voiceCallManager/voiceCallManager';
 import { Modal } from '../../core/modal/modal';
+import { Icon } from '../../core/icon/Icon';
+import { IconType } from '../../../utils/icons/types';
 
 interface Props {
   room: Room;
@@ -48,7 +50,6 @@ const CanvasComponent: React.FC<Props> = (props) => {
     '/environment-transformed.glb'
   ) as unknown as GLTFResult;
   const { isInVR, isDesktop } = useDeviceCheck();
-  const [players, setPlayers] = useState<IPlayerType>();
   const [physics, setPhysics] = useState<Physics | null>(null);
   const [_, reexecute] = useRealtime('profiles');
   const [userAvatar, setUserAvatar] = useState<string>();
@@ -56,10 +57,13 @@ const CanvasComponent: React.FC<Props> = (props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [clickedPlayers, setClickedPlayers] = useState<{ id: string }[]>([]);
   const classes = classNames([styles.container]);
-  const { playerIds, focusImage } = useStore(({ playerIds, focusImage }) => ({
-    playerIds,
-    focusImage,
-  }));
+  const { playerIds, focusImage, set } = useStore(
+    ({ playerIds, focusImage, set }) => ({
+      playerIds,
+      focusImage,
+      set,
+    })
+  );
 
   useEffect(() => {
     getUserModel();
@@ -104,7 +108,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
             mieDirectionalG={0.029}
             azimuth={91.5}
           />
-          {/* <Perf /> */}
+          <Perf />
           <ambientLight intensity={1.2} />
           <directionalLight color="white" position={[-3, 3, -2]} />
           {renderUser()}
@@ -183,14 +187,29 @@ const CanvasComponent: React.FC<Props> = (props) => {
       return (
         <Modal>
           <div className={styles.modalContainer}>
-            <img className={styles.image} alt="focus" src={focusImage}></img>
+            <img
+              className={styles.image}
+              alt="focus"
+              src={focusImage.src}
+            ></img>
             <div className={styles.contentContainer}>
               <div className={styles.headingContainer}>
-                <h3>Some Title</h3>
+                <h3>{focusImage.title}</h3>
+                <div
+                  className={styles.iconContainer}
+                  onClick={() => {
+                    set((state) => ({ ...state, focusImage: undefined }));
+                  }}
+                >
+                  <Icon icon={IconType.close} className={styles.icon} />
+                </div>
               </div>
-              <p className={styles.paragraph}>
-                Some wiedjishcchdhcsdhjcschcskhcshcjscscdk
-              </p>
+              <div className={styles.paragraphContainer}>
+                {focusImage.isVisibleInMuseum
+                  ? 'Artwork now visible in the Stedelijk museum'
+                  : 'Artwork not visible in the Stedelijk museum'}
+                <p className={styles.paragraph}>{focusImage.description}</p>
+              </div>
             </div>
           </div>
         </Modal>

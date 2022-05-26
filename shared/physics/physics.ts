@@ -32,7 +32,7 @@ export class Physics {
 
   public createPhysics<T extends THREE.Mesh>(
     geometry: BufferGeometry,
-    object: T,
+    object: T | undefined,
     hasMass: boolean
   ): CANNON.Body {
     const shape = this.createTrimesh(geometry);
@@ -44,9 +44,11 @@ export class Physics {
       collisionFilterMask: this.GROUP1,
     });
 
-    body.position.x = object.position.x;
-    body.position.y = object.position.y;
-    body.position.z = object.position.z;
+    if (object) {
+      body.position.x = object.position.x;
+      body.position.y = object.position.y;
+      body.position.z = object.position.z;
+    }
 
     return body;
   }
