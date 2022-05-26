@@ -7,7 +7,9 @@ import { useStore } from '../../../store/store';
 
 export const HopePaintings: React.FC<ComponentProps> = (props) => {
   const { nodes } = props;
-  const { set } = useStore(({ set }) => ({ set }));
+  const { canvasContainerRef, set } = useStore(
+    ({ canvasContainerRef, set }) => ({ canvasContainerRef, set })
+  );
   const paintings = [
     {
       src: './hope/70-08.jpg',
@@ -149,6 +151,16 @@ Camus
               onClick={() =>
                 set((state) => ({ ...state, focusImage: paintings[index] }))
               }
+              onPointerOver={() => {
+                if (typeof window !== 'undefined') {
+                  document.body.style.cursor = 'pointer';
+                }
+              }}
+              onPointerLeave={() => {
+                if (typeof window !== 'undefined') {
+                  document.body.style.cursor = 'grab';
+                }
+              }}
               key={index}
               geometry={nodes['hope-painting'].geometry}
               material={new THREE.MeshBasicMaterial({ map: painting })}
@@ -167,6 +179,16 @@ Camus
             onClick={() =>
               set((state) => ({ ...state, focusImage: paintings[index] }))
             }
+            onPointerOver={() => {
+              if (canvasContainerRef) {
+                canvasContainerRef.style.cursor = 'pointer';
+              }
+            }}
+            onPointerLeave={() => {
+              if (canvasContainerRef) {
+                canvasContainerRef.style.cursor = 'grab';
+              }
+            }}
           />
         );
       })}

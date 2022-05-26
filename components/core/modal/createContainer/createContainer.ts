@@ -4,7 +4,7 @@ export default function createContainer() {
   if (typeof window !== 'undefined') {
     console.log('clicked');
     // Client-side-only code
-    const portalId = 'notifyContainer';
+    const portalId = 'modalContainer';
     let element = document.getElementById(portalId);
 
     if (element) {

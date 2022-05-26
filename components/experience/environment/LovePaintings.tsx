@@ -6,7 +6,9 @@ import { PaintingMetaData, useStore } from '../../../store/store';
 
 export const LovePaintings: React.FC<ComponentProps> = (props) => {
   const { nodes } = props;
-  const { set } = useStore(({ set }) => ({ set }));
+  const { canvasContainerRef, set } = useStore(
+    ({ canvasContainerRef, set }) => ({ canvasContainerRef, set })
+  );
 
   const paintings: PaintingMetaData[] = [
     {
@@ -91,6 +93,16 @@ D. Berriganour personal life is as full of grief and private torment as a clown'
               onClick={() =>
                 set((state) => ({ ...state, focusImage: paintings[index] }))
               }
+              onPointerOver={() => {
+                if (canvasContainerRef) {
+                  canvasContainerRef.style.cursor = 'pointer';
+                }
+              }}
+              onPointerLeave={() => {
+                if (canvasContainerRef) {
+                  canvasContainerRef.style.cursor = 'grab';
+                }
+              }}
               geometry={nodes['love-painting'].geometry}
               material={new THREE.MeshBasicMaterial({ map: painting })}
             />
@@ -103,6 +115,16 @@ D. Berriganour personal life is as full of grief and private torment as a clown'
             onClick={() =>
               set((state) => ({ ...state, focusImage: paintings[index] }))
             }
+            onPointerOver={() => {
+              if (canvasContainerRef) {
+                canvasContainerRef.style.cursor = 'pointer';
+              }
+            }}
+            onPointerLeave={() => {
+              if (canvasContainerRef) {
+                canvasContainerRef.style.cursor = 'grab';
+              }
+            }}
             geometry={
               nodes[`love-painting00${index as 1 | 2 | 3 | 4}`].geometry
             }

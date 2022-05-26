@@ -57,6 +57,8 @@ const CanvasComponent: React.FC<Props> = (props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [clickedPlayers, setClickedPlayers] = useState<{ id: string }[]>([]);
   const classes = classNames([styles.container]);
+  const [shouldRenderInstructions, setShouldRenderInstructions] =
+    useState<boolean>(false);
   const { playerIds, focusImage, set } = useStore(
     ({ playerIds, focusImage, set }) => ({
       playerIds,
@@ -68,6 +70,10 @@ const CanvasComponent: React.FC<Props> = (props) => {
   useEffect(() => {
     getUserModel();
     setPhysics(new Physics());
+
+    if (containerRef.current) {
+      set((state) => ({ ...state, canvasContainerRef: containerRef.current }));
+    }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -108,7 +114,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
             mieDirectionalG={0.029}
             azimuth={91.5}
           />
-          <Perf />
+          {/* <Perf /> */}
           <ambientLight intensity={1.2} />
           <directionalLight color="white" position={[-3, 3, -2]} />
           {renderUser()}
@@ -124,6 +130,16 @@ const CanvasComponent: React.FC<Props> = (props) => {
             <Bloom />
           </EffectComposer>
         </Canvas>
+        <div
+          className={styles.instructionsIconContainer}
+          onClick={() => setShouldRenderInstructions(true)}
+        >
+          <Icon
+            icon={IconType.instruction}
+            className={styles.instructionsIcon}
+          />
+        </div>
+        {renderInstructions()}
         <audio className={styles.audio} playsInline ref={userAudio} autoPlay />
       </>
     );
@@ -209,6 +225,70 @@ const CanvasComponent: React.FC<Props> = (props) => {
                   ? 'Artwork now visible in the Stedelijk museum'
                   : 'Artwork not visible in the Stedelijk museum'}
                 <p className={styles.paragraph}>{focusImage.description}</p>
+              </div>
+            </div>
+          </div>
+        </Modal>
+      );
+    }
+  }
+
+  function renderInstructions() {
+    if (shouldRenderInstructions) {
+      return (
+        <Modal>
+          <div className={styles.instructionsContainer}>
+            <div className={styles.instructionsHeadingContainer}>
+              <div
+                className={styles.instructionsCloseIconContainer}
+                onClick={() => setShouldRenderInstructions(false)}
+              >
+                <Icon icon={IconType.close} />
+              </div>
+              <h3>Controls</h3>
+            </div>
+            <div className={styles.instructionsRowsContainer}>
+              <div className={styles.instructionsRow}>
+                <div className={styles.item}>
+                  <h4 className={styles.itemTitle}>Move</h4>
+                  <p>Use these keys to navigate</p>
+                  <div className={styles.itemColumn}>
+                    <img src={'./controls/keys-1.png'} alt={'keys'}></img>
+                    <p>or</p>
+                    <img src={'./controls/keys-2.png'} alt={'keys'}></img>
+                  </div>
+                </div>
+                <div className={styles.item}>
+                  <h4 className={styles.itemTitle}>Orbit Camera</h4>
+                  <p>Drag the screen to look around.</p>
+                  <img src={'./controls/orbit.png'} alt={'keys'}></img>
+                </div>
+              </div>
+              <div className={styles.instructionsRow}>
+                <div className={styles.item}>
+                  <h4 className={styles.itemTitle}>Voice call</h4>
+                  <p>Click on a player to start a voice call.</p>
+                  <img src={'./controls/player.png'} alt={'keys'}></img>
+                </div>
+                <div className={styles.item}>
+                  <h4 className={styles.itemTitle}>paintings</h4>
+                  <p>Click on painting to get more information.</p>
+                  <img src={'./controls/mini-painting.png'} alt={'keys'}></img>
+                </div>
+              </div>
+              <div className={styles.instructionsRow}>
+                <h4 className={styles.itemTitle}>Animations</h4>
+                <div className={styles.animationsContainer}>
+                  <div>
+                    <p>Pray</p>
+                    <img src={'./controls/1.png'} alt={'controls'}></img>
+                  </div>
+                  <div>
+                    <p>Fist</p>
+
+                    <img src={'./controls/2.png'} alt={'controls'}></img>
+                  </div>
+                </div>
               </div>
             </div>
           </div>

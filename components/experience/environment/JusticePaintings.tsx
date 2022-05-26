@@ -6,7 +6,9 @@ import { ComponentProps } from './types/types';
 
 export const JusticePaintings: React.FC<ComponentProps> = (props) => {
   const { nodes } = props;
-  const { set } = useStore(({ set }) => ({ set }));
+  const { canvasContainerRef, set } = useStore(
+    ({ canvasContainerRef, set }) => ({ canvasContainerRef, set })
+  );
   const paintings: PaintingMetaData[] = [
     {
       src: './justice/69-70.jpg',
@@ -140,6 +142,16 @@ LIFE THE NEGRO AND THE CITIESThe Cry That Will Be Heard March 8, 1968 35 WHY NOT
               onClick={() =>
                 set((state) => ({ ...state, focusImage: paintings[index] }))
               }
+              onPointerOver={() => {
+                if (canvasContainerRef) {
+                  canvasContainerRef.style.cursor = 'pointer';
+                }
+              }}
+              onPointerLeave={() => {
+                if (canvasContainerRef) {
+                  canvasContainerRef.style.cursor = 'grab';
+                }
+              }}
               material={new THREE.MeshBasicMaterial({ map: painting })}
             />
           );
@@ -155,6 +167,16 @@ LIFE THE NEGRO AND THE CITIESThe Cry That Will Be Heard March 8, 1968 35 WHY NOT
               nodes[`justice-painting00${index as 1 | 2 | 3 | 4 | 5 | 6 | 7}`]
                 .geometry
             }
+            onPointerOver={() => {
+              if (canvasContainerRef) {
+                canvasContainerRef.style.cursor = 'pointer';
+              }
+            }}
+            onPointerLeave={() => {
+              if (canvasContainerRef) {
+                canvasContainerRef.style.cursor = 'grab';
+              }
+            }}
             material={new THREE.MeshBasicMaterial({ map: painting })}
           />
         );

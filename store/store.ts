@@ -46,6 +46,8 @@ const callRequests: CallRequests[] = [];
 
 const playersCount: number = 0;
 
+const canvasContainerRef: HTMLDivElement | null = null;
+
 const focusImage: PaintingMetaData | undefined = undefined;
 
 const animationName: ActionState = { animationName: 'idle' };
@@ -69,6 +71,7 @@ export interface IState {
   players: IPlayerType | undefined;
   playerIds: string[];
   playersCount: number;
+  canvasContainerRef: HTMLDivElement | null;
   focusImage: PaintingMetaData | undefined;
   animationName: ActionState;
   callRequests: CallRequests[];
@@ -89,6 +92,7 @@ const useStoreImplementation = create(
         playerIds,
         playersCount,
         callRequests,
+        canvasContainerRef,
         focusImage,
         animationName,
         cursorState,
