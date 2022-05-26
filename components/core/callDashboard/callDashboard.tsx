@@ -3,6 +3,8 @@ import { Button } from '../button/Button';
 import styles from './callDashboard.module.scss';
 import ReactDOM from 'react-dom';
 import createContainer from '../notifications/createContainer/createContainer';
+import { Icon } from '../icon/Icon';
+import { IconType } from '../../../utils/icons/types';
 
 const container = createContainer();
 
@@ -10,10 +12,11 @@ interface Props {
   id: string;
   onMute: () => void;
   onEnd: () => void;
+  icon: IconType;
 }
 
 export const CallDashboard: React.FC<Props> = (props) => {
-  const { id, onMute, onEnd } = props;
+  const { id, onMute, onEnd, icon } = props;
   const [minutes, setMinutes] = useState<number>(0);
   const [seconds, setSeconds] = useState<number>(0);
   const [totalSeconds, setTotalSeconds] = useState<number>(0);
@@ -33,7 +36,11 @@ export const CallDashboard: React.FC<Props> = (props) => {
   return ReactDOM.createPortal(
     <div className={styles.container}>
       <div className={styles.contentContainer}>
-        <div className={styles.iconWrapper}>icon</div>
+        <div className={styles.iconWrapper}>
+          <div className={styles.iconContainer}>
+            <Icon icon={icon} />
+          </div>
+        </div>
         <div className={styles.metaData}>
           <div className={styles.titleContainer}>
             <p>{id}</p>

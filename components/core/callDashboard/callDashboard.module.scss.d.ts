@@ -6,3 +6,4 @@ export const metaData: string;
 export const titleContainer: string;
 export const audioVisualizer: string;
 export const button: string;
+export const iconContainer: string;

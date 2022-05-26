@@ -55,7 +55,7 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
     const state = getState().players;
     if (players && playerData && state) {
       const playersList = state[playerData.id];
-      if (state) {
+      if (playersList) {
         setAnimationState((v) => {
           if (v !== playersList.animationState) {
             return playersList.animationState;

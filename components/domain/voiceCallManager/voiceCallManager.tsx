@@ -6,6 +6,7 @@ import { Button } from '../../core/button/Button';
 import { Notifications } from '../../core/notifications/Notifications';
 import styles from './voiceCallManager.module.scss';
 import { CallDashboard } from '../../core/callDashboard/callDashboard';
+import { IconType } from '../../../utils/icons/types';
 
 interface Props {
   room: Room;
@@ -63,6 +64,7 @@ export const VoiceCallManager: React.FC<Props> = (props) => {
           id={isCalling.id}
           onMute={() => muteMic()}
           onEnd={() => leaveCall(isCalling.id)}
+          icon={muted ? IconType.muted : IconType.unmuted}
         />
       )}
       {renderCallNotification()}
