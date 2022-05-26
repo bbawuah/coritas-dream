@@ -16,7 +16,9 @@ export const AuthProvider: React.FC = ({ children }) => {
 
   useEffect(() => {
     const session = client.auth.session();
-    setState({ session, user: session?.user ?? null });
+    setState((v) => {
+      return { session, user: session?.user ?? null };
+    });
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -24,7 +26,9 @@ export const AuthProvider: React.FC = ({ children }) => {
   useAuthStateChange((event, session) => {
     console.log(`${event} from context`);
 
-    setState({ session, user: session?.user ?? null });
+    setState((v) => {
+      return { session, user: session?.user ?? null };
+    });
   });
 
   return <AuthContext.Provider value={state}>{children}</AuthContext.Provider>;

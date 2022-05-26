@@ -26,19 +26,6 @@ const Dream: NextPage = () => {
   const [characterIsCreated, setCharacterIsCreated] = useState<boolean>(false);
   const [hasProfile, setHasProfile] = useState<boolean>(false);
   const { session, user } = useAuth();
-  const router = useRouter();
-
-  useEffect(() => {
-    document.addEventListener('visibilitychange', async (event) => {
-      if (document.visibilityState !== 'visible') {
-        router.push('/');
-        if (room) {
-          await room.leave();
-        }
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room]);
 
   useEffect(() => {
     const webXRNavigator: Navigator = navigator as any as Navigator;
