@@ -27,3 +27,5 @@ export const instructionsRowsContainer: string;
 export const instructionsColumnsContainer: string;
 export const itemColumn: string;
 export const animationsContainer: string;
+export const inStedelijk: string;
+export const notInStedelijk: string;

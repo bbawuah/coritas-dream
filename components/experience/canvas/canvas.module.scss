@@ -68,6 +68,22 @@
         font-weight: 400;
         white-space: pre-wrap;
       }
+
+      .inStedelijk {
+        font-family: 'Neutral Face';
+        font-style: normal;
+        font-weight: 500;
+        color: green;
+        font-size: 0.75rem;
+      }
+
+      .notInStedelijk {
+        font-family: 'Neutral Face';
+        font-style: normal;
+        font-weight: 500;
+        color: rgb(155, 4, 4);
+        font-size: 0.75rem;
+      }
     }
   }
 }

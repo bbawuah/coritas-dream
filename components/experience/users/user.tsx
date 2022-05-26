@@ -3,6 +3,7 @@ import { OrbitControls } from '@react-three/drei';
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
+import { Text } from '@react-three/drei';
 import {
   getState,
   IPlayerNetworkData,
@@ -67,6 +68,8 @@ export const User: React.FC<Props> = (props) => {
     })
   );
   const userLookAt = useRef<THREE.Vector3>(new THREE.Vector3());
+  // const textRef = useRef<THREE.Mesh>();
+  // const textPosition = useRef<THREE.Vector3>(new THREE.Vector3());
 
   // const cannonDebugRenderer = useRef(
   //   new CannonDebugRenderer(scene, physics.physicsWorld)
@@ -91,6 +94,13 @@ export const User: React.FC<Props> = (props) => {
         players[id].y,
         players[id].z
       );
+
+      // textPosition.current.set(
+      //   players[id].x,
+      //   players[id].y + 3.5,
+      //   players[id].z - 7
+      // );
+      // textRef.current.position.copy(textPosition.current);
 
       // Update processed position
       processedAction.current = {
@@ -125,6 +135,7 @@ export const User: React.FC<Props> = (props) => {
   useFrame((state, dt) => {
     frameTime.current += state.clock.getElapsedTime();
     if (userRef.current && controlsRef) {
+      // console.log(userRef.current.controlObject.positionw);
       const userDirection = getDirection();
 
       if (userDirection !== 'idle') {
@@ -154,6 +165,17 @@ export const User: React.FC<Props> = (props) => {
 
   return (
     <Suspense fallback={null}>
+      {/* <Text
+        color={'#000'}
+        fontSize={0.9}
+        letterSpacing={0.03}
+        lineHeight={1}
+        textAlign={'center'}
+        ref={textRef}
+        font={'./fonts/NeutralFace-Bold.woff'}
+      >
+        {"Corita's Dream"}
+      </Text> */}
       <primitive object={userRef.current?.controlObject} />
       <OrbitControls
         ref={controlsRef}

@@ -221,9 +221,15 @@ const CanvasComponent: React.FC<Props> = (props) => {
                 </div>
               </div>
               <div className={styles.paragraphContainer}>
-                {focusImage.isVisibleInMuseum
-                  ? 'Artwork now visible in the Stedelijk museum'
-                  : 'Artwork not visible in the Stedelijk museum'}
+                {focusImage.isVisibleInMuseum ? (
+                  <p className={styles.inStedelijk}>
+                    Artwork now visible in the Stedelijk museum
+                  </p>
+                ) : (
+                  <p className={styles.notInStedelijk}>
+                    Artwork is not visible in the Stedelijk museum
+                  </p>
+                )}
                 <p className={styles.paragraph}>{focusImage.description}</p>
               </div>
             </div>
