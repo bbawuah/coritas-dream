@@ -1,12 +1,11 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState } from 'react';
 import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
 import { Canvas } from '@react-three/fiber';
 import { User } from '../users/user';
 import { Client, Room } from 'colyseus.js';
 import { Physics } from '../../../shared/physics/physics';
-import { XRCanvas } from './xrCanvas';
 import { Sky, useGLTF } from '@react-three/drei';
 import { VRCanvas } from '@react-three/xr';
 import { Perf } from 'r3f-perf';
@@ -30,6 +29,8 @@ import { VoiceCallManager } from '../../domain/voiceCallManager/voiceCallManager
 import { Modal } from '../../core/modal/modal';
 import { Icon } from '../../core/icon/Icon';
 import { IconType } from '../../../utils/icons/types';
+import dynamic from 'next/dynamic';
+import { XRCanvas } from './xrCanvas';
 
 interface Props {
   room: Room;
@@ -92,7 +93,9 @@ const CanvasComponent: React.FC<Props> = (props) => {
     if (isWebXrSupported && isInVR && isDesktop) {
       return (
         <VRCanvas>
-          <XRCanvas id={id} room={room} physics={physics} nodes={nodes} />
+          <Suspense fallback={null}>
+            <XRCanvas id={id} room={room} physics={physics} nodes={nodes} />
+          </Suspense>
           {renderNpcs()}
           <Perf />
         </VRCanvas>

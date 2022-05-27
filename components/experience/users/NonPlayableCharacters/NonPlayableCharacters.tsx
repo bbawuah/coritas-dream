@@ -18,8 +18,8 @@ import { Room } from 'colyseus.js';
 interface Props {
   playerData?: IPlayerNetworkData;
   onClick?: () => void;
-  onPointerOver: () => void;
-  onPointerLeave: () => void;
+  onPointerOver?: () => void;
+  onPointerLeave?: () => void;
   room: Room;
 }
 
@@ -132,8 +132,8 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
         <primitive
           object={userRef.current.controlObject}
           onClick={() => onClick?.()}
-          onPointerOver={() => onPointerOver()}
-          onPointerLeave={() => onPointerLeave()}
+          onPointerOver={() => onPointerOver?.()}
+          onPointerLeave={() => onPointerLeave?.()}
         />
 
         <Text

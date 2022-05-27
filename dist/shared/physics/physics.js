@@ -47,9 +47,11 @@ class Physics {
             collisionFilterGroup: this.GROUP2,
             collisionFilterMask: this.GROUP1,
         });
-        body.position.x = object.position.x;
-        body.position.y = object.position.y;
-        body.position.z = object.position.z;
+        if (object) {
+            body.position.x = object.position.x;
+            body.position.y = object.position.y;
+            body.position.z = object.position.z;
+        }
         return body;
     }
     createPlayerPhysics(object) {

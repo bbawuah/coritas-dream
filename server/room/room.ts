@@ -60,12 +60,17 @@ export class Gallery extends Room<State> {
 
     this.onMessage('teleport', (client, data: XRTeleportationData) => {
       const player = this.state.players.get(client.sessionId);
-      const { position } = data;
+      const { position, worldDirection, animationState } = data;
 
+      console.log(animationState);
       if (player) {
         player.x = position.x;
-        player.y = position.y;
+        player.y = position.y + 0.5;
         player.z = position.z;
+        player.rx = worldDirection.x;
+        player.ry = worldDirection.y;
+        player.rz = worldDirection.z;
+        player.animationState = animationState;
       }
 
       this.broadcast(

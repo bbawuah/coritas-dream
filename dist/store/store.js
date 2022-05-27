@@ -17,6 +17,8 @@ const playerIds = [];
 const players = {};
 const callRequests = [];
 const playersCount = 0;
+const canvasContainerRef = null;
+const focusImage = undefined;
 const animationName = { animationName: 'idle' };
 const actionNames = ['idle', 'walking', 'praying', 'fist'];
 const cursorState = 'grab';
@@ -27,6 +29,8 @@ const useStoreImplementation = (0, zustand_1.default)((0, middleware_1.subscribe
         playerIds,
         playersCount,
         callRequests,
+        canvasContainerRef,
+        focusImage,
         animationName,
         cursorState,
         get,

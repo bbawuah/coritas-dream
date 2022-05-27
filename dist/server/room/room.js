@@ -41,7 +41,7 @@ class Gallery extends colyseus_1.Room {
         });
         this.onMessage('teleport', (client, data) => {
             const player = this.state.players.get(client.sessionId);
-            const { position } = data;
+            const { position, rotation } = data;
             if (player) {
                 player.x = position.x;
                 player.y = position.y;
@@ -129,6 +129,7 @@ class Gallery extends colyseus_1.Room {
         const players = this.state.players;
         if (players) {
             //Optimize this to only sending the player that left
+            client.send('leave', { message: 'you left' });
             this.broadcast('removePlayer', {
                 players,
             });

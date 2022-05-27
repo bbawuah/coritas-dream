@@ -1,6 +1,8 @@
 import * as THREE from 'three';
+import { ActionNames } from '../../../store/store';
 
 export interface XRTeleportationData {
-  azimuthalAngle: THREE.Vector3;
+  worldDirection: THREE.Vector3;
   position: THREE.Vector3;
+  animationState: ActionNames;
 }

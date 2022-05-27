@@ -1,13 +1,20 @@
 // Based on the xr-locomotion-starter https://github.com/SamsungInternet/xr-locomotion-starter
 import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useController, useXR, useXREvent, XREvent } from '@react-three/xr';
+import {
+  useController,
+  useXR,
+  useXREvent,
+  useXRFrame,
+  XREvent,
+} from '@react-three/xr';
 import React, { useEffect, useRef } from 'react';
 import { NavigationLine } from './navigationLine';
 import { HighlightMesh } from './highlightMesh';
 import { Room } from 'colyseus.js';
 import { getState, IPlayerType } from '../../../store/store';
 import { XRTeleportationData } from './types';
+import { XRViewerPose } from 'webxr';
 // import { Pathfinding } from 'three-pathfinding';
 
 interface Props {
@@ -34,7 +41,9 @@ export const XRTeleport: React.FC<Props> = (props) => {
   const highLightMesh = useRef<HighlightMesh>(new HighlightMesh());
 
   const counter = useRef<number>(0);
-  const worldDirection = new THREE.Vector3();
+  const worldDirection = useRef<THREE.XRViewerPose>();
+  const temporaryWorldDirection = useRef<THREE.Vector3>(new THREE.Vector3());
+  const temporaryWorldDirection2 = useRef<THREE.Vector3>(new THREE.Vector3());
   const green = new THREE.Color(0x00ff00);
   const red = new THREE.Color(0xff0000);
   // const pathfinding = new Pathfinding();
@@ -84,8 +93,11 @@ export const XRTeleport: React.FC<Props> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useFrame(() => {
+  useXRFrame((time, xrFrame) => {
     if (guidingController.current && lineRef.current) {
+      const referenceSpace = gl.xr.getReferenceSpace();
+      if (referenceSpace)
+        worldDirection.current = xrFrame.getViewerPose(referenceSpace);
       const vertex = tempVector.current.set(0, 0, 0);
 
       if (guidingController.current) {
@@ -214,12 +226,28 @@ export const XRTeleport: React.FC<Props> = (props) => {
       // Do the locomotion
       player.position.add(offset);
 
+      const direction = gl.xr
+        .getCamera(camera)
+        .getWorldDirection(temporaryWorldDirection.current);
+
+      console.log(direction);
+
       const action: XRTeleportationData = {
-        azimuthalAngle: worldDirection,
+        worldDirection: direction.multiplyScalar(100),
         position: player.position,
+        animationState: 'walking',
       };
 
       room.send('teleport', action);
+
+      setTimeout(() => {
+        const action: XRTeleportationData = {
+          worldDirection: temporaryWorldDirection.current,
+          position: player.position,
+          animationState: 'idle',
+        };
+        room.send('teleport', action);
+      }, 500);
 
       if (counter.current >= 99) {
         counter.current = 0;
