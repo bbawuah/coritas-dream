@@ -89,14 +89,14 @@ const CanvasComponent: React.FC<Props> = (props) => {
       return null;
     }
 
-    if (isWebXrSupported && isDesktop) {
+    if (isWebXrSupported && isInVR && isDesktop) {
       return (
         <VRCanvas>
           <Suspense fallback={null}>
             <XRCanvas id={id} room={room} physics={physics} nodes={nodes} />
           </Suspense>
           {renderNpcs()}
-          <Perf />
+          {/* <Perf /> */}
         </VRCanvas>
       );
     }
