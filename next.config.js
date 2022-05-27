@@ -7,15 +7,6 @@ const nextConfig = {
   sassOptions: {
     includePaths: [path.join(__dirname, 'styles')],
   },
-  webpack: (config, { webpack }) => {
-    console.log('from webpck');
-    config.plugins.push(
-      new webpack.ProvidePlugin({
-        ThreeMeshUI: 'three-mesh-ui',
-      })
-    );
-    return config;
-  },
 };
 
 module.exports = withTM(nextConfig);
