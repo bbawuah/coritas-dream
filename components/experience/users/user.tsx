@@ -172,6 +172,7 @@ export const User: React.FC<Props> = (props) => {
       <OrbitControls
         ref={controlsRef}
         enablePan={false}
+        maxDistance={5}
         enableZoom={false}
         maxPolarAngle={Math.PI / 2}
       />
