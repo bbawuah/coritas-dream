@@ -4,12 +4,11 @@ import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
 import { Canvas } from '@react-three/fiber';
 import { User } from '../users/user';
-import { Client, Room } from 'colyseus.js';
 import { Physics } from '../../../shared/physics/physics';
 import { Sky, useGLTF } from '@react-three/drei';
 import { VRCanvas } from '@react-three/xr';
 import { Perf } from 'r3f-perf';
-import { getState, IPlayerType, useStore } from '../../../store/store';
+import { getState, useStore } from '../../../store/store';
 import { useDeviceCheck } from '../../../hooks/useDeviceCheck';
 import { Environment } from '../environment/Environment';
 import { BlendFunction } from 'postprocessing';
@@ -31,6 +30,7 @@ import { Icon } from '../../core/icon/Icon';
 import { IconType } from '../../../utils/icons/types';
 import dynamic from 'next/dynamic';
 import { XRCanvas } from './xrCanvas';
+import { Room } from 'colyseus.js';
 
 interface Props {
   room: Room;

@@ -214,12 +214,11 @@ export class Gallery extends Room<State> {
     player: Player | undefined,
     data: IHandlePhysicsProps
   ): void {
-    const { userDirection, azimuthalAngle, timestamp } = data;
+    const { userDirection, azimuthalAngle } = data;
     // Get the player
     if (player) {
       player.movement[userDirection] = true;
       player.handleUserDirection(azimuthalAngle);
-      player.timestamp = timestamp;
       player.movement[userDirection] = false;
     }
   }

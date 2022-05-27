@@ -15,7 +15,6 @@ export class Player extends Schema {
   @type('string') id: string = '';
   @type('string') uuid: string = '';
   @type('string') animationState: ActionNames = 'idle';
-  @type('number') timestamp: number = 0;
 
   public playerSpeed: number = 10;
   public physicalBody: CANNON.Body;

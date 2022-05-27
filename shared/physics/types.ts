@@ -5,7 +5,6 @@ export interface IPositionType {
 }
 
 export interface IHandlePhysicsProps {
-  timestamp: number;
   userDirection: IUserDirection;
   azimuthalAngle: number;
 }

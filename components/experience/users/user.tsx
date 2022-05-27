@@ -146,12 +146,7 @@ export const User: React.FC<Props> = (props) => {
         userRef.current.mixer.update(dt);
       }
 
-      if (currentAction.current) {
-        // Handle client prediction
-        handleUserDirection(currentAction.current);
-      }
-
-      room.onMessage('move', handleOnMessageMove);
+      handleUserDirection();
 
       state.camera.position.sub(controlsRef.current.target);
       controlsRef.current.target.copy(userRef.current.controlObject.position);
@@ -199,11 +194,7 @@ export const User: React.FC<Props> = (props) => {
     physicalBody.current?.sleep();
   }
 
-  function handleUserDirection(action: IHandlePhysicsProps) {
-    const processedTimeStamp = processedAction.current
-      ? processedAction.current[id].timestamp
-      : -1;
-
+  function handleUserDirection() {
     frontVector.current.setZ(
       Number(movement.current.backward) - Number(movement.current.forward)
     );
@@ -231,87 +222,31 @@ export const User: React.FC<Props> = (props) => {
       userLookAt.current.multiplyScalar(100);
     }
 
-    // If action is not equal to processedAction, predict position
-    if (action.timestamp !== processedTimeStamp) {
-      if (physicalBody?.current) {
-        physicalBody.current?.wakeUp();
-        physicalBody.current.velocity.set(
-          direction.current.x,
-          physicalBody.current.velocity.y,
-          direction.current.z
-        );
-
-        userRef.current?.controlObject.position.set(
-          physicalBody.current.position.x,
-          physicalBody.current.position.y,
-          physicalBody.current.position.z
-        );
-
-        userRef.current?.controlObject.lookAt(userLookAt.current);
-      }
-    } else {
-      handleServerReconsiliation();
-    }
-  }
-
-  function handleServerReconsiliation() {
-    // Reconsile with server
-    if (processedAction.current) {
-      // Processed vector
-      processedVector.current.set(
-        processedAction.current[id].x,
-        processedAction.current[id].y,
-        processedAction.current[id].z
+    // If action is not equal to processedAction, preif (action.timestamp !== processedTimeStamp) {
+    if (physicalBody?.current) {
+      physicalBody.current?.wakeUp();
+      physicalBody.current.velocity.set(
+        direction.current.x,
+        physicalBody.current.velocity.y,
+        direction.current.z
       );
 
-      physicalBodyVector.current.set(
-        processedAction.current[id].x,
-        processedAction.current[id].y,
-        processedAction.current[id].z
+      userRef.current?.controlObject.position.set(
+        physicalBody.current.position.x,
+        physicalBody.current.position.y,
+        physicalBody.current.position.z
       );
 
-      userRef.current?.controlObject.position.lerp(
-        processedVector.current,
-        0.1
-      );
-      physicalBody.current?.position.copy(physicalBodyVector.current);
-    }
-  }
-
-  function handleOnMessageMove(data: OnMoveProps) {
-    const { player } = data;
-
-    if (players && player.id === id) {
-      processedAction.current = {
-        [player.id]: {
-          id: players[id].id,
-          timestamp: player.timestamp,
-          animationState: players[id].animationState,
-          uuid: players[id].uuid,
-          x: player.x,
-          y: player.y,
-          z: player.z,
-          rx: players[id].rx,
-          ry: players[id].ry,
-          rz: players[id].rz,
-        },
-      };
+      userRef.current?.controlObject.lookAt(userLookAt.current);
     }
   }
 
   function handleSendPosition(direction: IUserDirection) {
     currentAction.current = {
-      timestamp: counter.current,
       userDirection: direction,
       azimuthalAngle: controlsRef.current.getAzimuthalAngle(),
     };
 
     room.send('move', currentAction.current);
-
-    if (counter.current >= 99) {
-      counter.current = 0;
-    } else {
-      counter.current++;
-    }
   }
 };
