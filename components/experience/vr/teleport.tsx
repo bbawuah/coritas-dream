@@ -43,7 +43,6 @@ export const XRTeleport: React.FC<Props> = (props) => {
   const counter = useRef<number>(0);
   const worldDirection = useRef<THREE.XRViewerPose>();
   const temporaryWorldDirection = useRef<THREE.Vector3>(new THREE.Vector3());
-  const temporaryWorldDirection2 = useRef<THREE.Vector3>(new THREE.Vector3());
   const green = new THREE.Color(0x00ff00);
   const red = new THREE.Color(0xff0000);
   // const pathfinding = new Pathfinding();
@@ -230,8 +229,6 @@ export const XRTeleport: React.FC<Props> = (props) => {
         .getCamera(camera)
         .getWorldDirection(temporaryWorldDirection.current);
 
-      console.log(direction);
-
       const action: XRTeleportationData = {
         worldDirection: direction.multiplyScalar(100),
         position: player.position,
@@ -242,7 +239,7 @@ export const XRTeleport: React.FC<Props> = (props) => {
 
       setTimeout(() => {
         const action: XRTeleportationData = {
-          worldDirection: temporaryWorldDirection.current,
+          worldDirection: direction.multiplyScalar(100),
           position: player.position,
           animationState: 'idle',
         };

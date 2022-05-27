@@ -1,0 +1,33 @@
+.container {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  .loader {
+    font-family: 'Neutral Face';
+    font-style: normal;
+    font-weight: 800;
+    font-size: 2vmax;
+  }
+  .loadingContainer {
+    width: 40%;
+    height: 10px;
+    background-color: rgb(218, 218, 218);
+    display: flex;
+    align-items: center;
+    border-radius: 50px;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
+      rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
+
+    .loadingBar {
+      width: 0%;
+      height: 8px;
+      background-color: rgb(73, 73, 73);
+      border-radius: 50px;
+      transition: 0.2s ease-in-ease-out;
+    }
+  }
+}

@@ -28,7 +28,6 @@ import { VoiceCallManager } from '../../domain/voiceCallManager/voiceCallManager
 import { Modal } from '../../core/modal/modal';
 import { Icon } from '../../core/icon/Icon';
 import { IconType } from '../../../utils/icons/types';
-import dynamic from 'next/dynamic';
 import { XRCanvas } from './xrCanvas';
 import { Room } from 'colyseus.js';
 
@@ -90,7 +89,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
       return null;
     }
 
-    if (isWebXrSupported && isInVR && isDesktop) {
+    if (isWebXrSupported && isDesktop) {
       return (
         <VRCanvas>
           <Suspense fallback={null}>
