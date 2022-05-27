@@ -43,7 +43,8 @@ const SignIn: NextPage = () => {
                   {
                     redirectTo: dev
                       ? 'http://localhost:3000/dream'
-                      : 'https://coritas-dream.herokuapp.com/dream',
+                      : 'https://coritas-dream.herokuapp.com/dream' ||
+                        'https://coritasdream.xyz/dream',
                   }
                 )
               }
@@ -59,7 +60,8 @@ const SignIn: NextPage = () => {
                   {
                     redirectTo: dev
                       ? 'http://localhost:3000/dream'
-                      : 'https://coritas-dream.herokuapp.com/dream',
+                      : 'https://coritas-dream.herokuapp.com/dream' ||
+                        'https://coritasdream.xyz/dream',
                   }
                 )
               }
@@ -76,7 +78,8 @@ const SignIn: NextPage = () => {
                   {
                     redirectTo: dev
                       ? 'http://localhost:3000/dream'
-                      : 'https://coritas-dream.herokuapp.com/dream',
+                      : 'https://coritas-dream.herokuapp.com/dream' ||
+                        'https://coritasdream.xyz/dream',
                   }
                 )
               }
