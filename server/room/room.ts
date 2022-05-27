@@ -1,10 +1,7 @@
 import { Client, Room } from 'colyseus';
 import { XRTeleportationData } from '../../components/experience/vr/types';
 import { Physics } from '../../shared/physics/physics';
-import {
-  IHandlePhysicsProps,
-  IUserDirection,
-} from '../../shared/physics/types';
+import { IMoveProps, IUserDirection } from '../../shared/physics/types';
 import { ActionNames } from '../../store/store';
 import { Player } from '../player/player';
 import { State } from '../state/state';
@@ -24,12 +21,22 @@ export class Gallery extends Room<State> {
   public onCreate() {
     // initialize empty room state
     this.setState(new State());
-    this.setSimulationInterval((deltaTime) => this.update(deltaTime));
+    // this.setSimulationInterval((deltaTime) => this.update(deltaTime));
 
     // Called every time this room receives a "move" message
-    this.onMessage('move', (client, data: IHandlePhysicsProps) => {
+    this.onMessage('move', (client, data: IMoveProps) => {
+      const { x, y, z, rx, ry, rz } = data;
       const player = this.state.players.get(client.sessionId);
-      this.handleMovement(player, data);
+      // Get the player
+
+      if (player) {
+        player.x = x;
+        player.y = y;
+        player.z = z;
+        player.rx = rx;
+        player.ry = ry;
+        player.rz = rz;
+      }
 
       // Loopen door nieuwe array en voor elke positie
 
@@ -40,22 +47,6 @@ export class Gallery extends Room<State> {
           afterNextPatch: true,
         }
       );
-    });
-
-    this.onMessage('idle', (client, data) => {
-      const player = this.state.players.get(client.sessionId);
-
-      if (player) {
-        for (let movement in player.movement) {
-          const key = movement as IUserDirection;
-          player.movement[key] = false;
-        }
-
-        player.physicalBody.velocity.setZero();
-        player.physicalBody.initVelocity.setZero();
-        player.physicalBody.angularVelocity.setZero();
-        player.physicalBody.initAngularVelocity.setZero();
-      }
     });
 
     this.onMessage('teleport', (client, data: XRTeleportationData) => {
@@ -180,12 +171,12 @@ export class Gallery extends Room<State> {
     });
   }
 
-  public update(deltaTime: number) {
-    // implement your physics or world updates here!
-    // this is a good place to update the room state
+  // public update(deltaTime: number) {
+  //   // implement your physics or world updates here!
+  //   // this is a good place to update the room state
 
-    this.physics.updatePhysics(deltaTime / 1000);
-  }
+  //   this.physics.updatePhysics(deltaTime / 1000);
+  // }
 
   public onLeave(client: Client) {
     this.state.players.delete(client.sessionId);
@@ -208,18 +199,5 @@ export class Gallery extends Room<State> {
 
   onDispose() {
     console.log('Dispose ChatRoom');
-  }
-
-  public handleMovement(
-    player: Player | undefined,
-    data: IHandlePhysicsProps
-  ): void {
-    const { userDirection, azimuthalAngle } = data;
-    // Get the player
-    if (player) {
-      player.movement[userDirection] = true;
-      player.handleUserDirection(azimuthalAngle);
-      player.movement[userDirection] = false;
-    }
   }
 }

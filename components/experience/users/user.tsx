@@ -12,10 +12,7 @@ import {
 } from '../../../store/store';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Room } from 'colyseus.js';
-import {
-  IHandlePhysicsProps,
-  IUserDirection,
-} from '../../../shared/physics/types';
+import { IMoveProps, IUserDirection } from '../../../shared/physics/types';
 import { useKeyboardEvents } from '../../../hooks/useKeys';
 import { IDirection } from '../../../server/player/types';
 import { Physics } from '../../../shared/physics/physics';
@@ -43,7 +40,7 @@ export const User: React.FC<Props> = (props) => {
   })); //Maybe refactor this late
   const controlsRef = useRef<any>();
   const processedAction = useRef<IPlayerType | null>(null);
-  const currentAction = useRef<IHandlePhysicsProps | null>(null);
+  const currentAction = useRef<IMoveProps | null>(null);
   const physicalBody = useRef<CANNON.Body | null>(null);
   const direction = useRef<THREE.Vector3>(new THREE.Vector3());
   const frontVector = useRef<THREE.Vector3>(new THREE.Vector3());
@@ -188,8 +185,6 @@ export const User: React.FC<Props> = (props) => {
   function keyUpEvent(direction: IUserDirection) {
     movement.current[direction] = false;
 
-    room.send('idle');
-
     userRef.current?.controlObject.position.lerp(processedVector.current, 0.01);
     physicalBody.current?.sleep();
   }
@@ -243,7 +238,12 @@ export const User: React.FC<Props> = (props) => {
 
   function handleSendPosition(direction: IUserDirection) {
     currentAction.current = {
-      userDirection: direction,
+      x: userRef.current.controlObject.position.x,
+      y: userRef.current.controlObject.position.y,
+      z: userRef.current.controlObject.position.z,
+      rx: userLookAt.current.x,
+      ry: userLookAt.current.y,
+      rz: userLookAt.current.z,
       azimuthalAngle: controlsRef.current.getAzimuthalAngle(),
     };
 

@@ -4,8 +4,10 @@ export interface IPositionType {
   z: number;
 }
 
-export interface IHandlePhysicsProps {
-  userDirection: IUserDirection;
+export interface IMoveProps extends IPositionType {
+  rx: number;
+  ry: number;
+  rz: number;
   azimuthalAngle: number;
 }
 
