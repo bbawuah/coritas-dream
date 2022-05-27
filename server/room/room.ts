@@ -53,7 +53,6 @@ export class Gallery extends Room<State> {
       const player = this.state.players.get(client.sessionId);
       const { position, worldDirection, animationState } = data;
 
-      console.log(animationState);
       if (player) {
         player.x = position.x;
         player.y = position.y + 0.5;
@@ -141,7 +140,6 @@ export class Gallery extends Room<State> {
 
     this.onMessage('sending signal', (payload: any) => {
       console.log(`from sending signal, ${payload}`);
-      console.log(payload);
       const { userToSignalId, callerId, signal } = payload;
       const client = this.clients.find(
         (user) => user.sessionId === userToSignalId
