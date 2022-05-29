@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
+import * as THREE from 'three';
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
@@ -11,6 +12,7 @@ import { Perf } from 'r3f-perf';
 import { getState, useStore } from '../../../store/store';
 import { useDeviceCheck } from '../../../hooks/useDeviceCheck';
 import { Environment } from '../environment/Environment';
+import { Text } from '@react-three/drei';
 import { BlendFunction } from 'postprocessing';
 import {
   EffectComposer,
@@ -96,6 +98,49 @@ const CanvasComponent: React.FC<Props> = (props) => {
             <XRCanvas id={id} room={room} physics={physics} nodes={nodes} />
           </Suspense>
           {renderNpcs()}
+          <Sky
+            turbidity={0.2}
+            rayleigh={3}
+            inclination={0.91}
+            mieCoefficient={0.003}
+            mieDirectionalG={0.029}
+            azimuth={180.5}
+          />
+          <ambientLight color="FDE9D7" intensity={1.7} />
+          <directionalLight color="#FF5C00" position={[-3, 3, -2]} />
+          <spotLight
+            distance={200}
+            color="#FFE3B8"
+            intensity={2.2}
+            angle={1}
+            penumbra={1}
+            position={[0, 20, 0]}
+          />
+          <spotLight
+            color="#FFE3B8"
+            intensity={10}
+            distance={50}
+            angle={1}
+            penumbra={1}
+            position={[1, 15, -67.1038477611397]}
+          />
+          <spotLight
+            color="#FFE3B8"
+            intensity={10}
+            distance={50}
+            angle={1}
+            penumbra={1}
+            position={[-62.817927678855646, 15, -1]}
+          />
+
+          <spotLight
+            color="#FFE3B8"
+            intensity={10}
+            distance={50}
+            angle={1}
+            penumbra={1}
+            position={[0.22130484492688, 15, 68.00761043552393]}
+          />
           {/* <Perf /> */}
         </VRCanvas>
       );
@@ -107,24 +152,94 @@ const CanvasComponent: React.FC<Props> = (props) => {
         <OnboardingManager />
         <VoiceCallManager room={room} clickedPlayers={clickedPlayers} id={id} />
         {renderFocusImage()}
-        <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
+        <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }} shadows>
           <Sky
-            turbidity={10.2}
-            rayleigh={0}
-            inclination={0.51}
+            turbidity={0.2}
+            rayleigh={3}
+            inclination={0.91}
             mieCoefficient={0.003}
             mieDirectionalG={0.029}
-            azimuth={91.5}
+            azimuth={180.5}
           />
-          {/* <Perf /> */}
-          <ambientLight intensity={1.2} />
-          <directionalLight color="white" position={[-3, 3, -2]} />
+          <Perf />
+          {/* <color attach="background" args={[new THREE.Color(0xfde0c6)]} /> */}
+          <ambientLight color="white" intensity={1.7} />
+          <directionalLight color="#FF5C00" position={[-3, 3, -2]} />
+          <spotLight
+            distance={200}
+            color="#FFE3B8"
+            intensity={2.2}
+            angle={1}
+            penumbra={1}
+            position={[0, 20, 0]}
+          />
+          <spotLight
+            color="#FFE3B8"
+            intensity={10}
+            distance={50}
+            angle={1}
+            penumbra={1}
+            position={[1, 15, -67.1038477611397]}
+          />
+          <spotLight
+            color="#FFE3B8"
+            intensity={10}
+            distance={50}
+            angle={1}
+            penumbra={1}
+            position={[-62.817927678855646, 15, -1]}
+          />
+
+          <spotLight
+            color="#FFE3B8"
+            intensity={10}
+            distance={50}
+            angle={1}
+            penumbra={1}
+            position={[0.22130484492688, 15, 68.00761043552393]}
+          />
+          <Text
+            color={'#FFE3B8'}
+            fontSize={8.9}
+            letterSpacing={0.03}
+            lineHeight={1}
+            textAlign={'center'}
+            position={new THREE.Vector3(47.75157312030056, 2.5, -74)}
+            rotation={new THREE.Euler(0, 6, 0)}
+            font={'./fonts/NeutralFace-Bold.woff'}
+          >
+            {'Love'}
+          </Text>
+          <Text
+            color={'#FFE3B8'}
+            fontSize={8.9}
+            letterSpacing={0.03}
+            lineHeight={1}
+            textAlign={'center'}
+            position={new THREE.Vector3(-53, 2.5, 74)}
+            rotation={new THREE.Euler(0, -4, 0)}
+            font={'./fonts/NeutralFace-Bold.woff'}
+          >
+            {'Justice'}
+          </Text>
+          <Text
+            color={'#FFE3B8'}
+            fontSize={8.9}
+            letterSpacing={0.03}
+            lineHeight={1}
+            textAlign={'center'}
+            position={new THREE.Vector3(-73, 2.5, -53)}
+            rotation={new THREE.Euler(0, 1, 0)}
+            font={'./fonts/NeutralFace-Bold.woff'}
+          >
+            {'Hope'}
+          </Text>
           {renderUser()}
           {renderNpcs()}
           <Environment nodes={nodes} physics={physics} />
           <EffectComposer>
             <Noise
-              opacity={0.3}
+              opacity={0.45}
               premultiply
               blendFunction={BlendFunction.ADD}
             />

@@ -47,8 +47,8 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
       waterNormals,
       sunDirection: new THREE.Vector3(),
       sunColor: 0xffffff,
-      waterColor: 0x001e0f,
-      distortionScale: 1.2,
+      waterColor: 0x112133,
+      distortionScale: 0.3,
       fog: false,
     }),
     [waterNormals]
@@ -60,18 +60,17 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
   normalTexture.minFilter = THREE.LinearFilter;
   metalnessMap.minFilter = THREE.LinearFilter;
 
-  const color = 0x8b7967;
   const material = new THREE.MeshPhongMaterial({
-    color,
+    color: 0x252525,
     normalMap: normalTexture,
-    specular: 0x00fff0,
+    specular: 0xff5c00,
     shininess: 25,
     specularMap: metalnessMap,
-    normalScale: new THREE.Vector2(0.75, 0.75),
+    normalScale: new THREE.Vector2(0.85, 0.85),
   });
   const materialTwo = new THREE.MeshPhongMaterial({
-    color: 0x34312b,
-    specular: 0xbfab8e,
+    color: 0x242424,
+    specular: 0xff5c00,
     shininess: 15,
     specularMap: metalnessMap,
   });
@@ -79,7 +78,7 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
   useFrame((state, delta) => {
     if (waterRef.current) {
       (waterRef.current.material as THREE.ShaderMaterial).uniforms.time.value +=
-        delta * 0.25;
+        delta * 0.1;
     }
   });
 
@@ -94,7 +93,6 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
       <HopePaintings nodes={nodes} material={material} />
       <LovePaintings nodes={nodes} material={material} />
       <JusticePaintings nodes={nodes} material={material} />
-      <mesh geometry={nodes.navmesh.geometry} material={material} />
       <mesh geometry={nodes.mountains.geometry} material={materialTwo} />
       <water
         ref={waterRef}

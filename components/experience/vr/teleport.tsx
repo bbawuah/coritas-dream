@@ -33,8 +33,8 @@ export const XRTeleport: React.FC<Props> = (props) => {
   const gravity = new THREE.Vector3(0, -9.8, 0); //Gravity
   const tempVector = useRef<THREE.Vector3>(new THREE.Vector3());
   const tempVector1 = useRef<THREE.Vector3>(new THREE.Vector3());
-  const tempVectorP = useRef<THREE.Vector3>(new THREE.Vector3());
-  const tempVectorV = useRef<THREE.Vector3>(new THREE.Vector3());
+  const tempVectorP = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
+  const tempVectorV = useRef<THREE.Vector3>(new THREE.Vector3(0, 0, 0));
 
   let guidingController = useRef<THREE.Group | null>(null);
   const lineRef = useRef<NavigationLine>(new NavigationLine(scene, 0x888888));
@@ -43,6 +43,7 @@ export const XRTeleport: React.FC<Props> = (props) => {
   const counter = useRef<number>(0);
   const worldDirection = useRef<THREE.XRViewerPose>();
   const temporaryWorldDirection = useRef<THREE.Vector3>(new THREE.Vector3());
+  const temporaryWorldDirection2 = useRef<THREE.Vector3>(new THREE.Vector3());
   const green = new THREE.Color(0x00ff00);
   const red = new THREE.Color(0xff0000);
   // const pathfinding = new Pathfinding();
@@ -82,7 +83,7 @@ export const XRTeleport: React.FC<Props> = (props) => {
     if (players) {
       const startingPosition = new THREE.Vector3(
         players[id].x,
-        player.position.y,
+        player.position.y + 0.5,
         players[id].z
       );
 
@@ -92,13 +93,13 @@ export const XRTeleport: React.FC<Props> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  useXRFrame((time, xrFrame) => {
+  useFrame((state, dt) => {
     if (guidingController.current && lineRef.current) {
-      const referenceSpace = gl.xr.getReferenceSpace();
-      if (referenceSpace)
-        worldDirection.current = xrFrame.getViewerPose(referenceSpace);
       const vertex = tempVector.current.set(0, 0, 0);
-
+      const referenceSpace = gl.xr.getReferenceSpace();
+      const frame = (state.gl.xr as any).getFrame() as THREE.XRFrame;
+      if (referenceSpace)
+        worldDirection.current = frame.getViewerPose(referenceSpace);
       if (guidingController.current) {
         // Controller start position
         rotationMatrix.current.extractRotation(
@@ -144,6 +145,9 @@ export const XRTeleport: React.FC<Props> = (props) => {
           v,
           gravity
         );
+
+        highLightMesh.current.mesh.position.y =
+          highLightMesh.current.mesh.position.y + 0.5;
 
         raycaster.current.ray.origin.set(p.x, p.y, p.z);
         raycaster.current.ray.direction

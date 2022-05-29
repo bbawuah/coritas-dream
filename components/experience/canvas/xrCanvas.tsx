@@ -30,14 +30,6 @@ export const XRCanvas: React.FC<Props> = (props) => {
 
   return (
     <>
-      <Sky
-        turbidity={10.2}
-        rayleigh={0}
-        inclination={0.51}
-        mieCoefficient={0.003}
-        mieDirectionalG={0.029}
-        azimuth={91.5}
-      />
       <DefaultXRControllers />
       <XRTeleport
         room={room}
@@ -46,9 +38,6 @@ export const XRCanvas: React.FC<Props> = (props) => {
       />
       {renderNonPlayableCharacters()}
       {/* <MakeTextPanel scene={scene} /> */}
-      <color attach="background" args={['#ffffff']} />
-      <ambientLight intensity={0.5} />
-      <directionalLight color="white" position={[0, 3, 0]} />
       <Environment physics={physics} nodes={nodes} />
     </>
   );

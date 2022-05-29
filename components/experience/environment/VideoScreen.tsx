@@ -3,11 +3,14 @@ import * as THREE from 'three';
 import { useStore } from '../../../store/store';
 import { ComponentProps } from './types/types';
 import { Text } from '@react-three/drei';
+import { Interactive } from '@react-three/xr';
+import { useThree } from '@react-three/fiber';
 
 export const VideoScreen: React.FC<ComponentProps> = (props) => {
   const position = new THREE.Vector3(23, 7.3, 0.2);
   const rotation = new THREE.Euler(0, -Math.PI / 2, 0);
   const { nodes } = props;
+  const { gl } = useThree();
   const { canvasContainerRef, set } = useStore(
     ({ canvasContainerRef, set }) => ({ canvasContainerRef, set })
   );
@@ -27,10 +30,46 @@ export const VideoScreen: React.FC<ComponentProps> = (props) => {
 
   // useEffect(() => void video.play(), [video]);
 
+  if (gl.xr.enabled) {
+    return (
+      <>
+        <Text
+          color={'#fff'}
+          fontSize={0.7}
+          letterSpacing={0.03}
+          lineHeight={1}
+          textAlign={'center'}
+          position={position}
+          rotation={rotation}
+          font={'./fonts/NeutralFace-Bold.woff'}
+        >
+          {'Click to play the video'}
+        </Text>
+        <Interactive onSelect={handlePlayVideo}>
+          <mesh
+            geometry={nodes.screen001.geometry}
+            material={material}
+            onPointerOver={() => {
+              if (canvasContainerRef) {
+                canvasContainerRef.style.cursor = 'pointer';
+              }
+            }}
+            onPointerLeave={() => {
+              if (canvasContainerRef) {
+                canvasContainerRef.style.cursor = 'grab';
+              }
+            }}
+            onClick={handlePlayVideo}
+          />
+        </Interactive>
+      </>
+    );
+  }
+
   return (
     <>
       <Text
-        color={'#000'}
+        color={'#fff'}
         fontSize={0.7}
         letterSpacing={0.03}
         lineHeight={1}
@@ -41,6 +80,7 @@ export const VideoScreen: React.FC<ComponentProps> = (props) => {
       >
         {'Click to play the video'}
       </Text>
+
       <mesh
         geometry={nodes.screen001.geometry}
         material={material}

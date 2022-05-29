@@ -132,7 +132,6 @@ export const User: React.FC<Props> = (props) => {
   useFrame((state, dt) => {
     frameTime.current += state.clock.getElapsedTime();
     if (userRef.current && controlsRef) {
-      // console.log(userRef.current.controlObject.positionw);
       const userDirection = getDirection();
 
       if (userDirection !== 'idle') {
@@ -142,6 +141,8 @@ export const User: React.FC<Props> = (props) => {
       if (userRef.current.mixer) {
         userRef.current.mixer.update(dt);
       }
+
+      // console.log(userRef.current.controlObject.position);
 
       handleUserDirection();
 
