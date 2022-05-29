@@ -161,8 +161,8 @@ const CanvasComponent: React.FC<Props> = (props) => {
             mieDirectionalG={0.029}
             azimuth={180.5}
           />
-          <Perf />
-          {/* <color attach="background" args={[new THREE.Color(0xfde0c6)]} /> */}
+          {/* <Perf /> */}
+
           <ambientLight color="white" intensity={1.7} />
           <directionalLight color="#FF5C00" position={[-3, 3, -2]} />
           <spotLight
