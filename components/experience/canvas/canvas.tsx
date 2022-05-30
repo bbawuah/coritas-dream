@@ -58,11 +58,11 @@ const Scene: React.FC<SceneProps> = (props) => {
     <>
       <Sky
         turbidity={0.2}
-        rayleigh={0.004}
+        rayleigh={3}
         inclination={0.91}
         mieCoefficient={0.003}
         mieDirectionalG={0.029}
-        azimuth={0}
+        azimuth={180.5}
       />
       {/* <Perf /> */}
 

@@ -18,7 +18,7 @@ import {
   useThree,
 } from '@react-three/fiber';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
-import { VideoScreen } from './VideoScreen';
+import { BigScreen } from './BigScreen';
 import { GeneralPaintings } from './GeneralPaintings';
 
 extend({ Water });
@@ -110,7 +110,7 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
           distance={50}
           angle={1}
           penumbra={1}
-          position={[1, 15, -67.1038477611397]}
+          position={[1, 15, -90.1038477611397]}
         />
         <spotLight
           color="#FFE3B8"
@@ -118,7 +118,7 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
           distance={50}
           angle={1}
           penumbra={1}
-          position={[-62.817927678855646, 15, -1]}
+          position={[-80.817927678855646, 15, -1]}
         />
 
         <spotLight
@@ -127,11 +127,11 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
           distance={50}
           angle={1}
           penumbra={1}
-          position={[0.22130484492688, 15, 68.00761043552393]}
+          position={[1.22130484492688, 15, 78.00761043552393]}
         />
       </mesh>
       <mesh geometry={nodes.floor.geometry} material={material} />
-      <VideoScreen nodes={nodes} material={material} />
+      <BigScreen nodes={nodes} material={material} />
       <HopePaintings nodes={nodes} material={material} />
       <LovePaintings nodes={nodes} material={material} />
       <JusticePaintings nodes={nodes} material={material} />
