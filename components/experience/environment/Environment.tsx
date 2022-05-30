@@ -68,12 +68,6 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
     specularMap: metalnessMap,
     normalScale: new THREE.Vector2(0.85, 0.85),
   });
-  const materialTwo = new THREE.MeshPhongMaterial({
-    color: 0x242424,
-    specular: 0xff5c00,
-    shininess: 15,
-    specularMap: metalnessMap,
-  });
 
   useFrame((state, delta) => {
     if (waterRef.current) {
@@ -93,7 +87,7 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
       <HopePaintings nodes={nodes} material={material} />
       <LovePaintings nodes={nodes} material={material} />
       <JusticePaintings nodes={nodes} material={material} />
-      <mesh geometry={nodes.mountains.geometry} material={materialTwo} />
+      <mesh geometry={nodes.mountains.geometry} material={material} />
       <water
         ref={waterRef}
         args={[geom, config]}
