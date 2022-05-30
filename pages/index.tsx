@@ -60,7 +60,7 @@ const Home: NextPage = () => {
                   This experience is inspired by the exhibition Everyday,
                   Someday and Other Stories, which can be viewed in the
                   Stedelijk Museum, where developments in visual art and design
-                  from the 1950s to the 1980s.
+                  from the &apos;50s to the &apos;80s are being displayed.
                 </p>
                 <p className={styles.description}>
                   Throughout the ‘60s, her work became increasingly political,
