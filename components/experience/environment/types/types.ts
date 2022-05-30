@@ -20,7 +20,9 @@ export type GLTFResult = GLTF & {
 export type GLTFNodes = {
   screen001: THREE.Mesh;
   mountains: THREE.Mesh;
-  environment: THREE.Mesh;
+  lights: THREE.Mesh;
+  lights001: THREE.Mesh;
+  lights002: THREE.Mesh;
   ['hope-painting']: THREE.Mesh;
   ['hope-painting001']: THREE.Mesh;
   ['hope-painting002']: THREE.Mesh;
@@ -42,6 +44,13 @@ export type GLTFNodes = {
   ['love-painting002']: THREE.Mesh;
   ['love-painting003']: THREE.Mesh;
   ['love-painting004']: THREE.Mesh;
+  ['general-painting001']: THREE.Mesh;
+  ['general-painting002']: THREE.Mesh;
+  ['general-painting003']: THREE.Mesh;
+  ['general-painting004']: THREE.Mesh;
+  ['general-painting005']: THREE.Mesh;
+  ['general-painting006']: THREE.Mesh;
+  environment: THREE.Mesh;
   navmesh: THREE.Mesh;
-  ['pathfinding-navmesh']: THREE.Mesh;
+  floor: THREE.Mesh;
 };

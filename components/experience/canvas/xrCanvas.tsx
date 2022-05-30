@@ -12,7 +12,6 @@ import { useThree } from '@react-three/fiber';
 interface Props {
   room: Room;
   id: string;
-  physics: Physics;
   nodes: GLTFNodes;
 }
 
@@ -22,7 +21,7 @@ interface Props {
 // }
 
 export const XRCanvas: React.FC<Props> = (props) => {
-  const { room, id, physics, nodes } = props;
+  const { room, id, nodes } = props;
   const { scene } = useThree();
   const { playerIds } = useStore(({ playerIds }) => ({
     playerIds,
@@ -38,7 +37,6 @@ export const XRCanvas: React.FC<Props> = (props) => {
       />
       {renderNonPlayableCharacters()}
       {/* <MakeTextPanel scene={scene} /> */}
-      <Environment physics={physics} nodes={nodes} />
     </>
   );
 

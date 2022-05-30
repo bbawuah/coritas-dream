@@ -17,7 +17,9 @@ import {
   useLoader,
   useThree,
 } from '@react-three/fiber';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
 import { VideoScreen } from './VideoScreen';
+import { GeneralPaintings } from './GeneralPaintings';
 
 extend({ Water });
 
@@ -69,6 +71,17 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
     normalScale: new THREE.Vector2(0.85, 0.85),
   });
 
+  const emissiveMaterial = new THREE.MeshPhongMaterial({
+    color: 0xff8540,
+    emissiveIntensity: 5,
+    emissive: 0xff8540,
+    normalMap: normalTexture,
+    specular: 0xff5c00,
+    shininess: 1,
+    specularMap: metalnessMap,
+    normalScale: new THREE.Vector2(5.85, 5.85),
+  });
+
   useFrame((state, delta) => {
     if (waterRef.current) {
       (waterRef.current.material as THREE.ShaderMaterial).uniforms.time.value +=
@@ -82,11 +95,47 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
         geometry={nodes.screen001.geometry}
         material={nodes.screen001.material}
       />
-      <mesh geometry={nodes.environment.geometry} material={material} />
+      <mesh geometry={nodes.environment.geometry} material={material}>
+        <spotLight
+          distance={200}
+          color="#FFE3B8"
+          intensity={2.2}
+          angle={1}
+          penumbra={1}
+          position={[0, 20, 0]}
+        />
+        <spotLight
+          color="#FFE3B8"
+          intensity={10}
+          distance={50}
+          angle={1}
+          penumbra={1}
+          position={[1, 15, -67.1038477611397]}
+        />
+        <spotLight
+          color="#FFE3B8"
+          intensity={10}
+          distance={50}
+          angle={1}
+          penumbra={1}
+          position={[-62.817927678855646, 15, -1]}
+        />
+
+        <spotLight
+          color="#FFE3B8"
+          intensity={10}
+          distance={50}
+          angle={1}
+          penumbra={1}
+          position={[0.22130484492688, 15, 68.00761043552393]}
+        />
+      </mesh>
+      <mesh geometry={nodes.floor.geometry} material={material} />
       <VideoScreen nodes={nodes} material={material} />
       <HopePaintings nodes={nodes} material={material} />
       <LovePaintings nodes={nodes} material={material} />
       <JusticePaintings nodes={nodes} material={material} />
+      <GeneralPaintings nodes={nodes} material={material} />
       <mesh geometry={nodes.mountains.geometry} material={material} />
       <water
         ref={waterRef}
@@ -94,6 +143,9 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
         rotation-x={-Math.PI / 2}
         position={new THREE.Vector3(0, -0.5, 0)}
       />
+      <mesh geometry={nodes.lights.geometry} material={material}></mesh>
+      <mesh geometry={nodes.lights001.geometry} material={material}></mesh>
+      <mesh geometry={nodes.lights002.geometry} material={material}></mesh>
     </group>
   );
 };

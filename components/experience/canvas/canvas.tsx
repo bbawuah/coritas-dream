@@ -20,7 +20,7 @@ import {
   Noise,
   BrightnessContrast,
 } from '@react-three/postprocessing';
-import { GLTFResult } from '../environment/types/types';
+import { GLTFNodes, GLTFResult } from '../environment/types/types';
 import { SettingsMenu } from '../../core/headers/settingsMenu/settingsMenu';
 import { OnboardingManager } from '../../domain/onboardingManager/onBoardingManager';
 import { client } from '../../../utils/supabase';
@@ -45,6 +45,69 @@ interface ProfileData {
   id: string;
   username: string | null;
 }
+
+interface SceneProps {
+  nodes: GLTFNodes;
+  physics: Physics;
+}
+
+const Scene: React.FC<SceneProps> = (props) => {
+  const { nodes, physics } = props;
+
+  return (
+    <>
+      <Sky
+        turbidity={0.2}
+        rayleigh={0.004}
+        inclination={0.91}
+        mieCoefficient={0.003}
+        mieDirectionalG={0.029}
+        azimuth={0}
+      />
+      {/* <Perf /> */}
+
+      <ambientLight color="white" intensity={1.7} />
+      <directionalLight color="#FF5C00" position={[-3, 3, -2]} />
+      <Text
+        color={'#FFE3B8'}
+        fontSize={8.9}
+        letterSpacing={0.03}
+        lineHeight={1}
+        textAlign={'center'}
+        position={new THREE.Vector3(47.75157312030056, 2.5, -74)}
+        rotation={new THREE.Euler(0, 6, 0)}
+        font={'./fonts/NeutralFace-Bold.woff'}
+      >
+        {'Love'}
+      </Text>
+      <Text
+        color={'#FFE3B8'}
+        fontSize={8.9}
+        letterSpacing={0.03}
+        lineHeight={1}
+        textAlign={'center'}
+        position={new THREE.Vector3(-53, 2.5, 74)}
+        rotation={new THREE.Euler(0, -4, 0)}
+        font={'./fonts/NeutralFace-Bold.woff'}
+      >
+        {'Justice'}
+      </Text>
+      <Text
+        color={'#FFE3B8'}
+        fontSize={8.9}
+        letterSpacing={0.03}
+        lineHeight={1}
+        textAlign={'center'}
+        position={new THREE.Vector3(-73, 2.5, -53)}
+        rotation={new THREE.Euler(0, 1, 0)}
+        font={'./fonts/NeutralFace-Bold.woff'}
+      >
+        {'Hope'}
+      </Text>
+      <Environment nodes={nodes} physics={physics} />
+    </>
+  );
+};
 
 const CanvasComponent: React.FC<Props> = (props) => {
   const { isWebXrSupported, room, id } = props;
@@ -95,52 +158,11 @@ const CanvasComponent: React.FC<Props> = (props) => {
       return (
         <VRCanvas>
           <Suspense fallback={null}>
-            <XRCanvas id={id} room={room} physics={physics} nodes={nodes} />
+            <XRCanvas id={id} room={room} nodes={nodes} />
           </Suspense>
           {renderNpcs()}
-          <Sky
-            turbidity={0.2}
-            rayleigh={3}
-            inclination={0.91}
-            mieCoefficient={0.003}
-            mieDirectionalG={0.029}
-            azimuth={180.5}
-          />
-          <ambientLight color="FDE9D7" intensity={1.7} />
-          <directionalLight color="#FF5C00" position={[-3, 3, -2]} />
-          <spotLight
-            distance={200}
-            color="#FFE3B8"
-            intensity={2.2}
-            angle={1}
-            penumbra={1}
-            position={[0, 20, 0]}
-          />
-          <spotLight
-            color="#FFE3B8"
-            intensity={10}
-            distance={50}
-            angle={1}
-            penumbra={1}
-            position={[1, 15, -67.1038477611397]}
-          />
-          <spotLight
-            color="#FFE3B8"
-            intensity={10}
-            distance={50}
-            angle={1}
-            penumbra={1}
-            position={[-62.817927678855646, 15, -1]}
-          />
+          <Scene nodes={nodes} physics={physics} />
 
-          <spotLight
-            color="#FFE3B8"
-            intensity={10}
-            distance={50}
-            angle={1}
-            penumbra={1}
-            position={[0.22130484492688, 15, 68.00761043552393]}
-          />
           {/* <Perf /> */}
         </VRCanvas>
       );
@@ -153,90 +175,9 @@ const CanvasComponent: React.FC<Props> = (props) => {
         <VoiceCallManager room={room} clickedPlayers={clickedPlayers} id={id} />
         {renderFocusImage()}
         <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }} shadows>
-          <Sky
-            turbidity={0.2}
-            rayleigh={3}
-            inclination={0.91}
-            mieCoefficient={0.003}
-            mieDirectionalG={0.029}
-            azimuth={180.5}
-          />
-          {/* <Perf /> */}
-
-          <ambientLight color="white" intensity={1.7} />
-          <directionalLight color="#FF5C00" position={[-3, 3, -2]} />
-          <spotLight
-            distance={200}
-            color="#FFE3B8"
-            intensity={2.2}
-            angle={1}
-            penumbra={1}
-            position={[0, 20, 0]}
-          />
-          <spotLight
-            color="#FFE3B8"
-            intensity={10}
-            distance={50}
-            angle={1}
-            penumbra={1}
-            position={[1, 15, -67.1038477611397]}
-          />
-          <spotLight
-            color="#FFE3B8"
-            intensity={10}
-            distance={50}
-            angle={1}
-            penumbra={1}
-            position={[-62.817927678855646, 15, -1]}
-          />
-
-          <spotLight
-            color="#FFE3B8"
-            intensity={10}
-            distance={50}
-            angle={1}
-            penumbra={1}
-            position={[0.22130484492688, 15, 68.00761043552393]}
-          />
-          <Text
-            color={'#FFE3B8'}
-            fontSize={8.9}
-            letterSpacing={0.03}
-            lineHeight={1}
-            textAlign={'center'}
-            position={new THREE.Vector3(47.75157312030056, 2.5, -74)}
-            rotation={new THREE.Euler(0, 6, 0)}
-            font={'./fonts/NeutralFace-Bold.woff'}
-          >
-            {'Love'}
-          </Text>
-          <Text
-            color={'#FFE3B8'}
-            fontSize={8.9}
-            letterSpacing={0.03}
-            lineHeight={1}
-            textAlign={'center'}
-            position={new THREE.Vector3(-53, 2.5, 74)}
-            rotation={new THREE.Euler(0, -4, 0)}
-            font={'./fonts/NeutralFace-Bold.woff'}
-          >
-            {'Justice'}
-          </Text>
-          <Text
-            color={'#FFE3B8'}
-            fontSize={8.9}
-            letterSpacing={0.03}
-            lineHeight={1}
-            textAlign={'center'}
-            position={new THREE.Vector3(-73, 2.5, -53)}
-            rotation={new THREE.Euler(0, 1, 0)}
-            font={'./fonts/NeutralFace-Bold.woff'}
-          >
-            {'Hope'}
-          </Text>
           {renderUser()}
           {renderNpcs()}
-          <Environment nodes={nodes} physics={physics} />
+          <Scene nodes={nodes} physics={physics} />
           <EffectComposer>
             <Noise
               opacity={0.45}
