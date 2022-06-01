@@ -5,7 +5,7 @@ import { IMoveProps, IUserDirection } from '../../shared/physics/types';
 import { ActionNames } from '../../store/store';
 import { Player } from '../player/player';
 import { State } from '../state/state';
-import Peer from 'simple-peer';
+import { Peer } from 'peerjs';
 
 export class Gallery extends Room<State> {
   public maxClients = 30; //Might need to change this amount.
@@ -90,7 +90,7 @@ export class Gallery extends Room<State> {
 
     this.onMessage(
       'sending private message',
-      (client, data: { to: string; signal: Peer.SignalData }) => {
+      (client, data: { to: string; signal: any }) => {
         const { to, signal } = data;
         const receiver = this.clients.find((v) => v.sessionId === to);
 
@@ -105,7 +105,7 @@ export class Gallery extends Room<State> {
 
     this.onMessage(
       'answerCall',
-      (client, data: { signal: Peer.SignalData; to: string }) => {
+      (client, data: { signal: any; to: string }) => {
         const { signal, to } = data;
         const receiver = this.clients.find((v) => v.sessionId === to);
 
@@ -129,52 +129,45 @@ export class Gallery extends Room<State> {
 
     const players = (this.state as State).players; // get player from store
 
-    this.onMessage('test', (client, data: string) => {
-      console.log(`${client.sessionId} has sent this message ${data}`);
-    });
-
     if (players) {
-      client.send('id', { id: client.sessionId });
       this.broadcast('spawnPlayer', { players }); //Optimize this to only sending the new player
     }
 
-    this.onMessage('sending signal', (payload: any) => {
-      console.log(`from sending signal, ${payload}`);
-      const { userToSignalId, callerId, signal } = payload;
-      const client = this.clients.find(
-        (user) => user.sessionId === userToSignalId
+    this.onMessage('join-call', (client, data) => {
+      const { id } = data;
+      console.log(id);
+
+      this.broadcast('user-connected', { id });
+    });
+
+    this.onMessage('sending signal', (client, payload) => {
+      const receiver = this.clients.find(
+        (v) => v.sessionId === payload.userToSignal
       );
 
-      if (client) {
-        client.send('user joined', {
-          signal: signal,
-          callerId: callerId,
+      if (receiver) {
+        console.log('running from sending signal');
+        console.log(receiver);
+        receiver.send('user joined', {
+          signal: payload.signal,
+          callerID: client.sessionId,
         });
       }
     });
 
-    this.onMessage('returning signal', (payload: any) => {
-      const { signal, callerId } = payload;
-      const caller = this.clients.find((user) => user.sessionId === callerId);
+    this.onMessage('returning signal', (client, payload) => {
+      const receiver = this.clients.find(
+        (v) => v.sessionId === payload.callerID
+      );
 
-      if (caller) {
-        caller.send('receiving returned signal', {
-          signal: signal,
+      if (receiver) {
+        receiver.send('receiving returned signal', {
+          signal: payload.signal,
           id: client.sessionId,
         });
       }
-      // io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id });
-
-      console.log('returning signal');
     });
   }
-
-  // public update(deltaTime: number) {
-  //   // implement your physics or world updates here!
-  //   // this is a good place to update the room state
-
-  //   this.physics.updatePhysics(deltaTime / 1000);
-  // }
 
   public onLeave(client: Client) {
     this.state.players.delete(client.sessionId);
@@ -189,6 +182,7 @@ export class Gallery extends Room<State> {
     if (players) {
       //Optimize this to only sending the player that left
       client.send('leave', { message: 'you left' });
+      this.broadcast('user-disconnected', { id: client.sessionId });
       this.broadcast('removePlayer', {
         players,
       });

@@ -11,7 +11,6 @@ import { useThree } from '@react-three/fiber';
 
 interface Props {
   room: Room;
-  id: string;
   nodes: GLTFNodes;
 }
 
@@ -21,7 +20,7 @@ interface Props {
 // }
 
 export const XRCanvas: React.FC<Props> = (props) => {
-  const { room, id, nodes } = props;
+  const { room, nodes } = props;
   const { scene } = useThree();
   const { playerIds } = useStore(({ playerIds }) => ({
     playerIds,
@@ -32,7 +31,7 @@ export const XRCanvas: React.FC<Props> = (props) => {
       <DefaultXRControllers />
       <XRTeleport
         room={room}
-        id={id}
+       
         navMeshGeometry={nodes['navmesh'].geometry}
       />
       {renderNonPlayableCharacters()}
@@ -45,7 +44,7 @@ export const XRCanvas: React.FC<Props> = (props) => {
 
     if (players) {
       const jsx = playerIds
-        .filter((data) => data !== id)
+        .filter((data) => data !== room.sessionId)
         .map((playerId, index) => {
           const player = players[playerId];
 

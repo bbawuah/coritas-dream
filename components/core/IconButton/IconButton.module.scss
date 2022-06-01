@@ -1,20 +1,24 @@
-.menu {
-  position: absolute;
-  right: 0;
-  margin: 1rem;
+.button {
   z-index: 2;
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
   padding: 0.2rem;
   background: rgba(4, 4, 4, 0.5);
   border-radius: 50%;
   transition: 0.325s ease-in-out;
   cursor: pointer;
+  outline: none;
+  border: none;
+
+  &.red {
+    background: rgba(224, 76, 76, 0.5);
+  }
 
   i {
     svg {
+      stroke-width: 0.1;
       path {
-        fill: #fff;
+        fill: white;
       }
     }
   }

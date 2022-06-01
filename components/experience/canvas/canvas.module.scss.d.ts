@@ -29,3 +29,4 @@ export const itemColumn: string;
 export const animationsContainer: string;
 export const inStedelijk: string;
 export const notInStedelijk: string;
+export const canvasFooterMenu: string;

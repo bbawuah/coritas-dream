@@ -2,7 +2,6 @@ import styles from './container.module.scss';
 
 export default function createContainer() {
   if (typeof window !== 'undefined') {
-    console.log('clicked');
     // Client-side-only code
     const portalId = 'notifyContainer';
     let element = document.getElementById(portalId);

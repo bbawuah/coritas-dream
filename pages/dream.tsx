@@ -19,7 +19,7 @@ const Canvas = dynamic(() => import('../components/experience/canvas/canvas'), {
 
 const Dream: NextPage = () => {
   const { isInVR } = useDeviceCheck();
-  const { id, room } = useColyseus();
+  const { room } = useColyseus();
   const [webXRIsSupported, setWebXRIsSupported] = useState<boolean>();
   const subdomain: string = 'demo';
   const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -38,14 +38,10 @@ const Dream: NextPage = () => {
   }, [isInVR]);
 
   useEffect(() => {
-    if (room) {
-      console.log('room is available');
-    }
-
     getUserProfile();
     window.addEventListener('message', subscribe);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id, room]);
+  }, [room]);
 
   return (
     <div className={styles.container}>
@@ -89,17 +85,13 @@ const Dream: NextPage = () => {
   }
 
   function renderCanvas() {
-    if (!id || !room) {
+    if (!room) {
       return null;
     }
 
     return (
       <Suspense fallback={<Loader />}>
-        <Canvas
-          isWebXrSupported={webXRIsSupported ?? false}
-          id={id}
-          room={room}
-        />
+        <Canvas isWebXrSupported={webXRIsSupported ?? false} room={room} />
       </Suspense>
     );
   }
@@ -129,8 +121,6 @@ const Dream: NextPage = () => {
 
     // Get avatar GLB URL
     if (json.eventName === 'v1.avatar.exported') {
-      console.log(`Avatar URL: ${json.data.url}`);
-
       if (iframeRef.current) {
         iframeRef.current.hidden = true;
       }
@@ -140,7 +130,7 @@ const Dream: NextPage = () => {
 
     // Get user id
     if (json.eventName === 'v1.user.set') {
-      console.log(`User with id ${json.data.id} set: ${JSON.stringify(json)}`);
+      // console.log(`User with id ${json.data.id} set: ${JSON.stringify(json)}`);
     }
   }
 
@@ -185,7 +175,6 @@ const Dream: NextPage = () => {
         }
 
         if (data) {
-          console.log('character is created');
           setCharacterIsCreated(true);
         }
 

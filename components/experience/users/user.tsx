@@ -22,7 +22,6 @@ import { UserModel } from './userModel';
 
 interface Props {
   room: Room;
-  id: string;
   physics: Physics;
   glbUrl: string;
 }
@@ -32,7 +31,7 @@ export type Animations = 'idle' | 'walking';
 type BaseActions = Record<Animations, { weight: number }>;
 
 export const User: React.FC<Props> = (props) => {
-  const { id, room, physics, glbUrl } = props;
+  const { room, physics, glbUrl } = props;
   const players = getState().players;
   const { scene } = useThree();
   const { animationName } = useStore(({ animationName }) => ({
@@ -81,15 +80,15 @@ export const User: React.FC<Props> = (props) => {
     if (userRef.current && players) {
       // Create physics
       physicalBody.current = physics.createPlayerPhysics<IPlayerNetworkData>(
-        players[id]
+        players[room.sessionId]
       ); // Create phyisical represenatation of player
       physics.physicsWorld.addBody(physicalBody.current); //Add to physics world
 
       // Create vector3
       const startingPosition = new THREE.Vector3(
-        players[id].x,
-        players[id].y,
-        players[id].z
+        players[room.sessionId].x,
+        players[room.sessionId].y,
+        players[room.sessionId].z
       );
 
       // textPosition.current.set(
@@ -101,17 +100,17 @@ export const User: React.FC<Props> = (props) => {
 
       // Update processed position
       processedAction.current = {
-        [id]: {
-          id: players[id].id,
-          timestamp: players[id].timestamp,
-          animationState: players[id].animationState,
-          uuid: players[id].uuid,
-          x: players[id].x,
-          y: players[id].y,
-          z: players[id].z,
-          rx: players[id].rx,
-          ry: players[id].ry,
-          rz: players[id].rz,
+        [room.sessionId]: {
+          id: players[room.sessionId].id,
+          timestamp: players[room.sessionId].timestamp,
+          animationState: players[room.sessionId].animationState,
+          uuid: players[room.sessionId].uuid,
+          x: players[room.sessionId].x,
+          y: players[room.sessionId].y,
+          z: players[room.sessionId].z,
+          rx: players[room.sessionId].rx,
+          ry: players[room.sessionId].ry,
+          rz: players[room.sessionId].rz,
         },
       };
 
