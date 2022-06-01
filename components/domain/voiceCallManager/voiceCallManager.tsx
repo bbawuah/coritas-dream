@@ -31,62 +31,91 @@ export const VoiceCallManager: React.FC<Props> = (props) => {
   >([]);
   const userAudio = useRef<HTMLAudioElement | null>(null);
   const peers = useRef<{ [id: string]: MediaConnection }>({});
-  const myPeer = useMemo(() => new Peer(room.sessionId), [room.sessionId]);
+  const myPeer = useRef<Peer>();
   const { isMuted } = useStore(({ isMuted }) => ({ isMuted }));
 
   useEffect(() => {
-    myPeer.on('open', (id) => {
-      room.send('join-call', { id });
+    myPeer.current = new Peer(room.sessionId, {
+      config: {
+        iceServers: [
+          {
+            urls: 'stun:openrelay.metered.ca:80',
+          },
+          {
+            urls: 'turn:openrelay.metered.ca:80',
+            username: 'openrelayproject',
+            credential: 'openrelayproject',
+          },
+          {
+            urls: 'turn:openrelay.metered.ca:443',
+            username: 'openrelayproject',
+            credential: 'openrelayproject',
+          },
+          {
+            urls: 'turn:openrelay.metered.ca:443?transport=tcp',
+            username: 'openrelayproject',
+            credential: 'openrelayproject',
+          },
+        ],
+      },
     });
+  }, []);
 
-    room.onMessage('user-connected', (data) => {
-      const { id } = data;
-    });
-    navigator.mediaDevices
-      .getUserMedia({ video: false, audio: true })
-      .then((stream) => {
-        setMyStream(stream);
-
-        myPeer.on('call', (call) => {
-          call.answer(stream);
-
-          call.on('stream', (stream) => {
-            setUsersStreams((v) => [...v, { id: call.peer, stream }]);
-          });
-
-          if (peers.current[call.peer]) {
-            peers.current[call.peer] = call;
-          } else {
-            peers.current = { ...peers.current, [call.peer]: call };
-          }
-        });
-
-        room.onMessage('user-connected', (data) => {
-          const { id } = data;
-
-          connectToNewUser(id, stream);
-        });
-
-        room.onMessage('user-disconnected', (data: { id: string }) => {
-          const { id } = data;
-          if (peers.current[id]) {
-            peers.current[id].close();
-            setUsersStreams((v) => {
-              const filter = v.filter((v) => v.id !== id);
-
-              return filter;
-            });
-          }
-        });
+  useEffect(() => {
+    if (myPeer.current) {
+      myPeer.current.on('open', (id) => {
+        room.send('join-call', { id });
       });
 
-    const peer = myPeer;
+      room.onMessage('user-connected', (data) => {
+        const { id } = data;
+      });
+      navigator.mediaDevices
+        .getUserMedia({ video: false, audio: true })
+        .then((stream) => {
+          setMyStream(stream);
 
-    return () => {
-      peer.destroy();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room, myPeer]);
+          if (myPeer.current)
+            myPeer.current.on('call', (call) => {
+              call.answer(stream);
+
+              call.on('stream', (stream) => {
+                setUsersStreams((v) => [...v, { id: call.peer, stream }]);
+              });
+
+              if (peers.current[call.peer]) {
+                peers.current[call.peer] = call;
+              } else {
+                peers.current = { ...peers.current, [call.peer]: call };
+              }
+            });
+
+          room.onMessage('user-connected', (data) => {
+            const { id } = data;
+
+            connectToNewUser(id, stream);
+          });
+
+          room.onMessage('user-disconnected', (data: { id: string }) => {
+            const { id } = data;
+            if (peers.current[id]) {
+              peers.current[id].close();
+              setUsersStreams((v) => {
+                const filter = v.filter((v) => v.id !== id);
+
+                return filter;
+              });
+            }
+          });
+        });
+
+      const peer = myPeer.current;
+
+      return () => {
+        peer.destroy();
+      };
+    }
+  }, [room]);
 
   useEffect(() => {
     muteMic(isMuted);
@@ -108,27 +137,29 @@ export const VoiceCallManager: React.FC<Props> = (props) => {
   }
 
   function connectToNewUser(userId: string, stream: MediaStream) {
-    const call = myPeer.call(userId, stream);
+    if (myPeer.current) {
+      const call = myPeer.current.call(userId, stream);
 
-    if (call) {
-      call.on('stream', (audioStream) => {
-        // Add stream to array of user
-        setUsersStreams((v) => [...v, { id: userId, stream: audioStream }]);
-      });
-
-      call.on('close', () => {
-        //Remove video from user
-        setUsersStreams((v) => {
-          const filter = v.filter((v) => v.id !== userId);
-
-          return filter;
+      if (call) {
+        call.on('stream', (audioStream) => {
+          // Add stream to array of user
+          setUsersStreams((v) => [...v, { id: userId, stream: audioStream }]);
         });
-      });
 
-      if (peers.current[userId]) {
-        peers.current[userId] = call;
-      } else {
-        peers.current = { ...peers.current, [userId]: call };
+        call.on('close', () => {
+          //Remove video from user
+          setUsersStreams((v) => {
+            const filter = v.filter((v) => v.id !== userId);
+
+            return filter;
+          });
+        });
+
+        if (peers.current[userId]) {
+          peers.current[userId] = call;
+        } else {
+          peers.current = { ...peers.current, [userId]: call };
+        }
       }
     }
   }
