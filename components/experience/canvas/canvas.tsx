@@ -32,10 +32,11 @@ import { Icon } from '../../core/icon/Icon';
 import { IconType } from '../../../utils/icons/types';
 import { XRCanvas } from './xrCanvas';
 import { Room } from 'colyseus.js';
+import { IconButton } from '../../core/IconButton/IconButton';
+import { State } from '../../../server/state/state';
 
 interface Props {
   room: Room;
-  id: string;
   isWebXrSupported: boolean;
 }
 
@@ -110,7 +111,7 @@ const Scene: React.FC<SceneProps> = (props) => {
 };
 
 const CanvasComponent: React.FC<Props> = (props) => {
-  const { isWebXrSupported, room, id } = props;
+  const { isWebXrSupported, room } = props;
   const { nodes } = useGLTF(
     '/environment-transformed.glb'
   ) as unknown as GLTFResult;
@@ -124,10 +125,11 @@ const CanvasComponent: React.FC<Props> = (props) => {
   const classes = classNames([styles.container]);
   const [shouldRenderInstructions, setShouldRenderInstructions] =
     useState<boolean>(false);
-  const { playerIds, focusImage, set } = useStore(
-    ({ playerIds, focusImage, set }) => ({
+  const { playerIds, focusImage, isMuted, set } = useStore(
+    ({ playerIds, focusImage, isMuted, set }) => ({
       playerIds,
       focusImage,
+      isMuted,
       set,
     })
   );
@@ -158,7 +160,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
       return (
         <VRCanvas>
           <Suspense fallback={null}>
-            <XRCanvas id={id} room={room} nodes={nodes} />
+            <XRCanvas room={room} nodes={nodes} />
           </Suspense>
           {renderNpcs()}
           <Scene nodes={nodes} physics={physics} />
@@ -172,7 +174,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
       <>
         <SettingsMenu room={room} />
         <OnboardingManager />
-        <VoiceCallManager room={room} clickedPlayers={clickedPlayers} id={id} />
+        <VoiceCallManager room={room} />
         {renderFocusImage()}
         <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }} shadows>
           {renderUser()}
@@ -180,22 +182,30 @@ const CanvasComponent: React.FC<Props> = (props) => {
           <Scene nodes={nodes} physics={physics} />
           <EffectComposer>
             <Noise
-              opacity={0.45}
+              opacity={0.2}
               premultiply
               blendFunction={BlendFunction.ADD}
             />
-            <BrightnessContrast brightness={-0.07} contrast={0.1} />
+            <BrightnessContrast brightness={-0.09} contrast={0.3} />
             <Bloom />
           </EffectComposer>
         </Canvas>
-        <div
-          className={styles.instructionsIconContainer}
-          onClick={() => setShouldRenderInstructions(true)}
-        >
-          <Icon
-            icon={IconType.instruction}
-            className={styles.instructionsIcon}
+        <div className={styles.canvasFooterMenu}>
+          <IconButton
+            icon={!isMuted ? IconType.muted : IconType.unmuted}
+            onClick={() =>
+              set((state) => ({ ...state, isMuted: !state.isMuted }))
+            }
           />
+          <div
+            className={styles.instructionsIconContainer}
+            onClick={() => setShouldRenderInstructions(true)}
+          >
+            <Icon
+              icon={IconType.instruction}
+              className={styles.instructionsIcon}
+            />
+          </div>
         </div>
         {renderInstructions()}
         <audio className={styles.audio} playsInline ref={userAudio} autoPlay />
@@ -205,7 +215,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
 
   function renderUser() {
     if (userAvatar && physics) {
-      return <User id={id} room={room} physics={physics} glbUrl={userAvatar} />;
+      return <User room={room} physics={physics} glbUrl={userAvatar} />;
     }
   }
 
@@ -230,7 +240,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
 
     if (players) {
       const jsx = playerIds
-        .filter((data) => data !== id)
+        .filter((data) => data !== room.sessionId)
         .map((playerId, index) => {
           const player = players[playerId];
 

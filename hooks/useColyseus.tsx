@@ -15,7 +15,6 @@ export const useColyseus = () => {
   const { set } = useStore(({ set }) => ({ set }));
   const [client, setClient] = useState<Client>();
   const [room, setRoom] = useState<Room>();
-  const [id, setId] = useState<string>();
   const { user } = useAuth();
 
   useEffect(() => {
@@ -29,7 +28,7 @@ export const useColyseus = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [client, user]);
 
-  return { client, id, room };
+  return { client, room };
 
   async function getRoom() {
     if (client && user) {
@@ -38,12 +37,11 @@ export const useColyseus = () => {
           id: user.id,
         })) as Room<State>;
 
-        getPlayerId(room);
         setRoom(room);
         onAnimation(room);
         onSpawnPlayer(room);
         onRemovePlayer(room);
-        onLeave(room);
+
         onMove(room);
       } catch (e) {
         console.log(e);
@@ -51,16 +49,9 @@ export const useColyseus = () => {
     }
   }
 
-  function getPlayerId(room: Room) {
-    room.onMessage('id', (data) => {
-      setId(data.id);
-    });
-  }
-
   function onSpawnPlayer(room: Room) {
     room.onMessage('spawnPlayer', (data) => {
       const { players } = data;
-      console.log('new player joined');
 
       set((state) => ({
         ...state,
@@ -103,21 +94,11 @@ export const useColyseus = () => {
     room.onMessage('removePlayer', (data) => {
       const { players } = data;
 
-      console.log('a player left');
-
       set((state) => ({
         ...state,
         players,
         playersCount: Object.keys(players).length,
       }));
-    });
-  }
-
-  function onLeave(room: Room) {
-    room.onMessage('leave', (data) => {
-      const { message } = data;
-
-      console.log(message);
     });
   }
 };

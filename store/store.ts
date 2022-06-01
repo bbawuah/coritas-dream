@@ -44,6 +44,8 @@ const players: IPlayerType = {};
 
 const callRequests: CallRequests[] = [];
 
+const isMuted: boolean = false;
+
 const playersCount: number = 0;
 
 const canvasContainerRef: HTMLDivElement | null = null;
@@ -71,6 +73,7 @@ export interface IState {
   players: IPlayerType | undefined;
   playerIds: string[];
   playersCount: number;
+  isMuted: boolean;
   canvasContainerRef: HTMLDivElement | null;
   focusImage: PaintingMetaData | undefined;
   animationName: ActionState;
@@ -91,6 +94,7 @@ const useStoreImplementation = create(
         players,
         playerIds,
         playersCount,
+        isMuted,
         callRequests,
         canvasContainerRef,
         focusImage,

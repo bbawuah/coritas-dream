@@ -5,8 +5,8 @@
     height: 100%;
     stroke: #fff;
     fill: #000;
-    transform: scale(0.7);
-    stroke-width: 0.5;
+    transform: scale(0.6);
+    stroke-width: 0.1;
     transition: 0.325s ease-in-out;
   }
 }
@@ -15,12 +15,12 @@
   :global(svg) {
     stroke: #000;
     fill: #fff;
-    stroke-width: 0.5;
+    stroke-width: 0.1;
   }
 }
 
 .small {
   :global(svg) {
-    transform: scale(0.7);
+    transform: scale(0.6);
   }
 }

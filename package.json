@@ -26,6 +26,7 @@
     "http-proxy-middleware": "^2.0.3",
     "next": "^12.1.0",
     "next-transpile-modules": "^9.0.0",
+    "peerjs": "^1.4.6",
     "postprocessing": "^6.26.3",
     "r3f-perf": "^5.5.0",
     "react": "17.0.2",

@@ -19,12 +19,11 @@ import { XRViewerPose } from 'webxr';
 
 interface Props {
   room: Room;
-  id: string;
   navMeshGeometry: THREE.BufferGeometry;
 }
 
 export const XRTeleport: React.FC<Props> = (props) => {
-  const { room, id, navMeshGeometry } = props;
+  const { room, navMeshGeometry } = props;
   const { player } = useXR();
   const { gl, camera, scene } = useThree();
   const players = getState().players;
@@ -82,9 +81,9 @@ export const XRTeleport: React.FC<Props> = (props) => {
 
     if (players) {
       const startingPosition = new THREE.Vector3(
-        players[id].x,
+        players[room.sessionId].x,
         player.position.y + 0.5,
-        players[id].z
+        players[room.sessionId].z
       );
 
       player.position.add(startingPosition);

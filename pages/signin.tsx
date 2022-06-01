@@ -12,7 +12,6 @@ import { useSignIn } from 'react-supabase';
 import { Button } from '../components/core/button/Button';
 
 const dev: boolean = process.env.NODE_ENV !== 'production';
-console.log(dev);
 
 const SignIn: NextPage = () => {
   const [{ error, fetching, session, user }, signIn] = useSignIn();
