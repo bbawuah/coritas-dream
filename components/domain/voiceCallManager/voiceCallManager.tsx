@@ -31,11 +31,11 @@ export const VoiceCallManager: React.FC<Props> = (props) => {
   >([]);
   const userAudio = useRef<HTMLAudioElement | null>(null);
   const peers = useRef<{ [id: string]: MediaConnection }>({});
-  const myPeer = useRef<Peer>(new Peer(room.sessionId));
+  const myPeer = useMemo(() => new Peer(room.sessionId), [room.sessionId]);
   const { isMuted } = useStore(({ isMuted }) => ({ isMuted }));
 
   useEffect(() => {
-    myPeer.current.on('open', (id) => {
+    myPeer.on('open', (id) => {
       room.send('join-call', { id });
     });
 
@@ -47,7 +47,7 @@ export const VoiceCallManager: React.FC<Props> = (props) => {
       .then((stream) => {
         setMyStream(stream);
 
-        myPeer.current.on('call', (call) => {
+        myPeer.on('call', (call) => {
           call.answer(stream);
 
           call.on('stream', (stream) => {
@@ -80,12 +80,13 @@ export const VoiceCallManager: React.FC<Props> = (props) => {
         });
       });
 
-    const peer = myPeer.current;
+    const peer = myPeer;
 
     return () => {
       peer.destroy();
     };
-  }, [room]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, myPeer]);
 
   useEffect(() => {
     muteMic(isMuted);
@@ -107,7 +108,7 @@ export const VoiceCallManager: React.FC<Props> = (props) => {
   }
 
   function connectToNewUser(userId: string, stream: MediaStream) {
-    const call = myPeer.current.call(userId, stream);
+    const call = myPeer.call(userId, stream);
 
     if (call) {
       call.on('stream', (audioStream) => {
