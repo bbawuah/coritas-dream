@@ -28,6 +28,7 @@ export const XRTeleport: React.FC<Props> = (props) => {
   const { gl, camera, scene } = useThree();
   const players = getState().players;
   const rightController = useController('right');
+  const canTeleport = useRef<boolean>(true);
 
   const gravity = new THREE.Vector3(0, -9.8, 0); //Gravity
   const tempVector = useRef<THREE.Vector3>(new THREE.Vector3());
@@ -160,10 +161,12 @@ export const XRTeleport: React.FC<Props> = (props) => {
           (
             highLightMesh.current.mesh.material as THREE.RawShaderMaterial
           ).uniforms.u_color.value = green;
+          canTeleport.current = true;
         } else {
           (
             highLightMesh.current.mesh.material as THREE.RawShaderMaterial
           ).uniforms.u_color.value = red;
+          canTeleport.current = false;
         }
       }
     }
@@ -201,6 +204,10 @@ export const XRTeleport: React.FC<Props> = (props) => {
 
   function onSelectEnd(e: XREvent) {
     const { controller } = e;
+    if (!canTeleport.current) {
+      return;
+    }
+
     if (guidingController.current) {
       const feetPos = gl.xr
         .getCamera(camera)

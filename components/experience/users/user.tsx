@@ -16,7 +16,6 @@ import { IMoveProps, IUserDirection } from '../../../shared/physics/types';
 import { useKeyboardEvents } from '../../../hooks/useKeys';
 import { IDirection } from '../../../server/player/types';
 import { Physics } from '../../../shared/physics/physics';
-import { OnMoveProps } from './types';
 import CannonDebugRenderer from '../../../shared/physics/cannonDebugger';
 import { UserModel } from './userModel';
 
@@ -53,8 +52,6 @@ export const User: React.FC<Props> = (props) => {
     idle: false,
   });
   const processedVector = useRef<THREE.Vector3>(new THREE.Vector3());
-  const physicalBodyVector = useRef<CANNON.Vec3>(new CANNON.Vec3());
-  const counter = useRef<number>(0);
   const playerSpeed = 10;
   const frameTime = useRef<number>(0.0);
   const gltf = useLoader(GLTFLoader, glbUrl);

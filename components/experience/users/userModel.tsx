@@ -58,12 +58,14 @@ export class UserModel {
       this.previousAction.fadeOut(duration);
     }
 
-    this.activeAction
-      .reset()
-      .setEffectiveTimeScale(1)
-      .setEffectiveWeight(1)
-      .fadeIn(duration)
-      .play();
+    if (this.activeAction) {
+      this.activeAction
+        .reset()
+        .setEffectiveTimeScale(1)
+        .setEffectiveWeight(1)
+        .fadeIn(duration)
+        .play();
+    }
   }
 
   createEmoteCallback(name: ActionNames) {

@@ -71,17 +71,6 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
     normalScale: new THREE.Vector2(0.85, 0.85),
   });
 
-  const emissiveMaterial = new THREE.MeshPhongMaterial({
-    color: 0xff8540,
-    emissiveIntensity: 5,
-    emissive: 0xff8540,
-    normalMap: normalTexture,
-    specular: 0xff5c00,
-    shininess: 1,
-    specularMap: metalnessMap,
-    normalScale: new THREE.Vector2(5.85, 5.85),
-  });
-
   useFrame((state, delta) => {
     if (waterRef.current) {
       (waterRef.current.material as THREE.ShaderMaterial).uniforms.time.value +=
