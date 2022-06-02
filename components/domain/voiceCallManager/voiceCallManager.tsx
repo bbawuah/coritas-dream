@@ -36,7 +36,6 @@ export const VoiceCallManager: React.FC<Props> = (props) => {
 
   useEffect(() => {
     myPeer.current = new Peer(room.sessionId);
-    console.log(myPeer.current);
   }, [room.sessionId]);
 
   useEffect(() => {
