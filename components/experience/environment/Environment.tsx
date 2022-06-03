@@ -43,7 +43,7 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
   waterNormals.wrapS = waterNormals.wrapT = THREE.RepeatWrapping;
   const geom = useMemo(() => new THREE.PlaneGeometry(10000, 10000), []);
   const { scene } = useThree();
-  const instancedArrows = useRef<InstancedArrows>(new InstancedArrows(scene));
+  // const instancedArrows = useRef<InstancedArrows>(new InstancedArrows(scene));
 
   const config = useMemo(
     () => ({
@@ -80,11 +80,11 @@ export const Environment: React.FC<EnvironmentProps> = (props) => {
         delta * 0.1;
     }
 
-    if (instancedArrows) {
-      (
-        instancedArrows.current.mesh.material as THREE.RawShaderMaterial
-      ).uniforms.u_time.value = state.clock.getElapsedTime() * 0.05;
-    }
+    // if (instancedArrows) {
+    //   (
+    //     instancedArrows.current.mesh.material as THREE.RawShaderMaterial
+    //   ).uniforms.u_time.value = state.clock.getElapsedTime() * 0.05;
+    // }
   });
 
   return (

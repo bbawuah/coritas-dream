@@ -289,7 +289,6 @@ const CanvasComponent: React.FC<Props> = (props) => {
   }
 
   function connectToNewUser(userId: string, stream: MediaStream, peer: Peer) {
-    console.log('tesngfdjknjfnk');
     const call = peer.call(userId, stream);
 
     if (call) {
