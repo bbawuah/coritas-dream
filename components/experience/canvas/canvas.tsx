@@ -1,5 +1,4 @@
 /* eslint-disable @next/next/no-img-element */
-import * as THREE from 'three';
 import React, { Suspense, useEffect, useRef, useState } from 'react';
 import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
@@ -9,10 +8,9 @@ import { Physics } from '../../../shared/physics/physics';
 import { Sky, useGLTF } from '@react-three/drei';
 import { VRCanvas } from '@react-three/xr';
 import { Perf } from 'r3f-perf';
+import { MediaConnection, Peer } from 'peerjs';
 import { getState, useStore } from '../../../store/store';
 import { useDeviceCheck } from '../../../hooks/useDeviceCheck';
-import { Environment } from '../environment/Environment';
-import { Text } from '@react-three/drei';
 import { BlendFunction } from 'postprocessing';
 import {
   EffectComposer,
@@ -26,14 +24,14 @@ import { OnboardingManager } from '../../domain/onboardingManager/onBoardingMana
 import { client } from '../../../utils/supabase';
 import { useRealtime } from 'react-supabase';
 import { NonPlayableCharacters } from '../users/NonPlayableCharacters/NonPlayableCharacters';
-import { VoiceCallManager } from '../../domain/voiceCallManager/voiceCallManager';
-import { Modal } from '../../core/modal/modal';
 import { Icon } from '../../core/icon/Icon';
 import { IconType } from '../../../utils/icons/types';
 import { XRCanvas } from './xrCanvas';
 import { Room } from 'colyseus.js';
 import { IconButton } from '../../core/IconButton/IconButton';
-import { State } from '../../../server/state/state';
+import { Instructions } from '../../core/Instructions/instructions';
+import { FocusImage } from '../../core/focusImage/focusImage';
+import { BaseScene } from '../baseScene/baseScene';
 
 interface Props {
   room: Room;
@@ -47,67 +45,17 @@ interface ProfileData {
   username: string | null;
 }
 
-interface SceneProps {
-  nodes: GLTFNodes;
-  physics: Physics;
-}
+const Audio: React.FC<{
+  stream: MediaStream;
+}> = (props) => {
+  const { stream } = props;
+  const ref = useRef<HTMLAudioElement | null>(null);
 
-const Scene: React.FC<SceneProps> = (props) => {
-  const { nodes, physics } = props;
+  useEffect(() => {
+    if (ref.current) ref.current.srcObject = stream;
+  }, [stream]);
 
-  return (
-    <>
-      <Sky
-        turbidity={0.2}
-        rayleigh={3}
-        inclination={0.91}
-        mieCoefficient={0.003}
-        mieDirectionalG={0.029}
-        azimuth={180.5}
-      />
-      {/* <Perf /> */}
-
-      <ambientLight color="white" intensity={1.7} />
-      <directionalLight color="#FF5C00" position={[-3, 3, -2]} />
-      <Text
-        color={'#FFE3B8'}
-        fontSize={8.9}
-        letterSpacing={0.03}
-        lineHeight={1}
-        textAlign={'center'}
-        position={new THREE.Vector3(47.75157312030056, 2.5, -74)}
-        rotation={new THREE.Euler(0, 6, 0)}
-        font={'./fonts/NeutralFace-Bold.woff'}
-      >
-        {'Love'}
-      </Text>
-      <Text
-        color={'#FFE3B8'}
-        fontSize={8.9}
-        letterSpacing={0.03}
-        lineHeight={1}
-        textAlign={'center'}
-        position={new THREE.Vector3(-53, 2.5, 74)}
-        rotation={new THREE.Euler(0, -4, 0)}
-        font={'./fonts/NeutralFace-Bold.woff'}
-      >
-        {'Justice'}
-      </Text>
-      <Text
-        color={'#FFE3B8'}
-        fontSize={8.9}
-        letterSpacing={0.03}
-        lineHeight={1}
-        textAlign={'center'}
-        position={new THREE.Vector3(-73, 2.5, -53)}
-        rotation={new THREE.Euler(0, 1, 0)}
-        font={'./fonts/NeutralFace-Bold.woff'}
-      >
-        {'Hope'}
-      </Text>
-      <Environment nodes={nodes} physics={physics} />
-    </>
-  );
+  return <audio className={styles.audio} playsInline ref={ref} autoPlay />;
 };
 
 const CanvasComponent: React.FC<Props> = (props) => {
@@ -119,20 +67,22 @@ const CanvasComponent: React.FC<Props> = (props) => {
   const [physics, setPhysics] = useState<Physics | null>(null);
   const [_, reexecute] = useRealtime('profiles');
   const [userAvatar, setUserAvatar] = useState<string>();
-  const userAudio = useRef<HTMLAudioElement | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [clickedPlayers, setClickedPlayers] = useState<{ id: string }[]>([]);
   const classes = classNames([styles.container]);
   const [shouldRenderInstructions, setShouldRenderInstructions] =
     useState<boolean>(false);
-  const { playerIds, focusImage, isMuted, set } = useStore(
-    ({ playerIds, focusImage, isMuted, set }) => ({
-      playerIds,
-      focusImage,
-      isMuted,
-      set,
-    })
-  );
+  const { playerIds, set } = useStore(({ playerIds, set }) => ({
+    playerIds,
+    set,
+  }));
+  const [myStream, setMyStream] = useState<MediaStream>();
+  const [usersStreams, setUsersStreams] = useState<
+    { id: string; stream: MediaStream }[]
+  >([]);
+  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const peers = useRef<{ [id: string]: MediaConnection }>({});
+  const [clickCounter, setClickCounter] = useState<number>(0);
 
   useEffect(() => {
     getUserModel();
@@ -163,7 +113,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
             <XRCanvas room={room} nodes={nodes} />
           </Suspense>
           {renderNpcs()}
-          <Scene nodes={nodes} physics={physics} />
+          <BaseScene nodes={nodes} physics={physics} />
 
           {/* <Perf /> */}
         </VRCanvas>
@@ -174,12 +124,11 @@ const CanvasComponent: React.FC<Props> = (props) => {
       <>
         <SettingsMenu room={room} />
         <OnboardingManager />
-        <VoiceCallManager room={room} />
-        {renderFocusImage()}
+        <FocusImage />
         <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }} shadows>
           {renderUser()}
           {renderNpcs()}
-          <Scene nodes={nodes} physics={physics} />
+          <BaseScene nodes={nodes} physics={physics} />
           <EffectComposer>
             <Noise
               opacity={0.2}
@@ -193,9 +142,17 @@ const CanvasComponent: React.FC<Props> = (props) => {
         <div className={styles.canvasFooterMenu}>
           <IconButton
             icon={!isMuted ? IconType.muted : IconType.unmuted}
-            onClick={() =>
-              set((state) => ({ ...state, isMuted: !state.isMuted }))
-            }
+            onClick={() => {
+              if (clickCounter === 0) {
+                handleVoiceCall();
+              }
+
+              setIsMuted(!isMuted);
+
+              muteMic();
+
+              setClickCounter((v) => v + 1);
+            }}
           />
           <div
             className={styles.instructionsIconContainer}
@@ -206,9 +163,15 @@ const CanvasComponent: React.FC<Props> = (props) => {
               className={styles.instructionsIcon}
             />
           </div>
+          {usersStreams.map((stream, index) => {
+            return <Audio stream={stream.stream} key={index} />;
+          })}
         </div>
-        {renderInstructions()}
-        <audio className={styles.audio} playsInline ref={userAudio} autoPlay />
+
+        <Instructions
+          shouldRenderInstructions={shouldRenderInstructions}
+          onClose={() => setShouldRenderInstructions(false)}
+        />
       </>
     );
   }
@@ -266,108 +229,89 @@ const CanvasComponent: React.FC<Props> = (props) => {
     }
   }
 
-  function renderFocusImage() {
-    if (focusImage) {
-      return (
-        <Modal>
-          <div className={styles.modalContainer}>
-            <img
-              className={styles.image}
-              alt="focus"
-              src={focusImage.src}
-            ></img>
-            <div className={styles.contentContainer}>
-              <div className={styles.headingContainer}>
-                <h3>{focusImage.title}</h3>
-                <div
-                  className={styles.iconContainer}
-                  onClick={() => {
-                    set((state) => ({ ...state, focusImage: undefined }));
-                  }}
-                >
-                  <Icon icon={IconType.close} className={styles.icon} />
-                </div>
-              </div>
-              <div className={styles.paragraphContainer}>
-                {focusImage.isVisibleInMuseum ? (
-                  <p className={styles.inStedelijk}>
-                    Artwork now visible in the Stedelijk museum
-                  </p>
-                ) : (
-                  <p className={styles.notInStedelijk}>
-                    Artwork is not visible in the Stedelijk museum
-                  </p>
-                )}
-                <p className={styles.paragraph}>{focusImage.description}</p>
-              </div>
-            </div>
-          </div>
-        </Modal>
-      );
-    }
+  function handleVoiceCall() {
+    console.log('triggered');
+    const peer = new Peer(room.sessionId);
+
+    peer.on('open', (id) => {
+      room.send('join-call', { id });
+    });
+
+    room.onMessage('user-connected', (data) => {
+      const { id } = data;
+    });
+
+    navigator.mediaDevices
+      .getUserMedia({ video: false, audio: true })
+      .then((stream) => {
+        setMyStream(stream);
+
+        peer.on('call', (call) => {
+          call.answer(stream);
+
+          call.on('stream', (stream) => {
+            setUsersStreams((v) => [...v, { id: call.peer, stream }]);
+          });
+
+          if (peers.current[call.peer]) {
+            peers.current[call.peer] = call;
+          } else {
+            peers.current = { ...peers.current, [call.peer]: call };
+          }
+        });
+
+        room.onMessage('user-connected', (data) => {
+          const { id } = data;
+
+          console.log('tessst');
+          connectToNewUser(id, stream, peer);
+        });
+
+        room.onMessage('user-disconnected', (data: { id: string }) => {
+          const { id } = data;
+          if (peers.current[id]) {
+            peers.current[id].close();
+            setUsersStreams((v) => {
+              const filter = v.filter((v) => v.id !== id);
+
+              return filter;
+            });
+          }
+        });
+      });
   }
 
-  function renderInstructions() {
-    if (shouldRenderInstructions) {
-      return (
-        <Modal>
-          <div className={styles.instructionsContainer}>
-            <div className={styles.instructionsHeadingContainer}>
-              <div
-                className={styles.instructionsCloseIconContainer}
-                onClick={() => setShouldRenderInstructions(false)}
-              >
-                <Icon icon={IconType.close} />
-              </div>
-              <h3>Controls</h3>
-            </div>
-            <div className={styles.instructionsRowsContainer}>
-              <div className={styles.instructionsRow}>
-                <div className={styles.item}>
-                  <h4 className={styles.itemTitle}>Move</h4>
-                  <p>Use these keys to navigate</p>
-                  <div className={styles.itemColumn}>
-                    <img src={'./controls/keys-1.png'} alt={'keys'}></img>
-                    <p>or</p>
-                    <img src={'./controls/keys-2.png'} alt={'keys'}></img>
-                  </div>
-                </div>
-                <div className={styles.item}>
-                  <h4 className={styles.itemTitle}>Orbit Camera</h4>
-                  <p>Drag the screen to look around.</p>
-                  <img src={'./controls/orbit.png'} alt={'keys'}></img>
-                </div>
-              </div>
-              <div className={styles.instructionsRow}>
-                <div className={styles.item}>
-                  <h4 className={styles.itemTitle}>Voice call</h4>
-                  <p>Click on a player to start a voice call.</p>
-                  <img src={'./controls/player.png'} alt={'keys'}></img>
-                </div>
-                <div className={styles.item}>
-                  <h4 className={styles.itemTitle}>paintings</h4>
-                  <p>Click on painting to get more information.</p>
-                  <img src={'./controls/mini-painting.png'} alt={'keys'}></img>
-                </div>
-              </div>
-              <div className={styles.instructionsRow}>
-                <h4 className={styles.itemTitle}>Animations</h4>
-                <div className={styles.animationsContainer}>
-                  <div>
-                    <p>Pray</p>
-                    <img src={'./controls/1.png'} alt={'controls'}></img>
-                  </div>
-                  <div>
-                    <p>Fist</p>
+  function muteMic() {
+    // console.log(usersStreams);
+    if (myStream) myStream.getAudioTracks()[0].enabled = !isMuted;
 
-                    <img src={'./controls/2.png'} alt={'controls'}></img>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </Modal>
-      );
+    console.log(myStream?.getAudioTracks());
+  }
+
+  function connectToNewUser(userId: string, stream: MediaStream, peer: Peer) {
+    console.log('tesngfdjknjfnk');
+    const call = peer.call(userId, stream);
+
+    if (call) {
+      call.on('stream', (audioStream) => {
+        // Add stream to array of user
+        setUsersStreams((v) => [...v, { id: userId, stream: audioStream }]);
+      });
+
+      call.on('close', () => {
+        //Remove video from user
+        setUsersStreams((v) => {
+          const filter = v.filter((v) => v.id !== userId);
+
+          return filter;
+        });
+      });
+
+      if (peers.current[userId]) {
+        peers.current[userId] = call;
+      } else {
+        peers.current = { ...peers.current, [userId]: call };
+      }
     }
   }
 };

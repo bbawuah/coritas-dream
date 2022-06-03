@@ -61,6 +61,7 @@ export const User: React.FC<Props> = (props) => {
     })
   );
   const userLookAt = useRef<THREE.Vector3>(new THREE.Vector3());
+
   // const textRef = useRef<THREE.Mesh>();
   // const textPosition = useRef<THREE.Vector3>(new THREE.Vector3());
 

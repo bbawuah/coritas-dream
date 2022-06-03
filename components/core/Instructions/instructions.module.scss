@@ -1,0 +1,82 @@
+.instructionsContainer {
+  width: 700px;
+  height: max-content;
+  background-color: #fff;
+  border-radius: 25px;
+
+  .instructionsHeadingContainer {
+    font-family: 'Neutral Face';
+    font-style: normal;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    position: relative;
+    width: 100%;
+    justify-content: center;
+
+    .instructionsCloseIconContainer {
+      position: absolute;
+      right: 3%;
+      width: 25px;
+      height: 25px;
+      background-color: #000;
+      cursor: pointer;
+      border-radius: 50%;
+      display: flex;
+      padding: 2.5px;
+      i {
+        width: 100%;
+        svg {
+          stroke: none;
+          fill: #fff;
+
+          path {
+            fill: #fff;
+          }
+        }
+      }
+    }
+  }
+
+  .instructionsRowsContainer {
+    padding: 2rem;
+    .instructionsRow {
+      margin-bottom: 2rem;
+      display: grid;
+      grid-template-columns: 50% 50%;
+      justify-content: space-between;
+
+      &:last-of-type {
+        grid-template-columns: none;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        margin-bottom: 0;
+      }
+
+      .item {
+        .itemColumn {
+          display: flex;
+          align-items: center;
+          p {
+            margin: 0 1rem;
+          }
+        }
+      }
+      .itemTitle {
+        font-family: 'Neutral Face';
+        font-style: normal;
+        font-weight: 600;
+        margin: 0;
+      }
+      .animationsContainer {
+        display: flex;
+
+        div {
+          margin: 0 0.5rem;
+        }
+      }
+    }
+  }
+}
