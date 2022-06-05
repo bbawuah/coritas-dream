@@ -147,7 +147,6 @@ export class Gallery extends Room<State> {
 
       if (receiver) {
         console.log('running from sending signal');
-        console.log(receiver);
         receiver.send('user joined', {
           signal: payload.signal,
           callerID: client.sessionId,

@@ -6,7 +6,6 @@ import {
   ActionNames,
   getState,
   IPlayerNetworkData,
-  IPlayerType,
   useStore,
 } from '../../../../store/store';
 import { UserModel } from '../userModel';
@@ -163,7 +162,7 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
 
   async function getPlayer() {
     try {
-      const { data, error, status } = await client
+      const { data, error } = await client
         .from('profiles')
         .select(`id, avatar`);
 

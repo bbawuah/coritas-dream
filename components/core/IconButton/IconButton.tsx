@@ -14,8 +14,8 @@ interface Props
 }
 
 export const IconButton: React.FC<Props> = (props) => {
-  const { icon, color = 'black', ...rest } = props;
-  const classes = classNames(styles.button, {
+  const { icon, color = 'black', className, ...rest } = props;
+  const classes = classNames(styles.button, className, {
     [styles.red]: color === 'red',
   });
 

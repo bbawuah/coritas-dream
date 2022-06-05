@@ -10,7 +10,9 @@ export const Modal: React.FC = (props) => {
 
   if (container) {
     return ReactDOM.createPortal(
-      <div className={styles.container}>{children}</div>,
+      <div className={styles.container}>
+        <div className={styles.contentContainer}>{children}</div>
+      </div>,
       container
     );
   }

@@ -92,6 +92,17 @@ const CanvasComponent: React.FC<Props> = (props) => {
       set((state) => ({ ...state, canvasContainerRef: containerRef.current }));
     }
 
+    room.onMessage('user-disconnected', (data: { id: string }) => {
+      const { id } = data;
+      if (peers.current[id]) {
+        peers.current[id].close();
+        setUsersStreams((v) => {
+          const filter = v.filter((v) => v.id !== id);
+
+          return filter;
+        });
+      }
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -154,15 +165,12 @@ const CanvasComponent: React.FC<Props> = (props) => {
               setClickCounter((v) => v + 1);
             }}
           />
-          <div
+          <IconButton
+            icon={IconType.instruction}
             className={styles.instructionsIconContainer}
             onClick={() => setShouldRenderInstructions(true)}
-          >
-            <Icon
-              icon={IconType.instruction}
-              className={styles.instructionsIcon}
-            />
-          </div>
+          />
+
           {usersStreams.map((stream, index) => {
             return <Audio stream={stream.stream} key={index} />;
           })}
@@ -230,7 +238,6 @@ const CanvasComponent: React.FC<Props> = (props) => {
   }
 
   function handleVoiceCall() {
-    console.log('triggered');
     const peer = new Peer(room.sessionId);
 
     peer.on('open', (id) => {
@@ -263,20 +270,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
         room.onMessage('user-connected', (data) => {
           const { id } = data;
 
-          console.log('tessst');
           connectToNewUser(id, stream, peer);
-        });
-
-        room.onMessage('user-disconnected', (data: { id: string }) => {
-          const { id } = data;
-          if (peers.current[id]) {
-            peers.current[id].close();
-            setUsersStreams((v) => {
-              const filter = v.filter((v) => v.id !== id);
-
-              return filter;
-            });
-          }
         });
       });
   }

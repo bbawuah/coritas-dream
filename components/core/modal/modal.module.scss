@@ -4,7 +4,15 @@
   background: rgba(74, 74, 74, 0.7);
   -webkit-backdrop-filter: blur(15px);
   backdrop-filter: blur(15px);
-  display: flex;
-  justify-content: center;
-  align-items: center;
+
+  .contentContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fit-content;
+  }
 }

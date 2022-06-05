@@ -1,18 +1,17 @@
 .modalContainer {
-  width: 900px;
   height: 600px;
-  border-radius: 0 25px 25px 0;
-  background-color: rgba(255, 255, 255, 0.75);
   display: flex;
+  justify-content: center;
 
   .image {
-    width: 50%;
+    width: auto;
   }
 
   .contentContainer {
     padding: 2.5rem;
-    width: inherit;
+    width: 325px;
     display: flex;
+    background-color: rgba(255, 255, 255, 0.75);
     flex-direction: column;
 
     .headingContainer {

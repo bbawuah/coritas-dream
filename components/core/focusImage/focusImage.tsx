@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element */
-import React from 'react';
+import React, { useRef } from 'react';
+import { useOutsideAlerter } from '../../../hooks/useOutsideAlerter';
 import { useStore } from '../../../store/store';
 import { IconType } from '../../../utils/icons/types';
 import { Icon } from '../icon/Icon';
@@ -7,10 +8,12 @@ import { Modal } from '../modal/modal';
 import styles from './focusImage.module.scss';
 
 export const FocusImage: React.FC = (props) => {
+  const ref = useRef<HTMLDivElement>(null);
   const { focusImage, set } = useStore(({ focusImage, set }) => ({
     focusImage,
     set,
   }));
+  useOutsideAlerter(ref, onClose);
 
   if (!focusImage) {
     return null;
@@ -20,15 +23,10 @@ export const FocusImage: React.FC = (props) => {
     <Modal>
       <div className={styles.modalContainer}>
         <img className={styles.image} alt="focus" src={focusImage.src}></img>
-        <div className={styles.contentContainer}>
+        <div ref={ref} className={styles.contentContainer}>
           <div className={styles.headingContainer}>
             <h3>{focusImage.title}</h3>
-            <div
-              className={styles.iconContainer}
-              onClick={() => {
-                set((state) => ({ ...state, focusImage: undefined }));
-              }}
-            >
+            <div className={styles.iconContainer} onClick={onClose}>
               <Icon icon={IconType.close} className={styles.icon} />
             </div>
           </div>
@@ -48,4 +46,8 @@ export const FocusImage: React.FC = (props) => {
       </div>
     </Modal>
   );
+
+  function onClose() {
+    set((state) => ({ ...state, focusImage: undefined }));
+  }
 };
