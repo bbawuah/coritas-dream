@@ -10,3 +10,7 @@ export const audio: string;
 export const instructionsIconContainer: string;
 export const instructionsIcon: string;
 export const canvasFooterMenu: string;
+export const vrOverlay: string;
+export const vrOverlayTitle: string;
+export const enableAudiobutton: string;
+export const textButton: string;

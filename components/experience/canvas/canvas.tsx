@@ -83,6 +83,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
   const [isMuted, setIsMuted] = useState<boolean>(false);
   const peers = useRef<{ [id: string]: MediaConnection }>({});
   const [clickCounter, setClickCounter] = useState<number>(0);
+  const [closeVROverlay, setCloseVROverlay] = useState<boolean>(false);
 
   useEffect(() => {
     getUserModel();
@@ -117,17 +118,42 @@ const CanvasComponent: React.FC<Props> = (props) => {
       return null;
     }
 
-    if (isWebXrSupported && isInVR && isDesktop) {
+    if (isWebXrSupported && isDesktop) {
       return (
-        <VRCanvas>
-          <Suspense fallback={null}>
-            <XRCanvas room={room} nodes={nodes} />
-          </Suspense>
-          {renderNpcs()}
-          <BaseScene nodes={nodes} physics={physics} />
+        <>
+          {!closeVROverlay ? (
+            <div className={styles.vrOverlay}>
+              <p className={styles.vrOverlayTitle}>Enable mic to continue </p>
+              <button
+                className={styles.enableAudiobutton}
+                onClick={() => {
+                  setCloseVROverlay(true);
+                  handleVoiceCall();
+                }}
+              >
+                Enable mic
+              </button>
+              <button
+                className={styles.textButton}
+                onClick={() => {
+                  setCloseVROverlay(true);
+                }}
+              >
+                Continue without mic
+              </button>
+            </div>
+          ) : (
+            <VRCanvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
+              <Suspense fallback={null}>
+                <XRCanvas room={room} nodes={nodes} />
+              </Suspense>
+              {renderNpcs()}
+              <BaseScene nodes={nodes} physics={physics} />
 
-          {/* <Perf /> */}
-        </VRCanvas>
+              {/* <Perf /> */}
+            </VRCanvas>
+          )}
+        </>
       );
     }
 
@@ -242,10 +268,6 @@ const CanvasComponent: React.FC<Props> = (props) => {
 
     peer.on('open', (id) => {
       room.send('join-call', { id });
-    });
-
-    room.onMessage('user-connected', (data) => {
-      const { id } = data;
     });
 
     navigator.mediaDevices
