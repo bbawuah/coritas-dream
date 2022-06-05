@@ -1,21 +1,13 @@
 // Based on the xr-locomotion-starter https://github.com/SamsungInternet/xr-locomotion-starter
 import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
-import {
-  useController,
-  useXR,
-  useXREvent,
-  useXRFrame,
-  XREvent,
-} from '@react-three/xr';
+import { useController, useXR, useXREvent, XREvent } from '@react-three/xr';
 import React, { useEffect, useRef } from 'react';
 import { NavigationLine } from './navigationLine';
 import { HighlightMesh } from './highlightMesh';
 import { Room } from 'colyseus.js';
-import { getState, IPlayerType } from '../../../store/store';
+import { getState } from '../../../store/store';
 import { XRTeleportationData } from './types';
-import { XRViewerPose } from 'webxr';
-// import { Pathfinding } from 'three-pathfinding';
 
 interface Props {
   room: Room;
@@ -27,7 +19,6 @@ export const XRTeleport: React.FC<Props> = (props) => {
   const { player } = useXR();
   const { gl, camera, scene } = useThree();
   const players = getState().players;
-  const rightController = useController('right');
   const canTeleport = useRef<boolean>(true);
 
   const gravity = new THREE.Vector3(0, -9.8, 0); //Gravity
@@ -43,15 +34,9 @@ export const XRTeleport: React.FC<Props> = (props) => {
   const counter = useRef<number>(0);
   const worldDirection = useRef<THREE.XRViewerPose>();
   const temporaryWorldDirection = useRef<THREE.Vector3>(new THREE.Vector3());
-  const temporaryWorldDirection2 = useRef<THREE.Vector3>(new THREE.Vector3());
   const green = new THREE.Color(0x00ff00);
   const red = new THREE.Color(0xff0000);
-  // const pathfinding = new Pathfinding();
-  // const ZONE = 'level';
-  // const zone = Pathfinding.createZone(navMeshGeometry);
-  // pathfinding.setZoneData(ZONE, zone);
   const rotationMatrix = useRef<THREE.Matrix4>(new THREE.Matrix4());
-  // const groupID = pathfinding.getGroup(ZONE, player.position);
   const raycaster = useRef<THREE.Raycaster>(new THREE.Raycaster());
   raycaster.current.params.Line = {
     threshold: 3,
@@ -98,7 +83,7 @@ export const XRTeleport: React.FC<Props> = (props) => {
       const vertex = tempVector.current.set(0, 0, 0);
       const referenceSpace = gl.xr.getReferenceSpace();
       const frame = (state.gl.xr as any).getFrame() as THREE.XRFrame;
-      if (referenceSpace)
+      if (referenceSpace && frame)
         worldDirection.current = frame.getViewerPose(referenceSpace);
       if (guidingController.current) {
         // Controller start position

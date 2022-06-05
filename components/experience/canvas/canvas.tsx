@@ -5,7 +5,7 @@ import classNames from 'classnames';
 import { Canvas } from '@react-three/fiber';
 import { User } from '../users/user';
 import { Physics } from '../../../shared/physics/physics';
-import { Sky, useGLTF } from '@react-three/drei';
+import { useGLTF } from '@react-three/drei';
 import { VRCanvas } from '@react-three/xr';
 import { Perf } from 'r3f-perf';
 import { MediaConnection, Peer } from 'peerjs';
@@ -18,13 +18,12 @@ import {
   Noise,
   BrightnessContrast,
 } from '@react-three/postprocessing';
-import { GLTFNodes, GLTFResult } from '../environment/types/types';
+import { GLTFResult } from '../environment/types/types';
 import { SettingsMenu } from '../../core/headers/settingsMenu/settingsMenu';
 import { OnboardingManager } from '../../domain/onboardingManager/onBoardingManager';
 import { client } from '../../../utils/supabase';
 import { useRealtime } from 'react-supabase';
 import { NonPlayableCharacters } from '../users/NonPlayableCharacters/NonPlayableCharacters';
-import { Icon } from '../../core/icon/Icon';
 import { IconType } from '../../../utils/icons/types';
 import { XRCanvas } from './xrCanvas';
 import { Room } from 'colyseus.js';
@@ -32,6 +31,7 @@ import { IconButton } from '../../core/IconButton/IconButton';
 import { Instructions } from '../../core/Instructions/instructions';
 import { FocusImage } from '../../core/focusImage/focusImage';
 import { BaseScene } from '../baseScene/baseScene';
+import { SVGButton } from '../svgButton/svgButton';
 
 interface Props {
   room: Room;
@@ -63,7 +63,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
   const { nodes } = useGLTF(
     '/environment-transformed.glb'
   ) as unknown as GLTFResult;
-  const { isInVR, isDesktop } = useDeviceCheck();
+  const { isDesktop } = useDeviceCheck();
   const [physics, setPhysics] = useState<Physics | null>(null);
   const [_, reexecute] = useRealtime('profiles');
   const [userAvatar, setUserAvatar] = useState<string>();
@@ -170,6 +170,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
         <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }} shadows>
           {renderUser()}
           {renderNpcs()}
+
           <BaseScene nodes={nodes} physics={physics} />
           <EffectComposer>
             <Noise

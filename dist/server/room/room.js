@@ -16,36 +16,36 @@ class Gallery extends colyseus_1.Room {
     onCreate() {
         // initialize empty room state
         this.setState(new state_1.State());
-        this.setSimulationInterval((deltaTime) => this.update(deltaTime));
+        // this.setSimulationInterval((deltaTime) => this.update(deltaTime));
         // Called every time this room receives a "move" message
         this.onMessage('move', (client, data) => {
+            const { x, y, z, rx, ry, rz } = data;
             const player = this.state.players.get(client.sessionId);
-            this.handleMovement(player, data);
+            // Get the player
+            if (player) {
+                player.x = x;
+                player.y = y;
+                player.z = z;
+                player.rx = rx;
+                player.ry = ry;
+                player.rz = rz;
+            }
             // Loopen door nieuwe array en voor elke positie
             this.broadcast('move', { player }, {
                 afterNextPatch: true,
             });
         });
-        this.onMessage('idle', (client, data) => {
-            const player = this.state.players.get(client.sessionId);
-            if (player) {
-                for (let movement in player.movement) {
-                    const key = movement;
-                    player.movement[key] = false;
-                }
-                player.physicalBody.velocity.setZero();
-                player.physicalBody.initVelocity.setZero();
-                player.physicalBody.angularVelocity.setZero();
-                player.physicalBody.initAngularVelocity.setZero();
-            }
-        });
         this.onMessage('teleport', (client, data) => {
             const player = this.state.players.get(client.sessionId);
-            const { position, rotation } = data;
+            const { position, worldDirection, animationState } = data;
             if (player) {
                 player.x = position.x;
-                player.y = position.y;
+                player.y = position.y + 0.5;
                 player.z = position.z;
+                player.rx = worldDirection.x;
+                player.ry = worldDirection.y;
+                player.rz = worldDirection.z;
+                player.animationState = animationState;
             }
             this.broadcast('move', { player }, {
                 afterNextPatch: true,
@@ -85,42 +85,33 @@ class Gallery extends colyseus_1.Room {
         this.state.players.set(client.sessionId, new player_1.Player(client.sessionId, id, this.physics)); //Store instance of user in state
         this.clients.push(client);
         const players = this.state.players; // get player from store
-        this.onMessage('test', (client, data) => {
-            console.log(`${client.sessionId} has sent this message ${data}`);
-        });
         if (players) {
-            client.send('id', { id: client.sessionId });
             this.broadcast('spawnPlayer', { players }); //Optimize this to only sending the new player
         }
-        this.onMessage('sending signal', (payload) => {
-            console.log(`from sending signal, ${payload}`);
-            console.log(payload);
-            const { userToSignalId, callerId, signal } = payload;
-            const client = this.clients.find((user) => user.sessionId === userToSignalId);
-            if (client) {
-                client.send('user joined', {
-                    signal: signal,
-                    callerId: callerId,
+        this.onMessage('join-call', (client, data) => {
+            const { id } = data;
+            console.log(id);
+            this.broadcast('user-connected', { id });
+        });
+        this.onMessage('sending signal', (client, payload) => {
+            const receiver = this.clients.find((v) => v.sessionId === payload.userToSignal);
+            if (receiver) {
+                console.log('running from sending signal');
+                receiver.send('user joined', {
+                    signal: payload.signal,
+                    callerID: client.sessionId,
                 });
             }
         });
-        this.onMessage('returning signal', (payload) => {
-            const { signal, callerId } = payload;
-            const caller = this.clients.find((user) => user.sessionId === callerId);
-            if (caller) {
-                caller.send('receiving returned signal', {
-                    signal: signal,
+        this.onMessage('returning signal', (client, payload) => {
+            const receiver = this.clients.find((v) => v.sessionId === payload.callerID);
+            if (receiver) {
+                receiver.send('receiving returned signal', {
+                    signal: payload.signal,
                     id: client.sessionId,
                 });
             }
-            // io.to(payload.callerID).emit('receiving returned signal', { signal: payload.signal, id: socket.id });
-            console.log('returning signal');
         });
-    }
-    update(deltaTime) {
-        // implement your physics or world updates here!
-        // this is a good place to update the room state
-        this.physics.updatePhysics(deltaTime / 1000);
     }
     onLeave(client) {
         this.state.players.delete(client.sessionId);
@@ -130,6 +121,7 @@ class Gallery extends colyseus_1.Room {
         if (players) {
             //Optimize this to only sending the player that left
             client.send('leave', { message: 'you left' });
+            this.broadcast('user-disconnected', { id: client.sessionId });
             this.broadcast('removePlayer', {
                 players,
             });
@@ -137,16 +129,6 @@ class Gallery extends colyseus_1.Room {
     }
     onDispose() {
         console.log('Dispose ChatRoom');
-    }
-    handleMovement(player, data) {
-        const { userDirection, azimuthalAngle, timestamp } = data;
-        // Get the player
-        if (player) {
-            player.movement[userDirection] = true;
-            player.handleUserDirection(azimuthalAngle);
-            player.timestamp = timestamp;
-            player.movement[userDirection] = false;
-        }
     }
 }
 exports.Gallery = Gallery;

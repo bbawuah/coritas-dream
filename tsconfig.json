@@ -16,12 +16,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": [
-    "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
-    "index.js",
-    "components/experience/three-mesh-ui/ThreeMeshUI.tsx"
-  ],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "index.js"],
   "exclude": ["node_modules"]
 }

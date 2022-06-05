@@ -1,14 +1,11 @@
-import { Sky } from '@react-three/drei';
 import { DefaultXRControllers, Interactive } from '@react-three/xr';
 import { Room } from 'colyseus.js';
-import { Physics } from '../../../shared/physics/physics';
 import { XRTeleport } from '../vr/teleport';
-import { Environment } from '../environment/Environment';
 import { GLTFNodes } from '../environment/types/types';
 import { getState, useStore } from '../../../store/store';
 import { NonPlayableCharacters } from '../users/NonPlayableCharacters/NonPlayableCharacters';
-import { useThree } from '@react-three/fiber';
-
+import { useState } from 'react';
+import { SVGButton } from '../svgButton/svgButton';
 interface Props {
   room: Room;
   nodes: GLTFNodes;
@@ -17,11 +14,12 @@ interface Props {
 // interface PanelProps extends TitleProps {}
 // interface TitleProps {
 //   id: string;
-// }
+//
 
 export const XRCanvas: React.FC<Props> = (props) => {
   const { room, nodes } = props;
-  const { scene } = useThree();
+  const [isPressed, setIsPressed] = useState<boolean>(false);
+  const [isHovered, setIsHovered] = useState<boolean>(false);
   const { playerIds } = useStore(({ playerIds }) => ({
     playerIds,
   }));
@@ -29,12 +27,15 @@ export const XRCanvas: React.FC<Props> = (props) => {
   return (
     <>
       <DefaultXRControllers />
-      <XRTeleport
-        room={room}
-       
-        navMeshGeometry={nodes['navmesh'].geometry}
-      />
+      <XRTeleport room={room} navMeshGeometry={nodes['navmesh'].geometry} />
       {renderNonPlayableCharacters()}
+
+      <SVGButton
+        url={'./svg/unmuted.svg'}
+        isPressed={isPressed}
+        isHovered={isHovered}
+      />
+
       {/* <MakeTextPanel scene={scene} /> */}
     </>
   );

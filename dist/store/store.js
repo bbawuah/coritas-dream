@@ -16,6 +16,7 @@ const controls = {
 const playerIds = [];
 const players = {};
 const callRequests = [];
+const isMuted = false;
 const playersCount = 0;
 const canvasContainerRef = null;
 const focusImage = undefined;
@@ -28,6 +29,7 @@ const useStoreImplementation = (0, zustand_1.default)((0, middleware_1.subscribe
         players,
         playerIds,
         playersCount,
+        isMuted,
         callRequests,
         canvasContainerRef,
         focusImage,

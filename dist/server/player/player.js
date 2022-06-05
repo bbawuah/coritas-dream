@@ -40,7 +40,6 @@ class Player extends schema_1.Schema {
         this.id = '';
         this.uuid = '';
         this.animationState = 'idle';
-        this.timestamp = 0;
         this.playerSpeed = 10;
         this.direction = new THREE.Vector3();
         this.frontVector = new THREE.Vector3();
@@ -115,7 +114,4 @@ __decorate([
 __decorate([
     (0, schema_1.type)('string')
 ], Player.prototype, "animationState", void 0);
-__decorate([
-    (0, schema_1.type)('number')
-], Player.prototype, "timestamp", void 0);
 exports.Player = Player;
