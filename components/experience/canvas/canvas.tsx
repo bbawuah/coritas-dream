@@ -143,15 +143,20 @@ const CanvasComponent: React.FC<Props> = (props) => {
               </button>
             </div>
           ) : (
-            <VRCanvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
-              <Suspense fallback={null}>
-                <XRCanvas room={room} nodes={nodes} />
-              </Suspense>
-              {renderNpcs()}
-              <BaseScene nodes={nodes} physics={physics} />
+            <>
+              <VRCanvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
+                <Suspense fallback={null}>
+                  <XRCanvas room={room} nodes={nodes} />
+                </Suspense>
+                {renderNpcs()}
+                <BaseScene nodes={nodes} physics={physics} />
 
-              {/* <Perf /> */}
-            </VRCanvas>
+                {/* <Perf /> */}
+              </VRCanvas>
+              {usersStreams.map((stream, index) => {
+                return <Audio stream={stream.stream} key={index} />;
+              })}
+            </>
           )}
         </>
       );
