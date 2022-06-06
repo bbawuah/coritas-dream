@@ -18,8 +18,6 @@ interface Props {
 
 export const XRCanvas: React.FC<Props> = (props) => {
   const { room, nodes } = props;
-  const [isPressed, setIsPressed] = useState<boolean>(false);
-  const [isHovered, setIsHovered] = useState<boolean>(false);
   const { playerIds } = useStore(({ playerIds }) => ({
     playerIds,
   }));
@@ -29,14 +27,6 @@ export const XRCanvas: React.FC<Props> = (props) => {
       <DefaultXRControllers />
       <XRTeleport room={room} navMeshGeometry={nodes['navmesh'].geometry} />
       {renderNonPlayableCharacters()}
-
-      <SVGButton
-        url={'./svg/unmuted.svg'}
-        isPressed={isPressed}
-        isHovered={isHovered}
-      />
-
-      {/* <MakeTextPanel scene={scene} /> */}
     </>
   );
 

@@ -28,8 +28,8 @@ import { IconType } from '../../../utils/icons/types';
 import { XRCanvas } from './xrCanvas';
 import { Room } from 'colyseus.js';
 import { IconButton } from '../../core/IconButton/IconButton';
-import { Instructions } from '../../core/Instructions/instructions';
-import { FocusImage } from '../../core/focusImage/focusImage';
+import { Instructions } from '../../domain/Instructions/instructions';
+import { FocusImage } from '../../domain/focusImage/focusImage';
 import { BaseScene } from '../baseScene/baseScene';
 import { SVGButton } from '../svgButton/svgButton';
 
@@ -72,18 +72,31 @@ const CanvasComponent: React.FC<Props> = (props) => {
   const classes = classNames([styles.container]);
   const [shouldRenderInstructions, setShouldRenderInstructions] =
     useState<boolean>(false);
-  const { playerIds, set } = useStore(({ playerIds, set }) => ({
-    playerIds,
-    set,
-  }));
+  const { playerIds, players, set } = useStore(
+    ({ playerIds, players, set }) => ({
+      playerIds,
+      players,
+      set,
+    })
+  );
   const [myStream, setMyStream] = useState<MediaStream>();
   const [usersStreams, setUsersStreams] = useState<
     { id: string; stream: MediaStream }[]
   >([]);
-  const [isMuted, setIsMuted] = useState<boolean>(false);
+  const [isUnMuted, setIsUnMuted] = useState<boolean>(false);
   const peers = useRef<{ [id: string]: MediaConnection }>({});
   const [clickCounter, setClickCounter] = useState<number>(0);
   const [closeVROverlay, setCloseVROverlay] = useState<boolean>(false);
+
+  useEffect(() => {
+    room.onMessage('mute player', (data) => {
+      const { id } = data;
+      setIsUnMuted(false);
+      muteMic();
+      console.log(`${id} muted you`);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room, myStream]);
 
   useEffect(() => {
     getUserModel();
@@ -148,6 +161,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
                 <Suspense fallback={null}>
                   <XRCanvas room={room} nodes={nodes} />
                 </Suspense>
+                {myStream && <SVGButton />}
                 {renderNpcs()}
                 <BaseScene nodes={nodes} physics={physics} />
 
@@ -184,13 +198,13 @@ const CanvasComponent: React.FC<Props> = (props) => {
         </Canvas>
         <div className={styles.canvasFooterMenu}>
           <IconButton
-            icon={!isMuted ? IconType.muted : IconType.unmuted}
+            icon={!isUnMuted ? IconType.muted : IconType.unmuted}
             onClick={() => {
               if (clickCounter === 0) {
                 handleVoiceCall();
               }
 
-              setIsMuted(!isMuted);
+              setIsUnMuted(!isUnMuted);
 
               muteMic();
 
@@ -305,9 +319,9 @@ const CanvasComponent: React.FC<Props> = (props) => {
 
   function muteMic() {
     // console.log(usersStreams);
-    if (myStream) myStream.getAudioTracks()[0].enabled = !isMuted;
+    if (myStream) myStream.getAudioTracks()[0].enabled = !isUnMuted;
 
-    console.log(myStream?.getAudioTracks());
+    room.send('mute', { isUnMuted });
   }
 
   function connectToNewUser(userId: string, stream: MediaStream, peer: Peer) {

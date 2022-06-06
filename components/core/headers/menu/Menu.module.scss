@@ -2,6 +2,7 @@
   position: absolute;
   right: 5px;
   top: 60px;
+  max-height: 390px;
   border-radius: 0.8rem;
   background: rgba(47, 47, 47, 0.7);
   -webkit-backdrop-filter: blur(10px);
@@ -15,44 +16,139 @@
   width: 250px;
   display: grid;
   grid-template-rows: max-content 1fr max-content;
+  color: #d4d3d3;
+
+  .menuContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    height: max-content;
+    margin-bottom: 1rem;
+    //   border-bottom: 0.2px solid #000;
+  }
+
+  .playersListContainer {
+    display: flex;
+    flex-direction: column;
+
+    .playersListTitle {
+      font-size: 1.125rem;
+      margin: 0.5rem 0;
+    }
+
+    ul {
+      padding-inline-start: 0;
+      margin: 5px 0;
+      list-style-type: none;
+      overflow-y: auto;
+
+      li {
+        margin: 0.25rem 0;
+        .playersListItemContainer {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+
+          .playersName {
+            margin: 0;
+          }
+
+          .muteButton {
+            width: 30px;
+            height: 30px;
+          }
+        }
+      }
+    }
+  }
+
+  .menuTitle {
+    font-family: 'Neutral Face';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin: 0;
+    color: #d4d3d3;
+  }
+
+  .button {
+    border-radius: 25px;
+    height: max-content;
+    cursor: pointer;
+    border: none;
+    padding: 0.5rem;
+    color: #2f2f2f;
+    background-color: #d4d3d3;
+  }
+
+  .logOutButton {
+    width: 100%;
+    align-self: flex-end;
+    border-radius: 25px;
+    cursor: pointer;
+    border: none;
+    padding: 0.5rem;
+    color: #2f2f2f;
+    background-color: #d4d3d3;
+  }
+}
+
+.modalHeaderContainer {
   font-family: 'Neutral Face';
-  color: #d4d3d3;
   font-style: normal;
-  font-weight: 700;
-}
-
-.menuContainer {
+  font-weight: 600;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  height: max-content;
-  //   border-bottom: 0.2px solid #000;
-}
-
-.menuTitle {
-  font-weight: 700;
-  font-size: 1.5rem;
-  margin: 0;
-  color: #d4d3d3;
-}
-
-.button {
-  border-radius: 25px;
-  height: max-content;
-  cursor: pointer;
-  border: none;
-  padding: 0.5rem;
-  color: #2f2f2f;
-  background-color: #d4d3d3;
-}
-
-.logOutButton {
+  position: relative;
   width: 100%;
-  align-self: flex-end;
-  border-radius: 25px;
-  cursor: pointer;
-  border: none;
-  padding: 0.5rem;
-  color: #2f2f2f;
-  background-color: #d4d3d3;
+  justify-content: center;
+
+  .modalCloseIconContainer {
+    position: absolute;
+    right: 3%;
+    width: 25px;
+    height: 25px;
+    background-color: #000;
+    cursor: pointer;
+    border-radius: 50%;
+    display: flex;
+    padding: 2.5px;
+    i {
+      width: 100%;
+      svg {
+        stroke: none;
+        fill: #fff;
+
+        path {
+          fill: #fff;
+        }
+      }
+    }
+  }
+}
+
+.contentContainer {
+  display: flex;
+  flex-direction: column;
+  // justify-content: center;
+
+  p {
+    text-align: center;
+    margin: 0.5rem;
+  }
+
+  .buttonContainer {
+    margin-top: 0.5rem;
+    display: flex;
+    justify-content: space-evenly;
+
+    .button {
+      background: none;
+      outline: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Neutral Face';
+      font-weight: 600;
+    }
+  }
 }

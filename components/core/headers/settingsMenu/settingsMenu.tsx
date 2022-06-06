@@ -30,7 +30,7 @@ export const SettingsMenu: React.FC<Props> = (props) => {
       return null;
     }
 
-    return <Menu onLogout={() => handleLogout()} />;
+    return <Menu room={room} onLogout={() => handleLogout()} />;
   }
 
   async function handleLogout() {

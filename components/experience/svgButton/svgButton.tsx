@@ -5,23 +5,17 @@ import * as THREE from 'three';
 import { Text } from '@react-three/drei';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader';
 
-interface Props {
-  url: string;
-  isPressed: boolean;
-  isHovered: boolean;
-}
+interface Props {}
 
 export const SVGButton: React.FC<Props> = (props) => {
-  const { url, isHovered } = props;
   const ref = useRef<THREE.Group>();
   const { scene, camera } = useThree();
   const rightController = useController('right');
   const { player } = useXR();
-  const { paths } = useLoader(SVGLoader, url);
   const svgMesh = useRef<THREE.Mesh>();
-  const plane = useRef<THREE.Mesh>();
   const buttonBackgroundRef = useRef<THREE.Mesh>();
   const [isPressed, setIsPressed] = useState<boolean>(false);
+  const { paths } = useLoader(SVGLoader, './svg/unmuted.svg');
   const labelsRef = useRef<THREE.Mesh>();
   const unmuteColor = useRef(new THREE.Color(0xffffff));
   const muteColor = useRef(new THREE.Color(0xff0000));

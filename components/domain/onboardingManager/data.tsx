@@ -1,5 +1,5 @@
 import { IconType } from '../../../utils/icons/types';
-import { Onboarding } from '../../core/onboarding/Onboarding';
+import { Onboarding } from '../onboarding/Onboarding';
 import { OnboardingData } from './types';
 
 export const onboardingData: JSX.Element[] = [

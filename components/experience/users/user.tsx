@@ -109,6 +109,7 @@ export const User: React.FC<Props> = (props) => {
           rx: players[room.sessionId].rx,
           ry: players[room.sessionId].ry,
           rz: players[room.sessionId].rz,
+          isUnMuted: players[room.sessionId].isUnMuted,
         },
       };
 

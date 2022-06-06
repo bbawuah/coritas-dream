@@ -1,7 +1,7 @@
 import React from 'react';
 import { IconType } from '../../../utils/icons/types';
-import { Button } from '../button/Button';
-import { Icon } from '../icon/Icon';
+import { Button } from '../../core/button/Button';
+import { Icon } from '../../core/icon/Icon';
 import styles from './Onboarding.module.scss';
 
 interface Props {

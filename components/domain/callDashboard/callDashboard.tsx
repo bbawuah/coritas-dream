@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Button } from '../button/Button';
+import { Button } from '../../core/button/Button';
 import styles from './callDashboard.module.scss';
 import ReactDOM from 'react-dom';
-import createContainer from '../notifications/createContainer/createContainer';
-import { Icon } from '../icon/Icon';
+import createContainer from '../../core/notifications/createContainer/createContainer';
+import { Icon } from '../../core/icon/Icon';
 import { IconType } from '../../../utils/icons/types';
 
 const container = createContainer();

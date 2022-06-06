@@ -41,7 +41,7 @@ export const useColyseus = () => {
         onAnimation(room);
         onSpawnPlayer(room);
         onRemovePlayer(room);
-
+        onMutePlayer(room);
         onMove(room);
       } catch (e) {
         console.log(e);
@@ -98,6 +98,17 @@ export const useColyseus = () => {
         ...state,
         players,
         playersCount: Object.keys(players).length,
+      }));
+    });
+  }
+
+  function onMutePlayer(room: Room) {
+    room.onMessage('mute state', (data) => {
+      const { players } = data;
+
+      set((state) => ({
+        ...state,
+        players,
       }));
     });
   }

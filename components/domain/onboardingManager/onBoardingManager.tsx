@@ -1,6 +1,6 @@
 import React, { CSSProperties, useEffect, useRef, useState } from 'react';
 import { IconType } from '../../../utils/icons/types';
-import { Onboarding } from '../../core/onboarding/Onboarding';
+import { Onboarding } from '../onboarding/Onboarding';
 import {
   useTransition,
   animated,

@@ -3,8 +3,8 @@ import React, { useRef } from 'react';
 import { useOutsideAlerter } from '../../../hooks/useOutsideAlerter';
 import { useStore } from '../../../store/store';
 import { IconType } from '../../../utils/icons/types';
-import { Icon } from '../icon/Icon';
-import { Modal } from '../modal/modal';
+import { Icon } from '../../core/icon/Icon';
+import { Modal } from '../../core/modal/modal';
 import styles from './focusImage.module.scss';
 
 export const FocusImage: React.FC = (props) => {

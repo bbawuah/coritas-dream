@@ -24,6 +24,7 @@ export interface IPlayerNetworkData {
   rx: number;
   ry: number;
   rz: number;
+  isUnMuted: boolean;
 }
 
 interface CallRequests {

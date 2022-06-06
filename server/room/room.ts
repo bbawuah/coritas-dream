@@ -127,7 +127,7 @@ export class Gallery extends Room<State> {
 
     this.clients.push(client);
 
-    const players = (this.state as State).players; // get player from store
+    const players = (this.state as State).players; // get players from state
 
     if (players) {
       this.broadcast('spawnPlayer', { players }); //Optimize this to only sending the new player
@@ -162,6 +162,46 @@ export class Gallery extends Room<State> {
       if (receiver) {
         receiver.send('receiving returned signal', {
           signal: payload.signal,
+          id: client.sessionId,
+        });
+      }
+    });
+
+    this.onMessage('mute', (client, data: { isUnMuted: boolean }) => {
+      const { isUnMuted } = data;
+      const player = this.state.players.get(client.sessionId);
+
+      if (player) {
+        player.isUnMuted = isUnMuted;
+      }
+
+      const players = (this.state as State).players;
+
+      this.broadcast('mute state', { players });
+    });
+
+    this.onMessage(
+      'unmute request',
+      (client, data: { userToUnmute: string }) => {
+        const { userToUnmute } = data;
+
+        const receiver = this.clients.find((v) => v.sessionId === userToUnmute);
+
+        if (receiver) {
+          receiver.send('unmute player', {
+            id: client.sessionId,
+          });
+        }
+      }
+    );
+
+    this.onMessage('mute request', (client, data: { userToMute: string }) => {
+      const { userToMute } = data;
+
+      const receiver = this.clients.find((v) => v.sessionId === userToMute);
+
+      if (receiver) {
+        receiver.send('mute player', {
           id: client.sessionId,
         });
       }

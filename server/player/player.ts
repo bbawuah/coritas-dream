@@ -15,6 +15,7 @@ export class Player extends Schema {
   @type('string') id: string = '';
   @type('string') uuid: string = '';
   @type('string') animationState: ActionNames = 'idle';
+  @type('boolean') isUnMuted: boolean = true;
 
   public playerSpeed: number = 10;
   public physicalBody: CANNON.Body;

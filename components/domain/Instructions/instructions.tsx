@@ -1,8 +1,8 @@
 /* eslint-disable @next/next/no-img-element */
 import React from 'react';
 import { IconType } from '../../../utils/icons/types';
-import { Icon } from '../icon/Icon';
-import { Modal } from '../modal/modal';
+import { Icon } from '../../core/icon/Icon';
+import { Modal } from '../../core/modal/modal';
 import styles from './instructions.module.scss';
 
 interface Props {
