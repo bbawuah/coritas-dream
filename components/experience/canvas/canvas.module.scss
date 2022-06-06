@@ -173,3 +173,22 @@
     }
   }
 }
+
+.notificationMessage {
+  color: #212121;
+}
+
+.buttonContainer {
+  margin-top: 0.5rem;
+  display: flex;
+  justify-content: space-evenly;
+
+  .button {
+    background: none;
+    outline: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Neutral Face';
+    font-weight: 600;
+  }
+}

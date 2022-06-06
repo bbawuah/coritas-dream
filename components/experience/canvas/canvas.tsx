@@ -32,6 +32,7 @@ import { Instructions } from '../../domain/Instructions/instructions';
 import { FocusImage } from '../../domain/focusImage/focusImage';
 import { BaseScene } from '../baseScene/baseScene';
 import { SVGButton } from '../svgButton/svgButton';
+import { Notifications } from '../../core/notifications/Notifications';
 
 interface Props {
   room: Room;
@@ -72,13 +73,11 @@ const CanvasComponent: React.FC<Props> = (props) => {
   const classes = classNames([styles.container]);
   const [shouldRenderInstructions, setShouldRenderInstructions] =
     useState<boolean>(false);
-  const { playerIds, players, set } = useStore(
-    ({ playerIds, players, set }) => ({
-      playerIds,
-      players,
-      set,
-    })
-  );
+  const { playerIds, set } = useStore(({ playerIds, set }) => ({
+    playerIds,
+
+    set,
+  }));
   const [myStream, setMyStream] = useState<MediaStream>();
   const [usersStreams, setUsersStreams] = useState<
     { id: string; stream: MediaStream }[]
@@ -87,13 +86,27 @@ const CanvasComponent: React.FC<Props> = (props) => {
   const peers = useRef<{ [id: string]: MediaConnection }>({});
   const [clickCounter, setClickCounter] = useState<number>(0);
   const [closeVROverlay, setCloseVROverlay] = useState<boolean>(false);
+  const [muteNotifications, setMuteNotifications] =
+    useState<{ id: string; message: string }>();
+  const [unmuteNotifications, setUnmuteNotifications] =
+    useState<{ id: string; message: string }>();
 
   useEffect(() => {
     room.onMessage('mute player', (data) => {
       const { id } = data;
       setIsUnMuted(false);
-      muteMic();
+
+      if (myStream) myStream.getAudioTracks()[0].enabled = false;
+      room.send('mute', { isUnMuted: true });
+      setMuteNotifications({ id, message: `${id} has muted you.` });
       console.log(`${id} muted you`);
+    });
+
+    room.onMessage('unmute player', (data) => {
+      const { id } = data;
+
+      setUnmuteNotifications({ id, message: `${id} wants you to unmute.` });
+      console.log(`${id} wants you to unmute.`);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [room, myStream]);
@@ -196,6 +209,43 @@ const CanvasComponent: React.FC<Props> = (props) => {
             <Bloom />
           </EffectComposer>
         </Canvas>
+        {muteNotifications && (
+          <Notifications
+            isSelfClosing={true}
+            onDelete={() => setMuteNotifications(undefined)}
+          >
+            <p className={styles.notificationMessage}>
+              {muteNotifications.message}
+            </p>
+          </Notifications>
+        )}
+        {unmuteNotifications && (
+          <Notifications>
+            <p className={styles.notificationMessage}>
+              {unmuteNotifications.message}
+            </p>
+            <div className={styles.buttonContainer}>
+              <button
+                className={styles.button}
+                onClick={() => setUnmuteNotifications(undefined)}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.button}
+                onClick={() => {
+                  if (myStream) myStream.getAudioTracks()[0].enabled = true;
+
+                  setIsUnMuted(true);
+                  room.send('mute', { isUnMuted });
+                  setUnmuteNotifications(undefined);
+                }}
+              >
+                Unmute
+              </button>
+            </div>
+          </Notifications>
+        )}
         <div className={styles.canvasFooterMenu}>
           <IconButton
             icon={!isUnMuted ? IconType.muted : IconType.unmuted}
