@@ -9,7 +9,6 @@ import {
   getState,
   IPlayerNetworkData,
   IPlayerType,
-  useStore,
 } from '../../../store/store';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
 import { Room } from 'colyseus.js';
@@ -28,15 +27,9 @@ interface Props {
 
 export type Animations = 'idle' | 'walking';
 
-type BaseActions = Record<Animations, { weight: number }>;
-
 export const User: React.FC<Props> = (props) => {
   const { room, physics, glbUrl } = props;
   const players = getState().players;
-  const { scene } = useThree();
-  const { animationName } = useStore(({ animationName }) => ({
-    animationName,
-  })); //Maybe refactor this late
   const controlsRef = useRef<any>();
   const processedAction = useRef<IPlayerType | null>(null);
   const currentAction = useRef<IMoveProps | null>(null);
@@ -64,9 +57,6 @@ export const User: React.FC<Props> = (props) => {
   const userLookAt = useRef<THREE.Vector3>(new THREE.Vector3());
   const previousAnimationState = useRef<ActionNames>();
 
-  // const textRef = useRef<THREE.Mesh>();
-  // const textPosition = useRef<THREE.Vector3>(new THREE.Vector3());
-
   // const cannonDebugRenderer = useRef(
   //   new CannonDebugRenderer(scene, physics.physicsWorld)
   // );
@@ -91,13 +81,6 @@ export const User: React.FC<Props> = (props) => {
         players[room.sessionId].z
       );
 
-      // textPosition.current.set(
-      //   players[id].x,
-      //   players[id].y + 3.5,
-      //   players[id].z - 7
-      // );
-      // textRef.current.position.copy(textPosition.current);
-
       // Update processed position
       processedAction.current = {
         [room.sessionId]: {
@@ -121,21 +104,11 @@ export const User: React.FC<Props> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controlsRef]);
 
-  // useEffect(() => {
-  //   if (userRef.current && userRef.current.actions) {
-  //     userRef.current.fadeToAction(animationName.animationName, 0.25);
-  //     room.send('animationState', animationName.animationName);
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [animationName.animationName]);
-
   useFrame((state, dt) => {
     frameTime.current += state.clock.getElapsedTime();
     if (userRef.current && controlsRef) {
       const userDirection = getDirection();
       let actionName = getAnimationState();
-
-      // console.log(actionName);\
 
       if (
         movement.current.backward ||
@@ -179,17 +152,6 @@ export const User: React.FC<Props> = (props) => {
 
   return (
     <Suspense fallback={null}>
-      {/* <Text
-        color={'#000'}
-        fontSize={0.9}
-        letterSpacing={0.03}
-        lineHeight={1}
-        textAlign={'center'}
-        ref={textRef}
-        font={'./fonts/NeutralFace-Bold.woff'}
-      >
-        {"Corita's Dream"}
-      </Text> */}
       <primitive object={userRef.current?.controlObject} />
       <OrbitControls
         ref={controlsRef}

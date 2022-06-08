@@ -1,7 +1,7 @@
 .instructionsContainer {
   width: 700px;
   height: max-content;
-  background-color: #fff;
+  background-color: #e2e8f0;
   border-radius: 25px;
 
   .instructionsHeadingContainer {
@@ -19,7 +19,7 @@
       right: 3%;
       width: 25px;
       height: 25px;
-      background-color: #000;
+      background-color: #334155;
       cursor: pointer;
       border-radius: 50%;
       display: flex;
@@ -28,10 +28,10 @@
         width: 100%;
         svg {
           stroke: none;
-          fill: #fff;
+          fill: #e2e8f0;
 
           path {
-            fill: #fff;
+            fill: #e2e8f0;
           }
         }
       }

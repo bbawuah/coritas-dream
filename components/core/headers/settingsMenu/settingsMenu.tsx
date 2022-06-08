@@ -5,6 +5,7 @@ import { IconType } from '../../../../utils/icons/types';
 import { IconButton } from '../../IconButton/IconButton';
 import styles from './settingsMenu.module.scss';
 import { Menu } from '../menu/Menu';
+import { useClient, useDelete, useSignOut } from 'react-supabase';
 
 interface Props {
   room: Room;
@@ -33,8 +34,9 @@ export const SettingsMenu: React.FC<Props> = (props) => {
     return <Menu room={room} onLogout={() => handleLogout()} />;
   }
 
+  // Not really a signout function tho but anyway
   async function handleLogout() {
-    router.push('/');
     await room.leave();
+    router.push('/');
   }
 };

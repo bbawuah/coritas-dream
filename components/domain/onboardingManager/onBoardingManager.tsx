@@ -9,6 +9,7 @@ import {
   config,
 } from '@react-spring/web';
 import styles from './onBoarding.module.scss';
+import { useSelect } from 'react-supabase';
 
 interface Props {}
 
@@ -29,7 +30,7 @@ export const OnboardingManager: React.FC<Props> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [index]);
 
-  const data: ((
+  const onboardingData: ((
     props: AnimatedProps<{ style: CSSProperties }>
   ) => JSX.Element)[] = [
     ({ style }) => (
@@ -74,7 +75,7 @@ export const OnboardingManager: React.FC<Props> = (props) => {
   function renderOnboarding() {
     if (isVisible) {
       const jsx = transitions((style, i) => {
-        const AnimatedOnboardingComponent = data[i];
+        const AnimatedOnboardingComponent = onboardingData[i];
 
         return (
           <div className={styles.container}>

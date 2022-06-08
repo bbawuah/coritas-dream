@@ -1,13 +1,23 @@
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
-import { useController, useInteraction, useXR } from '@react-three/xr';
+import {
+  useController,
+  useInteraction,
+  useXR,
+  useXREvent,
+} from '@react-three/xr';
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Text } from '@react-three/drei';
 import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader';
+import { Room } from 'colyseus.js';
 
-interface Props {}
+interface Props {
+  stream: MediaStream;
+  room: Room;
+}
 
 export const SVGButton: React.FC<Props> = (props) => {
+  const { stream, room } = props;
   const ref = useRef<THREE.Group>();
   const { scene, camera } = useThree();
   const rightController = useController('right');
@@ -20,10 +30,24 @@ export const SVGButton: React.FC<Props> = (props) => {
   const unmuteColor = useRef(new THREE.Color(0xffffff));
   const muteColor = useRef(new THREE.Color(0xff0000));
   const temporaryWorldDirection = useRef<THREE.Vector3>(new THREE.Vector3());
+  /**
+   * 
+   *   setIsPressed(!isPressed);
+    if (stream) stream.getAudioTracks()[0].enabled = !isPressed;
 
-  useInteraction(buttonBackgroundRef, 'onSelect', () => {
-    setIsPressed(!isPressed);
-  });
+    room.send('mute', { isUnMuted: !isPressed });
+   */
+
+  useXREvent(
+    'squeeze',
+    (e) => {
+      setIsPressed(!isPressed);
+      if (stream) stream.getAudioTracks()[0].enabled = !isPressed;
+
+      room.send('mute', { isUnMuted: !isPressed });
+    },
+    { handedness: 'right' }
+  );
 
   useEffect(() => {
     if (
@@ -118,4 +142,11 @@ export const SVGButton: React.FC<Props> = (props) => {
       </Text>
     </group>
   );
+
+  function muteMic() {
+    // console.log(usersStreams);
+    if (stream) stream.getAudioTracks()[0].enabled = isPressed;
+
+    room.send('mute', { isUnMuted: isPressed });
+  }
 };

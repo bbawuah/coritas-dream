@@ -8,10 +8,10 @@ import Link from 'next/link';
 import type { Navigator } from 'webxr';
 import { useDeviceCheck } from '../hooks/useDeviceCheck';
 import { Loader } from '../components/experience/loader/loader';
-import { client as supabaseClient } from '../utils/supabase';
 import { Header } from '../components/core/headers/basicHeader/basicHeader';
 import { useAuth } from '../hooks/useAuth';
 import { useRouter } from 'next/router';
+import { useClient } from 'react-supabase';
 
 const Canvas = dynamic(() => import('../components/experience/canvas/canvas'), {
   ssr: false,
@@ -26,6 +26,7 @@ const Dream: NextPage = () => {
   const [characterIsCreated, setCharacterIsCreated] = useState<boolean>(false);
   const [hasProfile, setHasProfile] = useState<boolean>(false);
   const { session, user } = useAuth();
+  const client = useClient();
 
   useEffect(() => {
     const webXRNavigator: Navigator = navigator as any as Navigator;
@@ -144,7 +145,7 @@ const Dream: NextPage = () => {
 
   async function getUserProfile() {
     if (user) {
-      const { data: profile } = await supabaseClient
+      const { data: profile } = await client
         .from('profiles')
         .select('id')
         .eq('id', user.id);
@@ -159,10 +160,10 @@ const Dream: NextPage = () => {
   }
 
   async function updateUserAvatar(url: string) {
-    const user = supabaseClient.auth.user();
+    const user = client.auth.user();
     if (user) {
       if (!hasProfile) {
-        const { data, error } = await supabaseClient.from('profiles').insert([
+        const { data, error } = await client.from('profiles').insert([
           {
             id: user.id,
             avatar: url,

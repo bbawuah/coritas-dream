@@ -1,5 +1,5 @@
 import { Room } from 'colyseus.js';
-import React, { useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { useOutsideAlerter } from '../../../../hooks/useOutsideAlerter';
 import { useStore } from '../../../../store/store';
 import { IconType } from '../../../../utils/icons/types';

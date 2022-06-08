@@ -16,7 +16,7 @@
   width: 250px;
   display: grid;
   grid-template-rows: max-content 1fr max-content;
-  color: #d4d3d3;
+  color: #f1f5f9;
 
   .menuContainer {
     display: flex;
@@ -24,7 +24,7 @@
     align-items: center;
     height: max-content;
     margin-bottom: 1rem;
-    //   border-bottom: 0.2px solid #000;
+    //   border-bottom: 0.2px solid #334155;
   }
 
   .playersListContainer {
@@ -68,7 +68,7 @@
     font-weight: 700;
     font-size: 1.5rem;
     margin: 0;
-    color: #d4d3d3;
+    color: #f1f5f9;
   }
 
   .button {
@@ -78,18 +78,29 @@
     border: none;
     padding: 0.5rem;
     color: #2f2f2f;
-    background-color: #d4d3d3;
+    background-color: #f1f5f9;
   }
 
   .logOutButton {
     width: 100%;
     align-self: flex-end;
+    font-family: 'Neutral Face';
+    font-weight: 700;
     border-radius: 25px;
     cursor: pointer;
     border: none;
     padding: 0.5rem;
+    font-size: 0.75rem;
     color: #2f2f2f;
-    background-color: #d4d3d3;
+    background-color: #f1f5f9;
+  }
+
+  .logOutAndDeleteButton {
+    font-family: 'Neutral Face';
+    font-weight: 700;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
+    background-color: #d74f4f;
   }
 }
 
@@ -108,7 +119,7 @@
     right: 3%;
     width: 25px;
     height: 25px;
-    background-color: #000;
+    background-color: #334155;
     cursor: pointer;
     border-radius: 50%;
     display: flex;
@@ -117,10 +128,10 @@
       width: 100%;
       svg {
         stroke: none;
-        fill: #fff;
+        fill: #e2e8f0;
 
         path {
-          fill: #fff;
+          fill: #e2e8f0;
         }
       }
     }

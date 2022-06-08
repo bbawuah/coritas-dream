@@ -69,7 +69,6 @@ const CanvasComponent: React.FC<Props> = (props) => {
   const [_, reexecute] = useRealtime('profiles');
   const [userAvatar, setUserAvatar] = useState<string>();
   const containerRef = useRef<HTMLDivElement>(null);
-  const [clickedPlayers, setClickedPlayers] = useState<{ id: string }[]>([]);
   const classes = classNames([styles.container]);
   const [shouldRenderInstructions, setShouldRenderInstructions] =
     useState<boolean>(false);
@@ -84,6 +83,8 @@ const CanvasComponent: React.FC<Props> = (props) => {
   >([]);
   const [isUnMuted, setIsUnMuted] = useState<boolean>(false);
   const peers = useRef<{ [id: string]: MediaConnection }>({});
+  const [clickedPlayer, setClickedPlayer] = useState<{ id: string }>();
+  const [isReported, setIsReported] = useState<{ id: string }>();
   const [clickCounter, setClickCounter] = useState<number>(0);
   const [closeVROverlay, setCloseVROverlay] = useState<boolean>(false);
   const [muteNotifications, setMuteNotifications] =
@@ -145,6 +146,8 @@ const CanvasComponent: React.FC<Props> = (props) => {
     }
 
     if (isWebXrSupported && isDesktop) {
+      if (myStream) myStream.getAudioTracks()[0].enabled = false;
+
       return (
         <>
           {!closeVROverlay ? (
@@ -174,7 +177,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
                 <Suspense fallback={null}>
                   <XRCanvas room={room} nodes={nodes} />
                 </Suspense>
-                {myStream && <SVGButton />}
+                {myStream && <SVGButton stream={myStream} room={room} />}
                 {renderNpcs()}
                 <BaseScene nodes={nodes} physics={physics} />
 
@@ -246,6 +249,42 @@ const CanvasComponent: React.FC<Props> = (props) => {
             </div>
           </Notifications>
         )}
+
+        {clickedPlayer && (
+          <Notifications>
+            <p className={styles.notificationMessage}>
+              {`Do you want to report player ${clickedPlayer.id}?`}
+            </p>
+            <div className={styles.buttonContainer}>
+              <button
+                className={styles.button}
+                onClick={() => setClickedPlayer(undefined)}
+              >
+                Cancel
+              </button>
+              <button
+                className={styles.button}
+                onClick={() => {
+                  // Report player with id {clickedPlayer.id}
+                  setClickedPlayer(undefined);
+                  setIsReported({ id: clickedPlayer.id });
+                }}
+              >
+                Report
+              </button>
+            </div>
+          </Notifications>
+        )}
+        {isReported && (
+          <Notifications
+            isSelfClosing={true}
+            onDelete={() => setIsReported(undefined)}
+          >
+            <p className={styles.notificationMessage}>
+              {`${isReported.id} has been reported. Thank you!`}
+            </p>
+          </Notifications>
+        )}
         <div className={styles.canvasFooterMenu}>
           <IconButton
             icon={!isUnMuted ? IconType.muted : IconType.unmuted}
@@ -315,7 +354,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
             <NonPlayableCharacters
               key={index}
               playerData={player}
-              onClick={() => setClickedPlayers((v) => [{ id: player.id }])}
+              onClick={() => setClickedPlayer({ id: player.id })}
               onPointerOver={() => {
                 if (containerRef?.current)
                   containerRef.current.style.cursor = 'pointer';

@@ -16,3 +16,4 @@ export const modalCloseIconContainer: string;
 export const contentContainer: string;
 export const contentDescription: string;
 export const buttonContainer: string;
+export const logOutAndDeleteButton: string;

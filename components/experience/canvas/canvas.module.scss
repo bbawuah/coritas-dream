@@ -40,7 +40,7 @@
       .iconContainer {
         width: 25px;
         height: 25px;
-        background-color: #000;
+        background-color: #334155;
         border-radius: 50%;
         display: flex;
         justify-content: center;
@@ -53,7 +53,7 @@
 
           svg {
             path {
-              fill: #fff;
+              fill: #e2e8f0;
             }
           }
         }
@@ -116,7 +116,7 @@
         stroke: none;
 
         path {
-          fill: #fff;
+          fill: #e2e8f0;
         }
       }
     }
@@ -156,7 +156,7 @@
     font-weight: 700;
     font-size: 1vmax;
     background-color: #212121;
-    color: #fff;
+    color: #e2e8f0;
     cursor: pointer;
     text-align: center;
   }
