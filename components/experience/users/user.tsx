@@ -5,6 +5,7 @@ import * as CANNON from 'cannon-es';
 import * as THREE from 'three';
 import { Text } from '@react-three/drei';
 import {
+  ActionNames,
   getState,
   IPlayerNetworkData,
   IPlayerType,
@@ -61,6 +62,7 @@ export const User: React.FC<Props> = (props) => {
     })
   );
   const userLookAt = useRef<THREE.Vector3>(new THREE.Vector3());
+  const previousAnimationState = useRef<ActionNames>();
 
   // const textRef = useRef<THREE.Mesh>();
   // const textPosition = useRef<THREE.Vector3>(new THREE.Vector3());
@@ -69,7 +71,7 @@ export const User: React.FC<Props> = (props) => {
   //   new CannonDebugRenderer(scene, physics.physicsWorld)
   // );
 
-  const [getDirection] = useKeyboardEvents({
+  const { getDirection, getAnimationState } = useKeyboardEvents({
     keyDownEvent,
     keyUpEvent,
   }); //Use keyboard events
@@ -119,18 +121,39 @@ export const User: React.FC<Props> = (props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [controlsRef]);
 
-  useEffect(() => {
-    if (userRef.current && userRef.current.actions) {
-      userRef.current.fadeToAction(animationName.animationName, 0.25);
-      room.send('animationState', animationName.animationName);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [animationName.animationName]);
+  // useEffect(() => {
+  //   if (userRef.current && userRef.current.actions) {
+  //     userRef.current.fadeToAction(animationName.animationName, 0.25);
+  //     room.send('animationState', animationName.animationName);
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [animationName.animationName]);
 
   useFrame((state, dt) => {
     frameTime.current += state.clock.getElapsedTime();
     if (userRef.current && controlsRef) {
       const userDirection = getDirection();
+      let actionName = getAnimationState();
+
+      // console.log(actionName);\
+
+      if (
+        movement.current.backward ||
+        movement.current.forward ||
+        movement.current.left ||
+        movement.current.right
+      ) {
+        actionName = 'walking';
+      }
+
+      if (previousAnimationState.current !== actionName) {
+        if (userRef.current && userRef.current.actions) {
+          userRef.current.fadeToAction(actionName, 0.25);
+          room.send('animationState', actionName);
+        }
+
+        previousAnimationState.current = actionName;
+      }
 
       if (userDirection !== 'idle') {
         handleSendPosition(userDirection);
