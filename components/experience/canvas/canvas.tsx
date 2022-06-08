@@ -373,16 +373,16 @@ const CanvasComponent: React.FC<Props> = (props) => {
   }
 
   function handleVoiceCall() {
-    const peer = new Peer(room.sessionId);
-
-    peer.on('open', (id) => {
-      room.send('join-call', { id });
-    });
-
     navigator.mediaDevices
       .getUserMedia({ video: false, audio: true })
       .then((stream) => {
         setMyStream(stream);
+
+        const peer = new Peer(room.sessionId);
+
+        peer.on('open', (id) => {
+          room.send('join-call', { id });
+        });
 
         peer.on('call', (call) => {
           call.answer(stream);
@@ -415,7 +415,6 @@ const CanvasComponent: React.FC<Props> = (props) => {
 
   function connectToNewUser(userId: string, stream: MediaStream, peer: Peer) {
     const call = peer.call(userId, stream);
-
     if (call) {
       call.on('stream', (audioStream) => {
         // Add stream to array of user
@@ -423,6 +422,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
       });
 
       call.on('close', () => {
+        console.log('close audio');
         //Remove video from user
         setUsersStreams((v) => {
           const filter = v.filter((v) => v.id !== userId);
