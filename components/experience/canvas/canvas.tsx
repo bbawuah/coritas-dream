@@ -237,9 +237,15 @@ const CanvasComponent: React.FC<Props> = (props) => {
               <button
                 className={styles.button}
                 onClick={() => {
-                  if (myStream) myStream.getAudioTracks()[0].enabled = true;
+                  if (clickCounter === 0) {
+                    handleVoiceCall();
+                  }
 
                   setIsUnMuted(true);
+                  if (myStream) myStream.getAudioTracks()[0].enabled = true;
+
+                  setClickCounter((v) => v + 1);
+
                   room.send('mute', { isUnMuted });
                   setUnmuteNotifications(undefined);
                 }}
