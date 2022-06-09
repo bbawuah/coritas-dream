@@ -55,7 +55,7 @@ export class Gallery extends Room<State> {
 
       if (player) {
         player.x = position.x;
-        player.y = position.y + 0.5;
+        player.y = position.y;
         player.z = position.z;
         player.rx = worldDirection.x;
         player.ry = worldDirection.y;
