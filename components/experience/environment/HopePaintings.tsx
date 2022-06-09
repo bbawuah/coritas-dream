@@ -152,13 +152,13 @@ Camus
                 set((state) => ({ ...state, focusImage: paintings[index] }))
               }
               onPointerOver={() => {
-                if (typeof window !== 'undefined') {
-                  document.body.style.cursor = 'pointer';
+                if (canvasContainerRef) {
+                  canvasContainerRef.style.cursor = 'pointer';
                 }
               }}
               onPointerLeave={() => {
-                if (typeof window !== 'undefined') {
-                  document.body.style.cursor = 'grab';
+                if (canvasContainerRef) {
+                  canvasContainerRef.style.cursor = '';
                 }
               }}
               key={index}
@@ -186,7 +186,7 @@ Camus
             }}
             onPointerLeave={() => {
               if (canvasContainerRef) {
-                canvasContainerRef.style.cursor = 'grab';
+                canvasContainerRef.style.cursor = '';
               }
             }}
           />

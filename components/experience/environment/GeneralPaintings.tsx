@@ -73,7 +73,7 @@ export const GeneralPaintings: React.FC<ComponentProps> = (props) => {
             }}
             onPointerLeave={() => {
               if (canvasContainerRef) {
-                canvasContainerRef.style.cursor = 'grab';
+                canvasContainerRef.style.cursor = '';
               }
             }}
           />

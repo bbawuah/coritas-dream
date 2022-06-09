@@ -10,6 +10,7 @@ import { VRCanvas } from '@react-three/xr';
 import { Perf } from 'r3f-perf';
 import { MediaConnection, Peer } from 'peerjs';
 import { getState, useStore } from '../../../store/store';
+import Image from 'next/image';
 import { useDeviceCheck } from '../../../hooks/useDeviceCheck';
 import { BlendFunction } from 'postprocessing';
 import {
@@ -173,6 +174,17 @@ const CanvasComponent: React.FC<Props> = (props) => {
             </div>
           ) : (
             <>
+              <div className={styles.vrInstructionsOverlay}>
+                <div className={styles.vrInstructionsImageContainer}>
+                  <Image
+                    alt="Controls"
+                    src="/controls/vr.png"
+                    width={700}
+                    height={539}
+                    layout="responsive"
+                  />
+                </div>
+              </div>
               <VRCanvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
                 <Suspense fallback={null}>
                   <XRCanvas room={room} nodes={nodes} />

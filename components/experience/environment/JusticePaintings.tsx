@@ -149,7 +149,7 @@ LIFE THE NEGRO AND THE CITIESThe Cry That Will Be Heard March 8, 1968 35 WHY NOT
               }}
               onPointerLeave={() => {
                 if (canvasContainerRef) {
-                  canvasContainerRef.style.cursor = 'grab';
+                  canvasContainerRef.style.cursor = '';
                 }
               }}
               material={new THREE.MeshBasicMaterial({ map: painting })}
@@ -174,7 +174,7 @@ LIFE THE NEGRO AND THE CITIESThe Cry That Will Be Heard March 8, 1968 35 WHY NOT
             }}
             onPointerLeave={() => {
               if (canvasContainerRef) {
-                canvasContainerRef.style.cursor = 'grab';
+                canvasContainerRef.style.cursor = '';
               }
             }}
             material={new THREE.MeshBasicMaterial({ map: painting })}

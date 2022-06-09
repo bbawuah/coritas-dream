@@ -18,21 +18,5 @@ export const BigScreen: React.FC<ComponentProps> = (props) => {
     map: texture,
   });
 
-  return (
-    <mesh
-      geometry={nodes.screen001.geometry}
-      material={material}
-      onPointerOver={() => {
-        if (canvasContainerRef) {
-          canvasContainerRef.style.cursor = 'pointer';
-        }
-      }}
-      onPointerLeave={() => {
-        if (canvasContainerRef) {
-          canvasContainerRef.style.cursor = 'grab';
-        }
-      }}
-      // onClick={handlePlayVideo}
-    />
-  );
+  return <mesh geometry={nodes.screen001.geometry} material={material} />;
 };

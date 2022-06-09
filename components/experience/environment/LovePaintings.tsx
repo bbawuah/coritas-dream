@@ -100,7 +100,7 @@ D. Berriganour personal life is as full of grief and private torment as a clown'
               }}
               onPointerLeave={() => {
                 if (canvasContainerRef) {
-                  canvasContainerRef.style.cursor = 'grab';
+                  canvasContainerRef.style.cursor = '';
                 }
               }}
               geometry={nodes['love-painting'].geometry}
@@ -122,7 +122,7 @@ D. Berriganour personal life is as full of grief and private torment as a clown'
             }}
             onPointerLeave={() => {
               if (canvasContainerRef) {
-                canvasContainerRef.style.cursor = 'grab';
+                canvasContainerRef.style.cursor = '';
               }
             }}
             geometry={

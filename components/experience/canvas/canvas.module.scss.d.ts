@@ -16,3 +16,5 @@ export const vrOverlayTitle: string;
 export const enableAudiobutton: string;
 export const textButton: string;
 export const notificationMessage: string;
+export const vrInstructionsOverlay: string;
+export const vrInstructionsImageContainer: string;
