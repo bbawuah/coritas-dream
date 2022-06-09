@@ -58,12 +58,12 @@ export const SVGButton: React.FC<Props> = (props) => {
       rightController?.controller.add(labelsRef.current);
       rightController?.controller.add(buttonBackgroundRef.current);
       labelsRef.current.position.y = 0.12;
-      labelsRef.current.position.x = 0.03;
-      labelsRef.current.position.z = -0.15;
+      labelsRef.current.position.x = -0.02;
+      labelsRef.current.position.z = -0.0;
 
       buttonBackgroundRef.current.position.y = 0.15;
-      buttonBackgroundRef.current.position.x = 0.02;
-      buttonBackgroundRef.current.position.z = -0.2;
+      buttonBackgroundRef.current.position.x = 0.0;
+      buttonBackgroundRef.current.position.z = -0.0;
 
       buttonBackgroundRef.current.visible = false;
     }
@@ -88,8 +88,8 @@ export const SVGButton: React.FC<Props> = (props) => {
 
         svgMesh.current.rotateZ(Math.PI);
         svgMesh.current.position.y = 0.2;
-        svgMesh.current.position.x = 0.05;
-        svgMesh.current.position.z = -0.15;
+        svgMesh.current.position.x = 0.0;
+        svgMesh.current.position.z = -0.0;
 
         svgMesh.current.scale.set(0.005, 0.005, 0.005);
 
