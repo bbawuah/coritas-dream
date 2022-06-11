@@ -138,7 +138,7 @@ export const SVGButton: React.FC<Props> = (props) => {
         letterSpacing={0.03}
         lineHeight={1}
       >
-        {isPressed ? 'Unmute' : 'Mute'}
+        {isPressed ? 'Mute' : 'Unmute'}
       </Text>
     </group>
   );

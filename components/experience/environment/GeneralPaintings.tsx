@@ -13,8 +13,8 @@ export const GeneralPaintings: React.FC<ComponentProps> = (props) => {
   const paintings = [
     {
       src: './general/79-03.jpg',
-      title: 'Title',
-      description: `text`,
+      title: 'Yes #3',
+      description: `love`,
       isVisibleInMuseum: false,
     },
     {
@@ -25,14 +25,33 @@ export const GeneralPaintings: React.FC<ComponentProps> = (props) => {
     },
     {
       src: './general/67-28.jpg',
-      title: 'Title',
-      description: `text `,
+      title: 'there is only one man in the world',
+      description: ` 
+      There is only one man in the world and his name is all men. There is only one woman in the world and her name is all women. There is only one child in the world and the child's name is all children.
+Carl Sandburg
+
+\nCorita.org. (z.d.-a). Corita.org. Geraadpleegd op 19 mei 2022, van https://www.corita.org/
+
+      `,
       isVisibleInMuseum: false,
     },
     {
       src: './general/69-64.jpg',
-      title: 'Title',
-      description: 'text',
+      title: 'News of the week',
+      description: `
+      Newsweek APRIL 12, 1965 35 CENTS
+Profile of the Viet Cong
+
+LIFE July 2, 1965 35 cents
+DEEPER INTO THE VIETNAM WAR
+A marine is evacuated during patrol action against the Vietcong
+\n
+I am the hounded slave, I wince at the bite of dogs, Hell and despair are upon me, crack again and crack the marksman, I clutch the rails of the fence, my gore dribs, thinned with the ooze of my skin. I fall on the weeds and stones, the riders spur their unwilling horses, haul close, taunt my dizzy ears and beat me violently over the head with whip-stocks.
+Agonies are one of my changes of garments, I do not ask the wounded person how he feels, I myself become the wounded person, my hurts turn livid upon me as I lean on a can and observe.
+Walt Whitman
+
+\nCorita.org. (z.d.-a). Corita.org. Geraadpleegd op 19 mei 2022, van https://www.corita.org/
+      `,
       isVisibleInMuseum: false,
     },
     {
@@ -43,8 +62,13 @@ export const GeneralPaintings: React.FC<ComponentProps> = (props) => {
     },
     {
       src: './general/69-72.jpg',
-      title: 'text',
-      description: `text`,
+      title: 'manflowers',
+      description: `
+      MAN
+POW-
+ER!
+where have all the flowers gone?
+      `,
       isVisibleInMuseum: false,
     },
   ];
