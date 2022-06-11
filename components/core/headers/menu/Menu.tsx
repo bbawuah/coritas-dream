@@ -44,18 +44,23 @@ export const Menu: React.FC<Props> = (props) => {
         onClickOutside={() => setClickedPlayer(undefined)}
       >
         <div className={styles.modalHeaderContainer}>
-          <div
+          <button
             className={styles.modalCloseIconContainer}
             onClick={() => setClickedPlayer(undefined)}
           >
             <Icon icon={IconType.close} />
-          </div>
+          </button>
           <h3>{renderModalTitle()}</h3>
         </div>
         <div className={styles.contentContainer}>
           <p className={styles.contentDescription}>{renderDescription()}</p>
           <div className={styles.buttonContainer}>
-            <button className={styles.button}>Cancel</button>
+            <button
+              className={styles.button}
+              onClick={() => setClickedPlayer(undefined)}
+            >
+              Cancel
+            </button>
             <button
               className={styles.button}
               onClick={() => handleMutePlayer()}

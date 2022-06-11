@@ -6,10 +6,12 @@
   z-index: 99;
   position: relative;
   color: #334155;
-  background-color: #e2e8f0;
+  background-color: #fff;
   border-radius: 10px;
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 50px 100px -20px,
+    rgba(0, 0, 0, 0.3) 0px 30px 60px -30px;
   transition: transform 0.3s ease-out;
 }
 

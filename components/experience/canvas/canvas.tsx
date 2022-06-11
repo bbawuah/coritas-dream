@@ -235,7 +235,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
           </Notifications>
         )}
         {unmuteNotifications && (
-          <Notifications>
+          <Notifications isSelfClosing={true}>
             <p className={styles.notificationMessage}>
               {unmuteNotifications.message}
             </p>
