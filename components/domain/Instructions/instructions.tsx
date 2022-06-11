@@ -46,8 +46,8 @@ export const Instructions: React.FC<Props> = (props) => {
           </div>
           <div className={styles.instructionsRow}>
             <div className={styles.item}>
-              <h4 className={styles.itemTitle}>Voice call</h4>
-              <p>Click on a player to start a voice call.</p>
+              <h4 className={styles.itemTitle}>Report a player</h4>
+              <p>Click on a player to report a player.</p>
               <img src={'./controls/player.png'} alt={'keys'}></img>
             </div>
             <div className={styles.item}>
