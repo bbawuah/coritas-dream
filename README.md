@@ -14,4 +14,4 @@ npm run dev
 yarn dev
 ```
 
-You can find the documentation of this project [here](https://lab-bawuah.notion.site/Productbiografie-897c8f690bc64b74a1058aadfb25f8e8)
+You can find the documentation of this project [here](https://acrobat.adobe.com/link/review?uri=urn:aaid:scds:US:34b8d297-f9fa-33ab-9166-6ef9c8ea674d)
