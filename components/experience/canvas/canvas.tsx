@@ -1,5 +1,5 @@
 /* eslint-disable @next/next/no-img-element */
-import React, { Suspense, useEffect, useRef, useState } from 'react';
+import React, { Suspense, useEffect, useRef, useState, useCallback } from 'react';
 import * as styles from './canvas.module.scss';
 import classNames from 'classnames';
 import { Canvas } from '@react-three/fiber';
@@ -7,7 +7,6 @@ import { User } from '../users/user';
 import { Physics } from '../../../shared/physics/physics';
 import { useGLTF } from '@react-three/drei';
 import { VRCanvas } from '@react-three/xr';
-import { Perf } from 'r3f-perf';
 import { MediaConnection, Peer } from 'peerjs';
 import { getState, useStore } from '../../../store/store';
 import Image from 'next/image';
@@ -22,12 +21,11 @@ import {
 import { GLTFResult } from '../environment/types/types';
 import { SettingsMenu } from '../../core/headers/settingsMenu/settingsMenu';
 import { OnboardingManager } from '../../domain/onboardingManager/onBoardingManager';
-import { client } from '../../../utils/supabase';
-import { useRealtime } from 'react-supabase';
 import { NonPlayableCharacters } from '../users/NonPlayableCharacters/NonPlayableCharacters';
 import { IconType } from '../../../utils/icons/types';
 import { XRCanvas } from './xrCanvas';
 import { Room } from 'colyseus.js';
+import { Player } from '../../../server/player/player';
 import { IconButton } from '../../core/IconButton/IconButton';
 import { Instructions } from '../../domain/Instructions/instructions';
 import { FocusImage } from '../../domain/focusImage/focusImage';
@@ -40,21 +38,15 @@ interface Props {
   isWebXrSupported: boolean;
 }
 
-interface ProfileData {
-  avatar: string;
-  updated_at: string;
-  id: string;
-  username: string | null;
-}
-
-const Audio: React.FC<{
-  stream: MediaStream;
-}> = (props) => {
-  const { stream } = props;
+const Audio: React.FC<{ stream: MediaStream; odId: string }> = ({ stream, odId }) => {
   const ref = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
     if (ref.current) ref.current.srcObject = stream;
+
+    return () => {
+      if (ref.current) ref.current.srcObject = null;
+    };
   }, [stream]);
 
   return <audio className={styles.audio} playsInline ref={ref} autoPlay />;
@@ -62,89 +54,224 @@ const Audio: React.FC<{
 
 const CanvasComponent: React.FC<Props> = (props) => {
   const { isWebXrSupported, room } = props;
-  const { nodes } = useGLTF(
-    '/environment-transformed.glb'
-  ) as unknown as GLTFResult;
+  const { nodes } = useGLTF('/environment-transformed.glb') as unknown as GLTFResult;
   const { isDesktop } = useDeviceCheck();
   const [physics, setPhysics] = useState<Physics | null>(null);
-  const [_, reexecute] = useRealtime('profiles');
   const [userAvatar, setUserAvatar] = useState<string>();
   const containerRef = useRef<HTMLDivElement>(null);
   const classes = classNames([styles.container]);
-  const [shouldRenderInstructions, setShouldRenderInstructions] =
-    useState<boolean>(false);
-  const { playerIds, set } = useStore(({ playerIds, set }) => ({
-    playerIds,
+  const [shouldRenderInstructions, setShouldRenderInstructions] = useState<boolean>(false);
+  const { playerIds, set } = useStore(({ playerIds, set }) => ({ playerIds, set }));
 
-    set,
-  }));
+  // WebRTC state
   const [myStream, setMyStream] = useState<MediaStream>();
-  const [usersStreams, setUsersStreams] = useState<
-    { id: string; stream: MediaStream }[]
-  >([]);
+  const [usersStreams, setUsersStreams] = useState<{ id: string; stream: MediaStream }[]>([]);
   const [isUnMuted, setIsUnMuted] = useState<boolean>(false);
   const peers = useRef<{ [id: string]: MediaConnection }>({});
+  const peerInstance = useRef<Peer | null>(null);
+  const [voiceCallInitialized, setVoiceCallInitialized] = useState(false);
+
+  // UI state
   const [clickedPlayer, setClickedPlayer] = useState<{ id: string }>();
   const [isReported, setIsReported] = useState<{ id: string }>();
-  const [clickCounter, setClickCounter] = useState<number>(0);
   const [closeVROverlay, setCloseVROverlay] = useState<boolean>(false);
-  const [muteNotifications, setMuteNotifications] =
-    useState<{ id: string; message: string }>();
-  const [unmuteNotifications, setUnmuteNotifications] =
-    useState<{ id: string; message: string }>();
+  const [muteNotifications, setMuteNotifications] = useState<{ id: string; message: string }>();
+  const [unmuteNotifications, setUnmuteNotifications] = useState<{ id: string; message: string }>();
 
+  // Cleanup function for WebRTC
+  const cleanupWebRTC = useCallback(() => {
+    // Stop all media tracks
+    if (myStream) {
+      myStream.getTracks().forEach(track => track.stop());
+    }
+
+    // Close all peer connections
+    Object.values(peers.current).forEach(conn => conn.close());
+    peers.current = {};
+
+    // Destroy peer instance
+    if (peerInstance.current) {
+      peerInstance.current.destroy();
+      peerInstance.current = null;
+    }
+
+    setUsersStreams([]);
+  }, [myStream]);
+
+  // Initialize physics and get user avatar
   useEffect(() => {
-    room.onMessage('mute player', (data) => {
-      const { id } = data;
-      setIsUnMuted(false);
-
-      if (myStream) myStream.getAudioTracks()[0].enabled = false;
-      room.send('mute', { isUnMuted: true });
-      setMuteNotifications({ id, message: `${id} has muted you.` });
-      console.log(`${id} muted you`);
-    });
-
-    room.onMessage('unmute player', (data) => {
-      const { id } = data;
-
-      setUnmuteNotifications({ id, message: `${id} wants you to unmute.` });
-      console.log(`${id} wants you to unmute.`);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [room, myStream]);
-
-  useEffect(() => {
-    getUserModel();
     setPhysics(new Physics());
+    getUserModel();
 
     if (containerRef.current) {
       set((state) => ({ ...state, canvasContainerRef: containerRef.current }));
     }
 
-    room.onMessage('user-disconnected', (data: { id: string }) => {
-      const { id } = data;
-      if (peers.current[id]) {
-        peers.current[id].close();
-        setUsersStreams((v) => {
-          const filter = v.filter((v) => v.id !== id);
-
-          return filter;
-        });
-      }
-    });
+    // Cleanup on unmount
+    return () => {
+      cleanupWebRTC();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return (
-    <div ref={containerRef} className={classes}>
-      {renderCanvas()}
-    </div>
-  );
+  // Handle mute/unmute messages
+  useEffect(() => {
+    const handleMutePlayer = (data: { id: string }) => {
+      const { id } = data;
+      setIsUnMuted(false);
+      if (myStream) myStream.getAudioTracks()[0].enabled = false;
+      room.send('mute', { isUnMuted: false });
+      setMuteNotifications({ id, message: `${id} has muted you.` });
+    };
+
+    const handleUnmutePlayer = (data: { id: string }) => {
+      const { id } = data;
+      setUnmuteNotifications({ id, message: `${id} wants you to unmute.` });
+    };
+
+    const handleUserDisconnected = (data: { id: string }) => {
+      const { id } = data;
+      if (peers.current[id]) {
+        peers.current[id].close();
+        delete peers.current[id];
+        setUsersStreams((v) => v.filter((s) => s.id !== id));
+      }
+    };
+
+    room.onMessage('mute player', handleMutePlayer);
+    room.onMessage('unmute player', handleUnmutePlayer);
+    room.onMessage('user-disconnected', handleUserDisconnected);
+
+    // Note: Colyseus doesn't have offMessage, handlers are cleaned when room is left
+  }, [room, myStream]);
+
+  function getUserModel() {
+    const player = room.state.players.get(room.sessionId);
+    if (player && player.avatar) {
+      setUserAvatar(player.avatar);
+    } else {
+      room.state.players.onAdd = (player: Player, key: string) => {
+        if (key === room.sessionId && player.avatar) {
+          setUserAvatar(player.avatar);
+        }
+      };
+    }
+  }
+
+  function handleVoiceCall() {
+    if (voiceCallInitialized) return;
+
+    navigator.mediaDevices
+      .getUserMedia({ video: false, audio: true })
+      .then((stream) => {
+        setMyStream(stream);
+        setVoiceCallInitialized(true);
+
+        const peer = new Peer(room.sessionId);
+        peerInstance.current = peer;
+
+        peer.on('open', (id) => {
+          room.send('join-call', { id });
+        });
+
+        peer.on('call', (call) => {
+          call.answer(stream);
+
+          call.on('stream', (remoteStream) => {
+            setUsersStreams((v) => {
+              // Prevent duplicates
+              if (v.some(s => s.id === call.peer)) return v;
+              return [...v, { id: call.peer, stream: remoteStream }];
+            });
+          });
+
+          peers.current[call.peer] = call;
+        });
+
+        peer.on('error', (err) => {
+          console.error('PeerJS error:', err);
+        });
+
+        room.onMessage('user-connected', (data: { id: string }) => {
+          const { id } = data;
+          connectToNewUser(id, stream, peer);
+        });
+      })
+      .catch((err) => {
+        console.error('Failed to get user media:', err);
+        alert('Could not access microphone. Please check permissions.');
+      });
+  }
+
+  function connectToNewUser(userId: string, stream: MediaStream, peer: Peer) {
+    // Don't call ourselves
+    if (userId === room.sessionId) return;
+
+    // Don't duplicate calls
+    if (peers.current[userId]) return;
+
+    const call = peer.call(userId, stream);
+    if (call) {
+      call.on('stream', (audioStream) => {
+        setUsersStreams((v) => {
+          if (v.some(s => s.id === userId)) return v;
+          return [...v, { id: userId, stream: audioStream }];
+        });
+      });
+
+      call.on('close', () => {
+        setUsersStreams((v) => v.filter((s) => s.id !== userId));
+        delete peers.current[userId];
+      });
+
+      peers.current[userId] = call;
+    }
+  }
+
+  function muteMic() {
+    if (myStream) {
+      myStream.getAudioTracks()[0].enabled = !isUnMuted;
+    }
+    room.send('mute', { isUnMuted: !isUnMuted });
+  }
+
+  function renderUser() {
+    if (userAvatar && physics) {
+      return <User room={room} physics={physics} glbUrl={userAvatar} />;
+    }
+    return null;
+  }
+
+  function renderNpcs() {
+    const players = getState().players;
+
+    if (!players) return null;
+
+    return playerIds
+      .filter((id) => id !== room.sessionId)
+      .map((playerId) => {
+        const player = players[playerId];
+        if (!player) return null;
+
+        return (
+          <NonPlayableCharacters
+            key={playerId}
+            playerData={player}
+            onClick={() => setClickedPlayer({ id: player.id })}
+            onPointerOver={() => {
+              if (containerRef?.current) containerRef.current.style.cursor = 'pointer';
+            }}
+            onPointerLeave={() => {
+              if (containerRef?.current) containerRef.current.style.cursor = 'grab';
+            }}
+            room={room}
+          />
+        );
+      });
+  }
 
   function renderCanvas() {
-    if (!physics) {
-      return null;
-    }
+    if (!physics) return null;
 
     if (isWebXrSupported && isDesktop) {
       if (myStream) myStream.getAudioTracks()[0].enabled = false;
@@ -153,7 +280,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
         <>
           {!closeVROverlay ? (
             <div className={styles.vrOverlay}>
-              <p className={styles.vrOverlayTitle}>Enable mic to continue </p>
+              <p className={styles.vrOverlayTitle}>Enable mic to continue</p>
               <button
                 className={styles.enableAudiobutton}
                 onClick={() => {
@@ -165,9 +292,7 @@ const CanvasComponent: React.FC<Props> = (props) => {
               </button>
               <button
                 className={styles.textButton}
-                onClick={() => {
-                  setCloseVROverlay(true);
-                }}
+                onClick={() => setCloseVROverlay(true)}
               >
                 Continue without mic
               </button>
@@ -192,12 +317,10 @@ const CanvasComponent: React.FC<Props> = (props) => {
                 {myStream && <SVGButton stream={myStream} room={room} />}
                 {renderNpcs()}
                 <BaseScene nodes={nodes} physics={physics} />
-
-                {/* <Perf /> */}
               </VRCanvas>
-              {usersStreams.map((stream, index) => {
-                return <Audio stream={stream.stream} key={index} />;
-              })}
+              {usersStreams.map((s) => (
+                <Audio stream={s.stream} odId={s.id} key={s.id} />
+              ))}
             </>
           )}
         </>
@@ -212,53 +335,34 @@ const CanvasComponent: React.FC<Props> = (props) => {
         <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }} shadows>
           {renderUser()}
           {renderNpcs()}
-
           <BaseScene nodes={nodes} physics={physics} />
           <EffectComposer>
-            <Noise
-              opacity={0.2}
-              premultiply
-              blendFunction={BlendFunction.ADD}
-            />
+            <Noise opacity={0.2} premultiply blendFunction={BlendFunction.ADD} />
             <BrightnessContrast brightness={-0.09} contrast={0.3} />
             <Bloom />
           </EffectComposer>
         </Canvas>
+
         {muteNotifications && (
-          <Notifications
-            isSelfClosing={true}
-            onDelete={() => setMuteNotifications(undefined)}
-          >
-            <p className={styles.notificationMessage}>
-              {muteNotifications.message}
-            </p>
+          <Notifications isSelfClosing={true} onDelete={() => setMuteNotifications(undefined)}>
+            <p className={styles.notificationMessage}>{muteNotifications.message}</p>
           </Notifications>
         )}
+
         {unmuteNotifications && (
           <Notifications isSelfClosing={true}>
-            <p className={styles.notificationMessage}>
-              {unmuteNotifications.message}
-            </p>
+            <p className={styles.notificationMessage}>{unmuteNotifications.message}</p>
             <div className={styles.buttonContainer}>
-              <button
-                className={styles.button}
-                onClick={() => setUnmuteNotifications(undefined)}
-              >
+              <button className={styles.button} onClick={() => setUnmuteNotifications(undefined)}>
                 Cancel
               </button>
               <button
                 className={styles.button}
                 onClick={() => {
-                  if (clickCounter === 0) {
-                    handleVoiceCall();
-                  }
-
+                  if (!voiceCallInitialized) handleVoiceCall();
                   setIsUnMuted(true);
                   if (myStream) myStream.getAudioTracks()[0].enabled = true;
-
-                  setClickCounter((v) => v + 1);
-
-                  room.send('mute', { isUnMuted });
+                  room.send('mute', { isUnMuted: true });
                   setUnmuteNotifications(undefined);
                 }}
               >
@@ -274,16 +378,12 @@ const CanvasComponent: React.FC<Props> = (props) => {
               {`Do you want to report player ${clickedPlayer.id}?`}
             </p>
             <div className={styles.buttonContainer}>
-              <button
-                className={styles.button}
-                onClick={() => setClickedPlayer(undefined)}
-              >
+              <button className={styles.button} onClick={() => setClickedPlayer(undefined)}>
                 Cancel
               </button>
               <button
                 className={styles.button}
                 onClick={() => {
-                  // Report player with id {clickedPlayer.id}
                   setClickedPlayer(undefined);
                   setIsReported({ id: clickedPlayer.id });
                 }}
@@ -293,29 +393,22 @@ const CanvasComponent: React.FC<Props> = (props) => {
             </div>
           </Notifications>
         )}
+
         {isReported && (
-          <Notifications
-            isSelfClosing={true}
-            onDelete={() => setIsReported(undefined)}
-          >
+          <Notifications isSelfClosing={true} onDelete={() => setIsReported(undefined)}>
             <p className={styles.notificationMessage}>
               {`${isReported.id} has been reported. Thank you!`}
             </p>
           </Notifications>
         )}
+
         <div className={styles.canvasFooterMenu}>
           <IconButton
             icon={!isUnMuted ? IconType.muted : IconType.unmuted}
             onClick={() => {
-              if (clickCounter === 0) {
-                handleVoiceCall();
-              }
-
+              if (!voiceCallInitialized) handleVoiceCall();
               setIsUnMuted(!isUnMuted);
-
               muteMic();
-
-              setClickCounter((v) => v + 1);
             }}
           />
           <IconButton
@@ -323,10 +416,9 @@ const CanvasComponent: React.FC<Props> = (props) => {
             className={styles.instructionsIconContainer}
             onClick={() => setShouldRenderInstructions(true)}
           />
-
-          {usersStreams.map((stream, index) => {
-            return <Audio stream={stream.stream} key={index} />;
-          })}
+          {usersStreams.map((s) => (
+            <Audio stream={s.stream} odId={s.id} key={s.id} />
+          ))}
         </div>
 
         <Instructions
@@ -337,125 +429,11 @@ const CanvasComponent: React.FC<Props> = (props) => {
     );
   }
 
-  function renderUser() {
-    if (userAvatar && physics) {
-      return <User room={room} physics={physics} glbUrl={userAvatar} />;
-    }
-  }
-
-  async function getUserModel() {
-    const user = client.auth.user();
-    const data = await reexecute();
-
-    if (data && data.data && user) {
-      const profile = data.data.filter(
-        (data: ProfileData) => data.id === user.id
-      );
-
-      if (profile?.length) {
-        const { avatar } = profile[0];
-        setUserAvatar(avatar as string);
-      }
-    }
-  }
-
-  function renderNpcs() {
-    const players = getState().players;
-
-    if (players) {
-      const jsx = playerIds
-        .filter((data) => data !== room.sessionId)
-        .map((playerId, index) => {
-          const player = players[playerId];
-
-          return (
-            <NonPlayableCharacters
-              key={index}
-              playerData={player}
-              onClick={() => setClickedPlayer({ id: player.id })}
-              onPointerOver={() => {
-                if (containerRef?.current)
-                  containerRef.current.style.cursor = 'pointer';
-              }}
-              onPointerLeave={() => {
-                if (containerRef?.current)
-                  containerRef.current.style.cursor = 'grab';
-              }}
-              room={room}
-            />
-          );
-        });
-
-      return jsx;
-    }
-  }
-
-  function handleVoiceCall() {
-    navigator.mediaDevices
-      .getUserMedia({ video: false, audio: true })
-      .then((stream) => {
-        setMyStream(stream);
-
-        const peer = new Peer(room.sessionId);
-
-        peer.on('open', (id) => {
-          room.send('join-call', { id });
-        });
-
-        peer.on('call', (call) => {
-          call.answer(stream);
-
-          call.on('stream', (stream) => {
-            setUsersStreams((v) => [...v, { id: call.peer, stream }]);
-          });
-
-          if (peers.current[call.peer]) {
-            peers.current[call.peer] = call;
-          } else {
-            peers.current = { ...peers.current, [call.peer]: call };
-          }
-        });
-
-        room.onMessage('user-connected', (data) => {
-          const { id } = data;
-
-          connectToNewUser(id, stream, peer);
-        });
-      });
-  }
-
-  function muteMic() {
-    // console.log(usersStreams);
-    if (myStream) myStream.getAudioTracks()[0].enabled = !isUnMuted;
-
-    room.send('mute', { isUnMuted });
-  }
-
-  function connectToNewUser(userId: string, stream: MediaStream, peer: Peer) {
-    const call = peer.call(userId, stream);
-    if (call) {
-      call.on('stream', (audioStream) => {
-        // Add stream to array of user
-        setUsersStreams((v) => [...v, { id: userId, stream: audioStream }]);
-      });
-
-      call.on('close', () => {
-        console.log('close audio');
-        //Remove video from user
-        setUsersStreams((v) => {
-          const filter = v.filter((v) => v.id !== userId);
-
-          return filter;
-        });
-      });
-
-      if (peers.current[userId]) {
-        peers.current[userId] = call;
-      } else {
-        peers.current = { ...peers.current, [userId]: call };
-      }
-    }
-  }
+  return (
+    <div ref={containerRef} className={classes}>
+      {renderCanvas()}
+    </div>
+  );
 };
 
 export default CanvasComponent;

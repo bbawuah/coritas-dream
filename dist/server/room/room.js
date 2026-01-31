@@ -40,7 +40,7 @@ class Gallery extends colyseus_1.Room {
             const { position, worldDirection, animationState } = data;
             if (player) {
                 player.x = position.x;
-                player.y = position.y + 0.5;
+                player.y = position.y;
                 player.z = position.z;
                 player.rx = worldDirection.x;
                 player.ry = worldDirection.y;
@@ -79,12 +79,11 @@ class Gallery extends colyseus_1.Room {
         });
     }
     // Called every time a client joins
-    onJoin(client, options) {
-        const { id } = options;
+    onJoin(client) {
         console.log('user joined');
-        this.state.players.set(client.sessionId, new player_1.Player(client.sessionId, id, this.physics)); //Store instance of user in state
+        this.state.players.set(client.sessionId, new player_1.Player(client.sessionId, this.physics)); //Store instance of user in state
         this.clients.push(client);
-        const players = this.state.players; // get player from store
+        const players = this.state.players; // get players from state
         if (players) {
             this.broadcast('spawnPlayer', { players }); //Optimize this to only sending the new player
         }
@@ -108,6 +107,33 @@ class Gallery extends colyseus_1.Room {
             if (receiver) {
                 receiver.send('receiving returned signal', {
                     signal: payload.signal,
+                    id: client.sessionId,
+                });
+            }
+        });
+        this.onMessage('mute', (client, data) => {
+            const { isUnMuted } = data;
+            const player = this.state.players.get(client.sessionId);
+            if (player) {
+                player.isUnMuted = isUnMuted;
+            }
+            const players = this.state.players;
+            this.broadcast('mute state', { players });
+        });
+        this.onMessage('unmute request', (client, data) => {
+            const { userToUnmute } = data;
+            const receiver = this.clients.find((v) => v.sessionId === userToUnmute);
+            if (receiver) {
+                receiver.send('unmute player', {
+                    id: client.sessionId,
+                });
+            }
+        });
+        this.onMessage('mute request', (client, data) => {
+            const { userToMute } = data;
+            const receiver = this.clients.find((v) => v.sessionId === userToMute);
+            if (receiver) {
+                receiver.send('mute player', {
                     id: client.sessionId,
                 });
             }

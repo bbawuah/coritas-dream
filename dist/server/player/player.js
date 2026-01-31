@@ -28,8 +28,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.Player = void 0;
 const schema_1 = require("@colyseus/schema");
 const THREE = __importStar(require("three"));
+const avatars_1 = require("../../shared/avatars");
 class Player extends schema_1.Schema {
-    constructor(id, uuid, physics) {
+    constructor(id, physics) {
         super();
         this.x = 0;
         this.y = 0;
@@ -39,7 +40,9 @@ class Player extends schema_1.Schema {
         this.rz = 0;
         this.id = '';
         this.uuid = '';
+        this.avatar = '';
         this.animationState = 'idle';
+        this.isUnMuted = true;
         this.playerSpeed = 10;
         this.direction = new THREE.Vector3();
         this.frontVector = new THREE.Vector3();
@@ -57,8 +60,9 @@ class Player extends schema_1.Schema {
         this.y = 0.5;
         this.z = Math.floor(Math.random() * 6) + 1;
         this.id = id;
-        this.uuid = uuid;
-        this.physicalBody = physics.createPlayerPhysics(this); // Create phyisical represenatation of player
+        this.uuid = id; // Use session ID as UUID (no auth needed)
+        this.avatar = (0, avatars_1.getRandomAvatar)();
+        this.physicalBody = physics.createPlayerPhysics(this);
         physics.physicsWorld.addBody(this.physicalBody);
     }
     handleUserDirection(angle) {
@@ -113,5 +117,11 @@ __decorate([
 ], Player.prototype, "uuid", void 0);
 __decorate([
     (0, schema_1.type)('string')
+], Player.prototype, "avatar", void 0);
+__decorate([
+    (0, schema_1.type)('string')
 ], Player.prototype, "animationState", void 0);
+__decorate([
+    (0, schema_1.type)('boolean')
+], Player.prototype, "isUnMuted", void 0);
 exports.Player = Player;

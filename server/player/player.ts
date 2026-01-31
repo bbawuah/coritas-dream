@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { Physics } from '../../shared/physics/physics';
 import { ActionNames } from '../../store/store';
 import { IDirection } from './types';
+import { getRandomAvatar } from '../../shared/avatars';
 
 export class Player extends Schema {
   @type('number') x: number = 0;
@@ -14,6 +15,7 @@ export class Player extends Schema {
   @type('number') rz: number = 0;
   @type('string') id: string = '';
   @type('string') uuid: string = '';
+  @type('string') avatar: string = '';
   @type('string') animationState: ActionNames = 'idle';
   @type('boolean') isUnMuted: boolean = true;
 
@@ -34,15 +36,16 @@ export class Player extends Schema {
     idle: false,
   };
 
-  constructor(id: string, uuid: string, physics: Physics) {
+  constructor(id: string, physics: Physics) {
     super();
     this.x = Math.floor(Math.random() * 6) + 1;
     this.y = 0.5;
     this.z = Math.floor(Math.random() * 6) + 1;
     this.id = id;
-    this.uuid = uuid;
+    this.uuid = id; // Use session ID as UUID (no auth needed)
+    this.avatar = getRandomAvatar();
 
-    this.physicalBody = physics.createPlayerPhysics<Player>(this); // Create phyisical represenatation of player
+    this.physicalBody = physics.createPlayerPhysics<Player>(this);
 
     physics.physicsWorld.addBody(this.physicalBody);
   }

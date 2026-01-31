@@ -87,6 +87,7 @@ export const User: React.FC<Props> = (props) => {
           id: players[room.sessionId].id,
           timestamp: players[room.sessionId].timestamp,
           animationState: players[room.sessionId].animationState,
+          avatar: players[room.sessionId].avatar,
           uuid: players[room.sessionId].uuid,
           x: players[room.sessionId].x,
           y: players[room.sessionId].y,

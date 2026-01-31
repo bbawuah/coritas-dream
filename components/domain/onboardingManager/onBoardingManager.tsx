@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect, useRef, useState } from 'react';
+import React, { CSSProperties, useEffect, useState } from 'react';
 import { IconType } from '../../../utils/icons/types';
 import { Onboarding } from '../onboarding/Onboarding';
 import {
@@ -6,10 +6,8 @@ import {
   animated,
   AnimatedProps,
   useSpringRef,
-  config,
 } from '@react-spring/web';
 import styles from './onBoarding.module.scss';
-import { useSelect } from 'react-supabase';
 
 interface Props {}
 

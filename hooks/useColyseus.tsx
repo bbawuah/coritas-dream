@@ -1,9 +1,8 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Client, Room } from 'colyseus.js';
 import { getState, useStore } from '../store/store';
 import { OnMoveProps } from '../components/experience/users/types';
 import { State } from '../server/state/state';
-import { useAuth } from './useAuth';
 
 const dev: boolean = process.env.NODE_ENV !== 'production';
 const developmentPort: string = dev ? '8080' : '3000';
@@ -14,102 +13,114 @@ const endpoint = dev ? `ws://localhost:${port}` : undefined;
 export const useColyseus = () => {
   const { set } = useStore(({ set }) => ({ set }));
   const [client, setClient] = useState<Client>();
-  const [room, setRoom] = useState<Room>();
-  const { user } = useAuth();
+  const [room, setRoom] = useState<Room<State>>();
+  const roomRef = useRef<Room<State>>();
 
+  // Create client on mount
   useEffect(() => {
-    setClient(new Client(endpoint));
+    const newClient = new Client(endpoint);
+    setClient(newClient);
   }, []);
 
+  // Join room when client is ready
   useEffect(() => {
-    if (client) {
-      getRoom();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [client, user]);
+    if (!client) return;
 
-  return { client, room };
+    let mounted = true;
 
-  async function getRoom() {
-    if (client && user) {
+    const joinRoom = async () => {
       try {
-        const room = (await client.joinOrCreate('gallery', {
-          id: user.id,
-        })) as Room<State>;
+        const newRoom = (await client.joinOrCreate('gallery')) as Room<State>;
 
-        setRoom(room);
-        onAnimation(room);
-        onSpawnPlayer(room);
-        onRemovePlayer(room);
-        onMutePlayer(room);
-        onMove(room);
+        if (!mounted) {
+          // Component unmounted before room joined
+          newRoom.leave();
+          return;
+        }
+
+        roomRef.current = newRoom;
+        setRoom(newRoom);
+
+        // Register message handlers
+        setupMessageHandlers(newRoom);
       } catch (e) {
-        console.log(e);
+        console.error('Failed to join room:', e);
       }
-    }
-  }
+    };
 
-  function onSpawnPlayer(room: Room) {
+    joinRoom();
+
+    // Cleanup on unmount
+    return () => {
+      mounted = false;
+      if (roomRef.current) {
+        roomRef.current.leave();
+        roomRef.current = undefined;
+      }
+    };
+  }, [client, set]);
+
+  const setupMessageHandlers = useCallback((room: Room<State>) => {
     room.onMessage('spawnPlayer', (data) => {
       const { players } = data;
-
-      set((state) => ({
-        ...state,
-        players,
-        playerIds: Object.keys(players),
-        playersCount: Object.keys(players).length,
-      }));
+      if (players) {
+        set((state) => ({
+          ...state,
+          players,
+          playerIds: Object.keys(players),
+          playersCount: Object.keys(players).length,
+        }));
+      }
     });
-  }
 
-  function onMove(room: Room) {
     room.onMessage('move', (data: OnMoveProps) => {
       const { player } = data;
-      const players = getState().players;
+      if (!player) return;
 
-      const obj = { ...players, [player.id]: player };
+      const players = getState().players;
+      const updatedPlayers = { ...players, [player.id]: player };
 
       set((state) => ({
         ...state,
-        players: obj,
+        players: updatedPlayers,
       }));
     });
-  }
 
-  function onAnimation(room: Room<State>) {
     room.onMessage('animationState', (data: OnMoveProps) => {
       const { player } = data;
-      const players = getState().players;
+      if (!player) return;
 
-      const obj = { ...players, [player.id]: player };
+      const players = getState().players;
+      const updatedPlayers = { ...players, [player.id]: player };
 
       set((state) => ({
         ...state,
-        players: obj,
+        players: updatedPlayers,
       }));
     });
-  }
 
-  function onRemovePlayer(room: Room) {
     room.onMessage('removePlayer', (data) => {
       const { players } = data;
-
-      set((state) => ({
-        ...state,
-        players,
-        playersCount: Object.keys(players).length,
-      }));
+      if (players) {
+        set((state) => ({
+          ...state,
+          players,
+          playerIds: Object.keys(players),
+          playersCount: Object.keys(players).length,
+        }));
+      }
     });
-  }
 
-  function onMutePlayer(room: Room) {
     room.onMessage('mute state', (data) => {
       const { players } = data;
-
-      set((state) => ({
-        ...state,
-        players,
-      }));
+      if (players) {
+        set((state) => ({
+          ...state,
+          players,
+        }));
+      }
     });
-  }
+  }, [set]);
+
+  return { client, room };
 };

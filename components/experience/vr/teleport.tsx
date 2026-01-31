@@ -56,25 +56,57 @@ export const XRTeleport: React.FC<Props> = (props) => {
   navMesh.current.position.set(0, 0, 0);
   navMesh.current.visible = false;
 
-  scene.add(navMesh.current);
-
   useXREvent('selectstart', onSelectStart, { handedness: 'right' }); //Handedness Should come from option menu
   useXREvent('selectend', onSelectEnd, { handedness: 'right' }); //Handedness Should come from option menu
 
+  // Add navMesh to scene and clean up on unmount
   useEffect(() => {
-    // Probeer iets met de gamepad
-    // const gamepad = rightController?.inputSource.gamepad;
+    const currentNavMesh = navMesh.current;
+    const currentLine = lineRef.current;
+    const currentHighlight = highLightMesh.current;
 
-    if (players) {
+    scene.add(currentNavMesh);
+
+    return () => {
+      // Remove navMesh from scene
+      scene.remove(currentNavMesh);
+      if (currentNavMesh.geometry) currentNavMesh.geometry.dispose();
+      if (currentNavMesh.material) {
+        (currentNavMesh.material as THREE.Material).dispose();
+      }
+
+      // Clean up NavigationLine
+      if (currentLine.guideline) {
+        scene.remove(currentLine.guideline);
+        if (currentLine.guideline.geometry) currentLine.guideline.geometry.dispose();
+        if (currentLine.guideline.material) {
+          (currentLine.guideline.material as THREE.Material).dispose();
+        }
+      }
+
+      // Clean up HighlightMesh
+      if (currentHighlight.mesh) {
+        scene.remove(currentHighlight.mesh);
+        if (currentHighlight.mesh.geometry) currentHighlight.mesh.geometry.dispose();
+        if (currentHighlight.mesh.material) {
+          (currentHighlight.mesh.material as THREE.Material).dispose();
+        }
+      }
+    };
+  }, [scene]);
+
+  // Set player starting position
+  useEffect(() => {
+    const playerData = players?.[room.sessionId];
+    if (playerData) {
       const startingPosition = new THREE.Vector3(
-        players[room.sessionId].x,
+        playerData.x,
         player.position.y + 0.5,
-        players[room.sessionId].z
+        playerData.z
       );
 
       player.position.add(startingPosition);
     }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

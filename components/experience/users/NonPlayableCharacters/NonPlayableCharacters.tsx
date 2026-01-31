@@ -10,7 +10,6 @@ import {
 } from '../../../../store/store';
 import { UserModel } from '../userModel';
 import * as THREE from 'three';
-import { client } from '../../../../utils/supabase';
 import { Text } from '@react-three/drei';
 import { Room } from 'colyseus.js';
 
@@ -20,13 +19,6 @@ interface Props {
   onPointerOver?: () => void;
   onPointerLeave?: () => void;
   room: Room;
-}
-
-interface ProfileData {
-  avatar: string;
-  updated_at: string;
-  id: string;
-  username: string | null;
 }
 
 // Hier moet je eigenlijk async call hebben naar 3D model
@@ -160,29 +152,14 @@ export const NonPlayableCharacters: React.FC<Props> = (props) => {
     });
   }
 
-  async function getPlayer() {
-    try {
-      const { data, error } = await client
-        .from('profiles')
-        .select(`id, avatar`);
-
-      if (error) {
-        throw error;
-      }
-
-      if (data && playerData) {
-        const playerObject = data.filter((value: ProfileData) => {
-          return value.id === playerData.uuid;
-        })[0];
-
-        gltfLoader.current.load(playerObject.avatar, (gltf) => {
-          userRef.current = new UserModel({
-            gltf,
-          });
+  function getPlayer() {
+    // Load avatar directly from playerData (comes from Colyseus state)
+    if (playerData && playerData.avatar) {
+      gltfLoader.current.load(playerData.avatar, (gltf) => {
+        userRef.current = new UserModel({
+          gltf,
         });
-      }
-    } catch (e) {
-      return e;
+      });
     }
   }
 };

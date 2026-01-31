@@ -5,7 +5,6 @@ import { IconType } from '../../../../utils/icons/types';
 import { IconButton } from '../../IconButton/IconButton';
 import styles from './settingsMenu.module.scss';
 import { Menu } from '../menu/Menu';
-import { useClient, useDelete, useSignOut } from 'react-supabase';
 
 interface Props {
   room: Room;

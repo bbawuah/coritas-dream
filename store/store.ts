@@ -17,6 +17,7 @@ export interface IPlayerNetworkData {
   id: string;
   timestamp: number;
   animationState: ActionNames;
+  avatar: string;
   x: number;
   uuid: string;
   y: number;
