@@ -1,4 +1,5 @@
-import { GLTF } from 'three/examples/jsm/loaders/GLTFLoader';
+import * as THREE from 'three';
+import type { GLTF } from 'three-stdlib';
 import { Physics } from '../../../../shared/physics/physics';
 
 export interface ComponentProps {

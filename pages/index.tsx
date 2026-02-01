@@ -62,8 +62,8 @@ const Home: NextPage = () => {
               </div>
             </section>
             <section className={styles.buttonContainer}>
-              <Link href="/dream">
-                <a className={styles.button}>Start Experience</a>
+              <Link href="/dream" className={styles.button}>
+                Start Experience
               </Link>
             </section>
           </main>

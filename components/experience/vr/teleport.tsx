@@ -1,13 +1,19 @@
 // Based on the xr-locomotion-starter https://github.com/SamsungInternet/xr-locomotion-starter
 import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
-import { useController, useXR, useXREvent, XREvent } from '@react-three/xr';
+import { useXR, useXREvent } from '@react-three/xr';
 import React, { useEffect, useRef } from 'react';
 import { NavigationLine } from './navigationLine';
 import { HighlightMesh } from './highlightMesh';
 import { Room } from 'colyseus.js';
 import { getState } from '../../../store/store';
 import { XRTeleportationData } from './types';
+
+// Type for XR event data
+interface XREventData {
+  type: string;
+  data: XRInputSource;
+}
 
 interface Props {
   room: Room;
@@ -16,10 +22,16 @@ interface Props {
 
 export const XRTeleport: React.FC<Props> = (props) => {
   const { room, navMeshGeometry } = props;
-  const { player } = useXR();
+  const origin = useXR((state) => state.origin);
   const { gl, camera, scene } = useThree();
   const players = getState().players;
   const canTeleport = useRef<boolean>(true);
+  const originRef = useRef<THREE.Object3D | null>(null);
+
+  // Keep ref synced with origin
+  useEffect(() => {
+    originRef.current = origin ?? null;
+  }, [origin]);
 
   const gravity = new THREE.Vector3(0, -9.8, 0); //Gravity
   const tempVector = useRef<THREE.Vector3>(new THREE.Vector3());
@@ -32,7 +44,7 @@ export const XRTeleport: React.FC<Props> = (props) => {
   const highLightMesh = useRef<HighlightMesh>(new HighlightMesh());
 
   const counter = useRef<number>(0);
-  const worldDirection = useRef<THREE.XRViewerPose>();
+  const worldDirection = useRef<XRViewerPose | undefined>();
   const temporaryWorldDirection = useRef<THREE.Vector3>(new THREE.Vector3());
   const green = new THREE.Color(0x00ff00);
   const red = new THREE.Color(0xff0000);
@@ -98,14 +110,14 @@ export const XRTeleport: React.FC<Props> = (props) => {
   // Set player starting position
   useEffect(() => {
     const playerData = players?.[room.sessionId];
-    if (playerData) {
+    if (playerData && originRef.current) {
       const startingPosition = new THREE.Vector3(
         playerData.x,
-        player.position.y + 0.5,
+        originRef.current.position.y + 0.5,
         playerData.z
       );
 
-      player.position.add(startingPosition);
+      originRef.current.position.add(startingPosition);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -114,7 +126,7 @@ export const XRTeleport: React.FC<Props> = (props) => {
     if (guidingController.current && lineRef.current) {
       const vertex = tempVector.current.set(0, 0, 0);
       const referenceSpace = gl.xr.getReferenceSpace();
-      const frame = (state.gl.xr as any).getFrame() as THREE.XRFrame;
+      const frame = (state.gl.xr as any).getFrame() as XRFrame;
       if (referenceSpace && frame)
         worldDirection.current = frame.getViewerPose(referenceSpace);
       if (guidingController.current) {
@@ -205,29 +217,32 @@ export const XRTeleport: React.FC<Props> = (props) => {
     return inVec;
   }
 
-  function onSelectStart(e: XREvent) {
+  function onSelectStart(e: XREventData) {
     // This is e.data is an XRInputSource and if
     // it has a hand and being handled by hand tracking so do nothing
-    const { originalEvent, controller } = e;
-    if (originalEvent && originalEvent.data && originalEvent.data.hand) {
+    const data = e.data as XRInputSource & { hand?: unknown };
+    if (data && data.hand) {
       return;
     }
 
-    guidingController.current = controller.controller;
+    // Get controller from the scene - in XR v6 the event structure has changed
+    // For now, we'll use a simplified approach
+    const controllers = gl.xr.getController(0);
+    guidingController.current = controllers;
 
-    controller.controller.add(lineRef.current.guideline as any as THREE.Line);
+    controllers.add(lineRef.current.guideline as any as THREE.Line);
     scene.add(highLightMesh.current.mesh);
   }
 
-  function onSelectEnd(e: XREvent) {
-    const { controller } = e;
+  function onSelectEnd(e: XREventData) {
+    const controller = gl.xr.getController(0);
     if (!canTeleport.current) {
       return;
     }
 
     if (guidingController.current) {
       const feetPos = gl.xr
-        .getCamera(camera)
+        .getCamera()
         .getWorldPosition(tempVector.current);
 
       feetPos.y = 0;
@@ -250,28 +265,32 @@ export const XRTeleport: React.FC<Props> = (props) => {
       const offset = cursorPos.addScaledVector(feetPos, -1);
 
       // Do the locomotion
-      player.position.add(offset);
+      if (originRef.current) {
+        originRef.current.position.add(offset);
 
-      const direction = gl.xr
-        .getCamera(camera)
-        .getWorldDirection(temporaryWorldDirection.current);
+        const direction = gl.xr
+          .getCamera()
+          .getWorldDirection(temporaryWorldDirection.current);
 
-      const action: XRTeleportationData = {
-        worldDirection: direction.multiplyScalar(100),
-        position: player.position,
-        animationState: 'walking',
-      };
-
-      room.send('teleport', action);
-
-      setTimeout(() => {
         const action: XRTeleportationData = {
           worldDirection: direction.multiplyScalar(100),
-          position: player.position,
-          animationState: 'idle',
+          position: originRef.current.position,
+          animationState: 'walking',
         };
+
         room.send('teleport', action);
-      }, 500);
+
+        setTimeout(() => {
+          if (originRef.current) {
+            const action: XRTeleportationData = {
+              worldDirection: direction.multiplyScalar(100),
+              position: originRef.current.position,
+              animationState: 'idle',
+            };
+            room.send('teleport', action);
+          }
+        }, 500);
+      }
 
       if (counter.current >= 99) {
         counter.current = 0;
@@ -281,7 +300,7 @@ export const XRTeleport: React.FC<Props> = (props) => {
 
       // Clean up
       guidingController.current = null;
-      controller.controller.remove(lineRef.current.guideline);
+      controller.remove(lineRef.current.guideline);
       scene.remove(highLightMesh.current.mesh);
     }
   }

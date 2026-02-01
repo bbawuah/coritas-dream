@@ -6,6 +6,7 @@ import { Modal } from '../../core/modal/modal';
 import styles from './mutePlayer.module.scss';
 
 interface Props {
+  children?: React.ReactNode;
   shouldRender: boolean;
   onClickOutside: () => void;
 }

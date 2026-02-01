@@ -1,14 +1,13 @@
 import { useFrame, useLoader, useThree } from '@react-three/fiber';
 import {
-  useController,
-  useInteraction,
   useXR,
   useXREvent,
+  useXRControllerState,
 } from '@react-three/xr';
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { Text } from '@react-three/drei';
-import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader';
+import { SVGLoader } from 'three-stdlib';
 import { Room } from 'colyseus.js';
 
 interface Props {

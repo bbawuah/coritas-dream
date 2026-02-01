@@ -1,4 +1,4 @@
-import { DefaultXRControllers, Interactive } from '@react-three/xr';
+import { Interactive } from '@react-three/xr';
 import { Room } from 'colyseus.js';
 import { XRTeleport } from '../vr/teleport';
 import { GLTFNodes } from '../environment/types/types';
@@ -24,7 +24,7 @@ export const XRCanvas: React.FC<Props> = (props) => {
 
   return (
     <>
-      <DefaultXRControllers />
+      {/* DefaultXRController automatically handles both controllers in XR v6 */}
       <XRTeleport room={room} navMeshGeometry={nodes['navmesh'].geometry} />
       {renderNonPlayableCharacters()}
     </>

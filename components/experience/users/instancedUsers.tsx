@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 import { useFrame, useThree } from '@react-three/fiber';
 import React, { Suspense, useEffect, useRef, useState } from 'react';
-import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry';
+import { RoundedBoxGeometry } from 'three-stdlib';
 import { getState, useStore } from '../../../store/store';
 import { Text } from '@react-three/drei';
 

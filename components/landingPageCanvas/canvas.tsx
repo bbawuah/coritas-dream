@@ -103,7 +103,7 @@ const ImageMesh: React.FC<CaptionProps> = (props) => {
 
   return (
     <mesh ref={imagePlane}>
-      <planeBufferGeometry args={[1, 1, 32, 32]} />
+      <planeGeometry args={[1, 1, 32, 32]} />
       <shaderMaterial
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}

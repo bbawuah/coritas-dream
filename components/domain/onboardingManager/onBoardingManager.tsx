@@ -3,11 +3,15 @@ import { IconType } from '../../../utils/icons/types';
 import { Onboarding } from '../onboarding/Onboarding';
 import {
   useTransition,
-  animated,
-  AnimatedProps,
   useSpringRef,
 } from '@react-spring/web';
+import { animated } from '@react-spring/web';
+import type { AnimatedProps } from '@react-spring/web';
 import styles from './onBoarding.module.scss';
+
+// Type assertion for animated.div due to react-spring types compatibility with React 19
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const AnimatedDiv = (animated as any).div as React.ComponentType<{ children?: React.ReactNode; style?: any; key?: string }>;
 
 interface Props {}
 
@@ -30,9 +34,9 @@ export const OnboardingManager: React.FC<Props> = (props) => {
 
   const onboardingData: ((
     props: AnimatedProps<{ style: CSSProperties }>
-  ) => JSX.Element)[] = [
+  ) => React.ReactElement)[] = [
     ({ style }) => (
-      <animated.div style={{ ...style }} key={'keys'}>
+      <AnimatedDiv style={{ ...style }} key={'keys'}>
         <Onboarding
           title={'Navigating'}
           message={'Use these keys to navigate'}
@@ -41,10 +45,10 @@ export const OnboardingManager: React.FC<Props> = (props) => {
           onBack={() => setIndex((v) => v - 1)}
           onNext={() => setIndex((v) => v + 1)}
         />
-      </animated.div>
+      </AnimatedDiv>
     ),
     ({ style }) => (
-      <animated.div style={{ ...style }} key={'mouse'}>
+      <AnimatedDiv style={{ ...style }} key={'mouse'}>
         <Onboarding
           title={'Navigating'}
           message={'Click and drag on the screen to look/turn around'}
@@ -52,10 +56,10 @@ export const OnboardingManager: React.FC<Props> = (props) => {
           onBack={() => setIndex((v) => v - 1)}
           onNext={() => setIndex((v) => v + 1)}
         />
-      </animated.div>
+      </AnimatedDiv>
     ),
     ({ style }) => (
-      <animated.div style={{ ...style }} key={'settings'}>
+      <AnimatedDiv style={{ ...style }} key={'settings'}>
         <Onboarding
           title={'Navigating'}
           message={'Use the settings menu to personalise your experience'}
@@ -64,7 +68,7 @@ export const OnboardingManager: React.FC<Props> = (props) => {
           onBack={() => setIndex((v) => v - 1)}
           onNext={() => setIsVisible(false)}
         />
-      </animated.div>
+      </AnimatedDiv>
     ),
   ];
 

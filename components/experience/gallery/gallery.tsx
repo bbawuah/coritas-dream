@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { BoxLineGeometry } from 'three/examples/jsm/geometries/BoxLineGeometry';
+import { BoxLineGeometry } from 'three-stdlib';
 import * as THREE from 'three';
 
 interface Props {}

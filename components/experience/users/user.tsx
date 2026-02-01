@@ -10,7 +10,7 @@ import {
   IPlayerNetworkData,
   IPlayerType,
 } from '../../../store/store';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { GLTFLoader } from 'three-stdlib';
 import { Room } from 'colyseus.js';
 import { IMoveProps, IUserDirection } from '../../../shared/physics/types';
 import { useKeyboardEvents } from '../../../hooks/useKeys';

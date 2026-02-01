@@ -12,23 +12,21 @@ import { LovePaintings } from './LovePaintings';
 import { Water } from 'three-stdlib';
 import {
   extend,
-  ReactThreeFiber,
   useFrame,
   useLoader,
   useThree,
+  ThreeElement,
 } from '@react-three/fiber';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass';
+import { UnrealBloomPass } from 'three-stdlib';
 import { BigScreen } from './BigScreen';
 import { GeneralPaintings } from './GeneralPaintings';
 import { InstancedArrows } from '../arrows/arrows';
 
 extend({ Water });
 
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      water: ReactThreeFiber.Object3DNode<Water, typeof Water>;
-    }
+declare module '@react-three/fiber' {
+  interface ThreeElements {
+    water: ThreeElement<typeof Water>;
   }
 }
 

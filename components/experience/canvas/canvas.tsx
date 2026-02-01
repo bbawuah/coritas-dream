@@ -6,7 +6,7 @@ import { Canvas } from '@react-three/fiber';
 import { User } from '../users/user';
 import { Physics } from '../../../shared/physics/physics';
 import { useGLTF } from '@react-three/drei';
-import { VRCanvas } from '@react-three/xr';
+import { XR, createXRStore } from '@react-three/xr';
 import { MediaConnection, Peer } from 'peerjs';
 import { getState, useStore } from '../../../store/store';
 import Image from 'next/image';
@@ -23,7 +23,7 @@ import { SettingsMenu } from '../../core/headers/settingsMenu/settingsMenu';
 import { OnboardingManager } from '../../domain/onboardingManager/onBoardingManager';
 import { NonPlayableCharacters } from '../users/NonPlayableCharacters/NonPlayableCharacters';
 import { IconType } from '../../../utils/icons/types';
-import { XRCanvas } from './xrCanvas';
+import { XRCanvas as XRCanvasComponent } from './xrCanvas';
 import { Room } from 'colyseus.js';
 import { Player } from '../../../server/player/player';
 import { IconButton } from '../../core/IconButton/IconButton';
@@ -51,6 +51,9 @@ const Audio: React.FC<{ stream: MediaStream; odId: string }> = ({ stream, odId }
 
   return <audio className={styles.audio} playsInline ref={ref} autoPlay />;
 };
+
+// Create XR store outside of component to avoid recreation on re-renders
+const xrStore = createXRStore();
 
 const CanvasComponent: React.FC<Props> = (props) => {
   const { isWebXrSupported, room } = props;
@@ -306,18 +309,20 @@ const CanvasComponent: React.FC<Props> = (props) => {
                     src="/controls/vr.png"
                     width={700}
                     height={539}
-                    layout="responsive"
+                    style={{ width: '100%', height: 'auto' }}
                   />
                 </div>
               </div>
-              <VRCanvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
-                <Suspense fallback={null}>
-                  <XRCanvas room={room} nodes={nodes} />
-                </Suspense>
-                {myStream && <SVGButton stream={myStream} room={room} />}
-                {renderNpcs()}
-                <BaseScene nodes={nodes} physics={physics} />
-              </VRCanvas>
+              <Canvas camera={{ fov: 70, position: [0, 1.8, 6] }}>
+                <XR store={xrStore}>
+                  <Suspense fallback={null}>
+                    <XRCanvasComponent room={room} nodes={nodes} />
+                  </Suspense>
+                  {myStream && <SVGButton stream={myStream} room={room} />}
+                  {renderNpcs()}
+                  <BaseScene nodes={nodes} physics={physics} />
+                </XR>
+              </Canvas>
               {usersStreams.map((s) => (
                 <Audio stream={s.stream} odId={s.id} key={s.id} />
               ))}

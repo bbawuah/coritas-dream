@@ -13,8 +13,8 @@ export const Header: React.FC<Props> = (props) => {
   function renderContent() {
     if (showLogo) {
       return (
-        <Link href="/">
-          <a className={styles.logoLink}>Corita&apos;s dream</a>
+        <Link href="/" className={styles.logoLink}>
+          Corita&apos;s dream
         </Link>
       );
     }

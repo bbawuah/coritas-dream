@@ -1,7 +1,6 @@
 import { useFrame, useThree } from '@react-three/fiber';
 import React, { Suspense, useEffect, useRef, useState } from 'react';
-import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+import { GLTFLoader, DRACOLoader } from 'three-stdlib';
 import {
   ActionNames,
   getState,

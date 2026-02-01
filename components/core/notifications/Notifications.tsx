@@ -5,6 +5,7 @@ import createContainer from './createContainer/createContainer';
 import ReactDOM from 'react-dom';
 
 interface Props {
+  children?: React.ReactNode;
   isSelfClosing?: boolean;
   onDelete?: () => void;
 }

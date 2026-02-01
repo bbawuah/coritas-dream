@@ -1,7 +1,6 @@
-import create from 'zustand';
+import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
-import shallow from 'zustand/shallow';
-import type { GetState, SetState, StateSelector } from 'zustand';
+import { useShallow } from 'zustand/shallow';
 import Peer from 'simple-peer';
 
 const controls = {
@@ -81,36 +80,29 @@ export interface IState {
   animationName: ActionState;
   callRequests: CallRequests[];
   cursorState: CursorStates;
-  get: Getter;
-  set: Setter;
+  get: () => IState;
+  set: (partial: Partial<IState> | ((state: IState) => Partial<IState>)) => void;
 }
 
-type Getter = GetState<IState>;
-export type Setter = SetState<IState>;
-
-const useStoreImplementation = create(
-  subscribeWithSelector<IState>(
-    (set: SetState<IState>, get: GetState<IState>) => {
-      return {
-        controls,
-        players,
-        playerIds,
-        playersCount,
-        isMuted,
-        callRequests,
-        canvasContainerRef,
-        focusImage,
-        animationName,
-        cursorState,
-        get,
-        set,
-      };
-    }
-  )
+const useStoreImplementation = create<IState>()(
+  subscribeWithSelector((set, get) => ({
+    controls,
+    players,
+    playerIds,
+    playersCount,
+    isMuted,
+    callRequests,
+    canvasContainerRef,
+    focusImage,
+    animationName,
+    cursorState,
+    get,
+    set,
+  }))
 );
 
-const useStore = <T>(sel: StateSelector<IState, T>) =>
-  useStoreImplementation(sel, shallow);
+const useStore = <T>(sel: (state: IState) => T) =>
+  useStoreImplementation(useShallow(sel));
 Object.assign(useStore, useStoreImplementation);
 
 const { getState, setState, subscribe } = useStoreImplementation;

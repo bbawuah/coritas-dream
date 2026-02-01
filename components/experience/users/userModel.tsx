@@ -1,5 +1,4 @@
-import { GLTF, GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
-import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+import { GLTF, GLTFLoader, DRACOLoader } from 'three-stdlib';
 import * as THREE from 'three';
 import { ObjectMap } from '@react-three/fiber';
 import { ActionNames, getState, setState } from '../../../store/store';

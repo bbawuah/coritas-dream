@@ -1,19 +1,14 @@
-import { extend, ReactThreeFiber } from '@react-three/fiber';
+import { extend, ThreeElement } from '@react-three/fiber';
 import React from 'react';
 import { FloorMaterial } from './floorMaterial'; //This is a temporary material
 
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      floorMaterial: ReactThreeFiber.Object3DNode<
-        FloorMaterial,
-        typeof FloorMaterial
-      >;
-    }
+extend({ FloorMaterial });
+
+declare module '@react-three/fiber' {
+  interface ThreeElements {
+    floorMaterial: ThreeElement<typeof FloorMaterial>;
   }
 }
-
-extend({ FloorMaterial });
 
 interface Props {}
 
